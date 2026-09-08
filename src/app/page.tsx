@@ -68,17 +68,17 @@ export default function HomePage() {
       {/* =========================================================
           SECTION 1 — Hero & Overview
       ========================================================= */}
-      <section className="relative pt-24 pb-12 lg:pt-28 lg:pb-16 flex flex-col justify-center overflow-hidden border-b border-amber-200/60 bg-transparent">
-        {/* Background Image with subtle parallax & crystal-clear overlay */}
+      <section className="relative pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 flex flex-col justify-center overflow-hidden border-b border-amber-200/60 bg-transparent">
+        {/* Full-Cover Background Image extending behind headline and form on mobile and desktop */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <ScrollParallax speed={-0.15} className="w-full h-full">
-            <img
-              src="/images/hero-bg.jpg"
-              alt="Saffron City Master Community"
-              className="w-full h-[120%] object-cover object-center -mt-8"
-            />
-          </ScrollParallax>
-          <div className="absolute inset-0 bg-gradient-to-r from-white/30 " />
+          <img
+            src="/images/hero-bg.jpg"
+            alt="Saffron City Master Community"
+            className="w-full h-full object-cover object-center scale-105"
+          />
+          {/* Subtle multi-layer gradient overlay to ensure text and form stand out with luxury clarity */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/30 to-white/75 sm:bg-gradient-to-r sm:from-white/80 sm:via-white/50 sm:to-white/20" />
+          <div className="absolute inset-0 bg-amber-500/[0.03]" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
