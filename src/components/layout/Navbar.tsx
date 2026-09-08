@@ -109,14 +109,14 @@ export default function Navbar() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="hidden lg:flex items-center justify-between gap-6 min-h-[58px]">
+        <div className="hidden lg:flex items-center justify-between gap-6 min-h-[74px] lg:min-h-[82px]">
 
           {/* Left Side: Brand Logo */}
-          <Link href="/" className="flex items-center group flex-shrink-0" aria-label="Saffron City">
+          <Link href="/" className="flex items-center group flex-shrink-0 py-1" aria-label="Saffron City">
             <img
               src="/images/saffron-city-logo.png"
               alt="Saffron City Islamabad"
-              className="h-14 lg:h-16 w-auto object-contain group-hover:scale-105 transition-all flex-shrink-0"
+              className="h-18 lg:h-22 xl:h-24 w-auto object-contain group-hover:scale-105 transition-all flex-shrink-0 drop-shadow-sm"
             />
           </Link>
 
@@ -196,7 +196,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center flex-shrink-0">
             <a
               href={`tel:${SITE_CONFIG.phone}`}
-              className="inline-flex items-center gap-2 pl-3 pr-4 py-2 rounded-full bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold border border-amber-400 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all whitespace-nowrap"
+              className="inline-flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold border border-amber-400 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all whitespace-nowrap"
             >
               <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                 <Phone className="w-3.5 h-3.5 text-white fill-white" />
@@ -209,12 +209,12 @@ export default function Navbar() {
         </div>
 
         {/* Mobile / Tablet Header (< lg) */}
-        <div className="lg:hidden flex items-center justify-between min-h-[52px]">
+        <div className="lg:hidden flex items-center justify-between min-h-[60px] py-1">
           <Link href="/" className="flex items-center group" aria-label="Saffron City">
             <img
               src="/images/saffron-city-logo.png"
               alt="Saffron City Islamabad"
-              className="h-12 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0"
+              className="h-14 sm:h-16 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0 drop-shadow-sm"
             />
           </Link>
 

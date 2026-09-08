@@ -17,7 +17,7 @@ export default function Footer() {
               <img
                 src="/images/saffron-city-logo.png"
                 alt="Saffron City Islamabad"
-                className="h-14 sm:h-16 w-auto object-contain"
+                className="h-20 sm:h-24 w-auto object-contain drop-shadow-sm"
               />
             </Link>
             <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
