@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model LeadInquiry {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  message     String?
+  plotSize    String?  @default("5 Marla")
+  plotType    String?  @default("Residential")
+  sector      String?  @default("Sector A")
+  status      String   @default("New") // New, Contacted, FollowUp, Booked, Closed
+  source      String   @default("Website Form")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlotInventory {
+  id             String   @id @default(uuid())
+  plotNumber     String   @unique
+  sector         String   // Sector A, Sector B, Commercial
+  category       String   // 5 Marla, 10 Marla, 1 Kanal, 4 Marla, 8 Marla
+  type           String   // Residential, Commercial
+  totalPrice     Float
+  downPayment    Float
+  monthlyInst    Float
+  status         String   @default("Available") // Available, Reserved, Sold
+  features       String?  // Corner, Main Boulevard, Park Facing
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SiteSetting {
+  id          String   @id @default("default")
+  siteName    String   @default("Saffron City Islamabad")
+  contactPhone String  @default("+92 300 0000000")
+  whatsappPhone String @default("+923000000000")
+  officialEmail String @default("info@saffroncity.org")
+  officeAddress String @default("Main GT Road, Rawat, Islamabad/Rawalpindi")
+  rdaNocStatus String  @default("Approved - January 2025")
+  announcement String? @default("Pre-launch plot bookings currently open with 10% down payment")
+  updatedAt   DateTime @updatedAt
+}
