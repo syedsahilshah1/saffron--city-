@@ -81,7 +81,7 @@ export default function GsapSplitReveal({
   return (
     <div
       ref={containerRef}
-      className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center overflow-hidden ${className}`}
+      className={`grid grid-cols-1 lg:grid-cols-2 items-center ${className ? className : "gap-8"}`}
     >
       <div ref={leftRef} className={`w-full ${leftClassName}`}>
         {leftContent}

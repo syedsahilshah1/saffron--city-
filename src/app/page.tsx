@@ -81,10 +81,10 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-amber-500/[0.03]" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <GsapSplitReveal
+            className="gap-8 sm:gap-10 lg:gap-12"
             leftContent={
-              <div className="space-y-6 relative max-w-xl">
+              <div className="space-y-6 relative max-w-xl pb-3 sm:pb-5 lg:pb-0">
                 {/* Headline */}
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight font-heading leading-tight">
                   Invest in Premium Living at <span className="text-[#D4A017]">Saffron City</span>
