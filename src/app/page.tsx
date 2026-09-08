@@ -78,9 +78,9 @@ export default function HomePage() {
           />
           {/* Subtle multi-layer gradient overlay to ensure text and form stand out with luxury clarity */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/30 to-white/75 sm:bg-gradient-to-r sm:from-white/80 sm:via-white/50 sm:to-white/20" />
-          <div className="absolute inset-0 bg-amber-500/[0.03]" />
         </div>
 
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <GsapSplitReveal
             className="gap-8 sm:gap-10 lg:gap-12"
             leftContent={
