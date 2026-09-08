@@ -90,8 +90,8 @@ export default function HomePage() {
                   Invest in Premium Living at <span className="text-[#D4A017]">Saffron City</span>
                 </h1>
 
-                {/* Action Buttons */}
-                <div className="pt-2 flex flex-wrap items-center gap-3">
+                {/* Action Buttons (Desktop view - below headline) */}
+                <div className="pt-2 hidden lg:flex flex-wrap items-center gap-3">
                   <a
                     href="#hero-booking-form"
                     className="shimmer-gold-btn inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
@@ -111,12 +111,31 @@ export default function HomePage() {
               </div>
             }
             rightContent={
-              <div className="relative flex justify-end pr-2 sm:pr-6 lg:pr-10 xl:pr-14">
+              <div className="relative flex flex-col items-center lg:items-end pr-0 lg:pr-10 xl:pr-14 space-y-4 w-full">
                 <EnquiryForm
                   id="hero-booking-form"
                   title="Book Your Plot"
                   subtitle="Sector A (Block B) new rates with 10% down payment (PKR 450,000)."
                 />
+
+                {/* Action Buttons (Mobile view - below the form) */}
+                <div className="w-full max-w-lg flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 lg:hidden pt-1">
+                  <a
+                    href="#hero-booking-form"
+                    className="shimmer-gold-btn inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white font-bold text-xs shadow-md transition-all text-center"
+                  >
+                    <span>Book Your Plot</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                  <a
+                    href={SITE_CONFIG.masterPlanPdf}
+                    download="Saffron-City-Master-Plan-Model.pdf"
+                    className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-white/90 backdrop-blur-md border border-amber-300 text-slate-800 font-bold text-xs shadow-sm transition-all text-center"
+                  >
+                    <Download className="w-4 h-4 text-[#D4A017]" />
+                    <span>Download Master Plan</span>
+                  </a>
+                </div>
               </div>
             }
           />
