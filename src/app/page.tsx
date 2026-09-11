@@ -55,11 +55,14 @@ import SectorComparison from "@/components/home/SectorComparison";
 import SectorsAccordion from "@/components/home/SectorsAccordion";
 import PlotsForSaleGrid from "@/components/home/PlotsForSaleGrid";
 import FaqAccordion from "@/components/home/FaqAccordion";
+import HomeBlogsSection from "@/components/home/HomeBlogsSection";
+import NocApprovalSection from "@/components/home/NocApprovalSection";
 
 import { db } from "@/lib/db";
 
 export default async function HomePage() {
   const settings = await db.getSettings();
+  const blogs = await db.getBlogs(true);
 
   const whatsappUrl = `https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
     "Hi, I want to start booking a plot in Saffron City."
@@ -706,7 +709,12 @@ export default async function HomePage() {
         </section>
 
         {/* =========================================================
-            SECTION 12 — FAQ
+            SECTION 12 — Blogs, News & Market Insights
+        ========================================================= */}
+        <HomeBlogsSection initialBlogs={blogs} />
+
+        {/* =========================================================
+            SECTION 13 — FAQ
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-10">
           <ScrollReveal animation="fade-up" className="text-center space-y-3">
@@ -722,7 +730,12 @@ export default async function HomePage() {
         </section>
 
         {/* =========================================================
-            SECTION 13 — Centered Booking Form
+            SECTION 14 — Official RDA NOC Legal Verification
+        ========================================================= */}
+        <NocApprovalSection settings={settings} />
+
+        {/* =========================================================
+            SECTION 15 — Centered Booking Form
         ========================================================= */}
         <section id="booking-form" className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col items-center justify-center pt-6">
           <ScrollReveal animation="zoom-in" duration={800} className="w-full">

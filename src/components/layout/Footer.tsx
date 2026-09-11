@@ -78,6 +78,9 @@ export default function Footer() {
               <li>
                 <Link href="/noc-status" className="hover:text-[#D4A017] transition-colors">NOC & Legal Status</Link>
               </li>
+              <li>
+                <Link href="/blogs" className="hover:text-[#D4A017] transition-colors">Blogs & Insights</Link>
+              </li>
             </ul>
           </div>
 

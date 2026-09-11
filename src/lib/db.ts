@@ -13,6 +13,7 @@ import {
   DashboardPermission,
   ALL_PERMISSIONS,
   SafeUser,
+  StoredBlog,
 } from "./types";
 
 export * from "./types";
@@ -411,6 +412,55 @@ const initialPlots: StoredPlot[] = [
 ];
 
 // -------------------------------------------------------------
+// Initial Blogs Seed Data
+// -------------------------------------------------------------
+
+export const initialBlogs: StoredBlog[] = [
+  {
+    id: "blog-001",
+    slug: "rawalpindi-ring-road-interchange-saffron-city-impact",
+    title: "Rawalpindi Ring Road Interchange — Transformative Value for Saffron City",
+    excerpt: "How the 2-minute direct bypass connection turns Saffron City on GT Road into a primary commercial and residential nexus for Islamabad & Rawalpindi.",
+    content: "The Rawalpindi Ring Road (RRR) project stands as one of the most critical economic game-changers for the twin cities. Saffron City's strategic positioning just 2 minutes from the Rawat interchange provides signal-free connectivity to the New Islamabad International Airport, M-2 Motorway, and Central Islamabad.\n\nInvestors are seeing rapid capital appreciation as infrastructure earthworks accelerate. With wide 250-foot boulevards and direct arterial links, Saffron City offers unmatched logistical convenience for overseas Pakistanis and local residents alike.",
+    image: "/images/hero-bg.jpg",
+    category: "Market Insights",
+    author: "Saffron City Research Desk",
+    readTime: "4 min read",
+    isPublished: true,
+    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+  },
+  {
+    id: "blog-002",
+    slug: "sector-a-block-b-development-milestones-2026",
+    title: "Sector A (Block B) Fast-Track Infrastructure & Development Update",
+    excerpt: "On-ground progress report on underground utilities, Grand Jamia Mosque foundation, carpeted roads, and recreational park zones.",
+    content: "Development works across Sector A (Block B) have entered an advanced phase. Underground cabling for electrical distribution, water filtration plant earthworks, and modern sewerage systems are being installed with precision.\n\nThe project philosophy of 'infrastructure preceding residents' ensures that every allottee steps into a fully operational, secure community from day one. New official rates are now live with 10% down payment options.",
+    image: "/images/sectors/sector-a-luxury.jpg",
+    category: "Development Update",
+    author: "SKB Engineering Team",
+    readTime: "5 min read",
+    isPublished: true,
+    createdAt: new Date(Date.now() - 3600000 * 96).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 96).toISOString(),
+  },
+  {
+    id: "blog-003",
+    slug: "why-saffron-city-top-rda-approved-investment",
+    title: "Why Saffron City is Ranked Among Top RDA-Approved Societies in 2026",
+    excerpt: "A deep-dive into legal security, 15,000 Kanal RDA NOC approval, 70-year construction pedigree of SKB Group, and high ROI potential.",
+    content: "Real estate investment requires two fundamental pillars: legal transparency and reliable developer pedigree. Saffron City boasts an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across its full 15,000 Kanal master plan.\n\nBacked by Saadullah Khan & Brothers (SKB Group) with over 70 years of nationwide mega-infrastructure achievements, Saffron City ensures zero-risk, high-growth investment for families and commercial developers.",
+    image: "/images/facilities/gated-security.jpg",
+    category: "Legal & Investment",
+    author: "Official Advisory Board",
+    readTime: "6 min read",
+    isPublished: true,
+    createdAt: new Date(Date.now() - 3600000 * 140).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 140).toISOString(),
+  },
+];
+
+// -------------------------------------------------------------
 // Persistent Store Implementation (JSON File + Memory Cache)
 // -------------------------------------------------------------
 
@@ -422,6 +472,7 @@ interface CMSStoreData {
   resetTokens: PasswordResetRecord[];
   inquiries: StoredInquiry[];
   plots: StoredPlot[];
+  blogs: StoredBlog[];
   settings: StoredSettings;
 }
 
@@ -461,6 +512,7 @@ function loadStore(): CMSStoreData {
         resetTokens: Array.isArray(parsed.resetTokens) ? parsed.resetTokens : [],
         inquiries: Array.isArray(parsed.inquiries) ? parsed.inquiries : initialInquiries,
         plots: Array.isArray(parsed.plots) ? parsed.plots : initialPlots,
+        blogs: Array.isArray(parsed.blogs) ? parsed.blogs : initialBlogs,
         settings: { ...defaultSettings, ...(parsed.settings || {}) },
       };
       return globalForStore.cmsStore;
@@ -474,6 +526,7 @@ function loadStore(): CMSStoreData {
     resetTokens: [],
     inquiries: initialInquiries,
     plots: initialPlots,
+    blogs: initialBlogs,
     settings: defaultSettings,
   };
 
@@ -911,6 +964,67 @@ export const db = {
     const prevLen = store.plots.length;
     store.plots = store.plots.filter((p) => p.id !== id);
     if (store.plots.length !== prevLen) {
+      saveStore(store);
+      return true;
+    }
+    return false;
+  },
+
+  // -------------------------
+  // Blogs & Articles CMS
+  // -------------------------
+  getBlogs: async (publishedOnly: boolean = false): Promise<StoredBlog[]> => {
+    const cached = backendCache.get<StoredBlog[]>(`all_blogs_${publishedOnly}`);
+    if (cached) return cached;
+
+    const store = loadStore();
+    const list = publishedOnly
+      ? (store.blogs || []).filter((b) => b.isPublished)
+      : store.blogs || [];
+    backendCache.set(`all_blogs_${publishedOnly}`, list, 30);
+    return list;
+  },
+
+  getBlogBySlug: async (slug: string): Promise<StoredBlog | null> => {
+    const store = loadStore();
+    return (store.blogs || []).find((b) => b.slug === slug) || null;
+  },
+
+  createBlog: async (data: Omit<StoredBlog, "id" | "createdAt" | "updatedAt">): Promise<StoredBlog> => {
+    const store = loadStore();
+    if (!store.blogs) store.blogs = [];
+    const newBlog: StoredBlog = {
+      id: `blog-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    store.blogs.unshift(newBlog);
+    saveStore(store);
+    return newBlog;
+  },
+
+  updateBlog: async (id: string, updates: Partial<StoredBlog>): Promise<StoredBlog | null> => {
+    const store = loadStore();
+    if (!store.blogs) store.blogs = [];
+    const index = store.blogs.findIndex((b) => b.id === id);
+    if (index === -1) return null;
+
+    store.blogs[index] = {
+      ...store.blogs[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    saveStore(store);
+    return store.blogs[index];
+  },
+
+  deleteBlog: async (id: string): Promise<boolean> => {
+    const store = loadStore();
+    if (!store.blogs) return false;
+    const prevLen = store.blogs.length;
+    store.blogs = store.blogs.filter((b) => b.id !== id);
+    if (store.blogs.length !== prevLen) {
       saveStore(store);
       return true;
     }

@@ -254,6 +254,17 @@ export default function Navbar() {
             >
               NOC Status
             </Link>
+
+            <Link
+              href="/blogs"
+              className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                pathname.startsWith("/blogs")
+                  ? "text-[#D4A017] border-b-2 border-[#D4A017]"
+                  : "text-slate-700 hover:text-[#D4A017]"
+              }`}
+            >
+              Blogs &amp; Insights
+            </Link>
           </nav>
 
           {/* Right Side: Gold Call Button Pill */}
@@ -387,6 +398,18 @@ export default function Navbar() {
               }`}
             >
               NOC Status
+            </Link>
+
+            <Link
+              href="/blogs"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold mt-1 ${
+                pathname.startsWith("/blogs")
+                  ? "bg-amber-50 text-[#D4A017]"
+                  : "text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              Blogs &amp; Insights
             </Link>
 
             <div className="pt-4 flex flex-col gap-2">

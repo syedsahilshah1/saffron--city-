@@ -88,24 +88,24 @@ model PlotInventory {
 model SiteSetting {
   id                   String   @id @default("default")
   siteName             String   @default("Saffron City Islamabad")
-  contactPhone         String   @default("+92 300 0000000")
-  secondaryPhone       String?  @default("+92 51 111 723 376")
-  whatsappPhone        String   @default("+923000000000")
-  officialEmail        String   @default("info@saffroncity.pk")
-  officeAddress        String   @default("Main GT Road, Rawat, Islamabad/Rawalpindi")
+  contactPhone         String   @default("0333 1113551")
+  secondaryPhone       String?  @default("")
+  whatsappPhone        String   @default("923331113551")
+  officialEmail        String   @default("info@saffroncity.org")
+  officeAddress        String   @default("Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi")
   rdaNocStatus         String   @default("RDA Approved (Full 15,000 Kanal)")
   announcement         String?  @db.Text
-  activePreLaunchDiscount Boolean @default(true)
+  activePreLaunchDiscount Boolean @default(false)
   
   // SMTP Settings
-  smtpEnabled          Boolean  @default(false)
-  smtpHost             String?  @default("smtp.gmail.com")
+  smtpEnabled          Boolean  @default(true)
+  smtpHost             String?  @default("smtp.hostinger.com")
   smtpPort             Int?     @default(465)
   smtpSecure           Boolean  @default(true)
-  smtpUser             String?
-  smtpPass             String?
-  smtpFromEmail        String?  @default("no-reply@saffroncity.pk")
-  leadNotificationEmail String? @default("ubaidnasir401@gmail.com")
+  smtpUser             String?  @default("info@saffroncity.org")
+  smtpPass             String?  @default("2igu-plh8-etms-ioqc")
+  smtpFromEmail        String?  @default("info@saffroncity.org")
+  leadNotificationEmail String? @default("info@saffroncity.org")
 
   // Raw JSON fields for flexible CMS content
   metaSettingsJson     String?  @db.Text
