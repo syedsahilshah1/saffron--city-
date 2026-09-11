@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -259,14 +259,58 @@ export default function PlotsInventoryExplorer() {
   const [selectedScale, setSelectedScale] = useState<string>("all");
   const [budgetTier, setBudgetTier] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "size">("featured");
+  const [dynamicPlots, setDynamicPlots] = useState<PlotInventoryItem[]>([]);
   
   // Mobile UI States
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileShowAll, setMobileShowAll] = useState(false);
 
+  useEffect(() => {
+    fetch("/api/plots")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const mapped: PlotInventoryItem[] = data.data.map((p: any) => ({
+            id: p.id,
+            plotNumber: p.plotNumber.startsWith("#") ? p.plotNumber : `#${p.plotNumber}`,
+            title: `${p.category} ${p.type} Plot ${p.plotNumber}`,
+            category: p.type || "Residential",
+            sector: p.sector,
+            sizeScale: p.category,
+            tag: p.status === "Available" ? "Open for Booking" : p.status,
+            dimensions: p.category.includes("5 Marla") ? "25' × 50'" : p.category.includes("10 Marla") ? "35' × 70'" : "50' × 90'",
+            totalPriceNumeric: p.totalPrice,
+            totalPriceFormatted: `PKR ${(p.totalPrice / 100000).toFixed(0)} Lakh`,
+            downPaymentNumeric: p.downPayment || p.totalPrice * 0.1,
+            downPaymentFormatted: `PKR ${((p.downPayment || p.totalPrice * 0.1) / 100000).toFixed(1)} Lakh (10%)`,
+            monthlyNumeric: p.monthlyInst || (p.totalPrice * 0.3) / 30,
+            monthlyFormatted: `PKR ${((p.monthlyInst || (p.totalPrice * 0.3) / 30)).toLocaleString()} / mo`,
+            possessionNumeric: p.totalPrice * 0.2,
+            possessionFormatted: `PKR ${(p.totalPrice * 0.2 / 100000).toFixed(0)} Lakh`,
+            biAnnualFormatted: "Bi-Annual Schedule",
+            image: p.image || "/images/sectors/sector-a-luxury.jpg",
+            features: [p.features || "100% Underground Utilities", "RDA Approved Layout", "30-Month Installment Plan", "Possession on Schedule"],
+            href: p.type === "Commercial" ? "/plots/commercial" : "/plots/residential",
+          }));
+          setDynamicPlots(mapped);
+        }
+      })
+      .catch((err) => console.warn("Could not load dynamic plots:", err));
+  }, []);
+
   // Filter & Search Logic
+  const allInventory = useMemo(() => {
+    if (dynamicPlots.length > 0) {
+      // Merge unique
+      const existingIds = new Set(dynamicPlots.map((d) => d.id));
+      const filteredExisting = COMPLETE_PLOTS_INVENTORY.filter((item) => !existingIds.has(item.id));
+      return [...dynamicPlots, ...filteredExisting];
+    }
+    return COMPLETE_PLOTS_INVENTORY;
+  }, [dynamicPlots]);
+
   const filteredInventory = useMemo(() => {
-    return COMPLETE_PLOTS_INVENTORY.filter((item) => {
+    return allInventory.filter((item) => {
       // 1. Text Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();

@@ -1,0 +1,398 @@
+{
+  "users": [
+    {
+      "id": "usr-superadmin-01",
+      "email": "ubaidnasir401@gmail.com",
+      "name": "Ubaid Nasir (Super Admin)",
+      "passwordHash": "cf85baab50ea15b9fc6a54ababa67fc429e5a183cd783b7d301bd946018a40df914bbbfc19f6eccd49c5017f435c016cfcbf315b23f6b000fe0b1c243e42fd66",
+      "salt": "485e2fdd0848da21cb8eeee11336fe6adbfbc0de904160537025aec3ac2de18e",
+      "role": "SUPER_ADMIN",
+      "permissions": [
+        "overview",
+        "leads",
+        "plots",
+        "content",
+        "masterplan",
+        "paymentplans",
+        "seo",
+        "settings",
+        "users"
+      ],
+      "failedAttempts": 0,
+      "lockedUntil": null,
+      "isActive": true,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-09-11T06:35:11.612Z",
+      "lastLoginAt": "2026-09-11T06:35:11.609Z",
+      "sessionToken": "tls_saff_dXNyLXN1cGVyYWRtaW4tMDE6dWJhaWRuYXNpcjQwMUBnbWFpbC5jb206MTc4OTEwODUxMTYwOTo0ZTM2YjhmMTFkZTNjMjEwYWNkMWZmMjhkYjQxNzA2Zg.b24b4a91fbaf99bf0686bb030daf3f9fde6509162bd006f8f74aa5a18c304863"
+    }
+  ],
+  "resetTokens": [
+    {
+      "id": "rst-1789107840755",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "ff45f1d0185afaf045a6149fe24e633910340eb2c0430713eab23468beea4b4b",
+      "expiresAt": "2026-09-11T07:24:00.755Z",
+      "used": true,
+      "createdAt": "2026-09-11T06:24:00.755Z"
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "lead-001",
+      "name": "Tariq Mehmood",
+      "phone": "+92 321 5554321",
+      "message": "Interested in 1 Kanal residential plot in Sector A with park facing option.",
+      "plotSize": "1 Kanal",
+      "plotType": "Residential",
+      "sector": "Sector A",
+      "status": "New",
+      "source": "Website Hero Form",
+      "notes": "Requires remote overseas booking guidance.",
+      "createdAt": "2026-09-11T01:49:58.754Z",
+      "updatedAt": "2026-09-11T01:49:58.755Z"
+    },
+    {
+      "id": "lead-002",
+      "name": "Dr. Usman Farooq",
+      "phone": "+92 300 9876543",
+      "message": "Looking for 4 Marla commercial plot on GT Road frontage for clinic setup.",
+      "plotSize": "4 Marla",
+      "plotType": "Commercial",
+      "sector": "Commercial Block",
+      "status": "Contacted",
+      "source": "WhatsApp Lead",
+      "notes": "Sent payment plan brochure. Follow-up scheduled for Friday.",
+      "createdAt": "2026-09-10T05:49:58.755Z",
+      "updatedAt": "2026-09-10T11:49:58.755Z"
+    },
+    {
+      "id": "lead-003",
+      "name": "Bilal Ahmad",
+      "phone": "+92 333 1234567",
+      "message": "I need a 5 Marla plot in Saffron City Sector B on 3-year installment.",
+      "plotSize": "5 Marla",
+      "plotType": "Residential",
+      "sector": "Sector B",
+      "status": "FollowUp",
+      "source": "Plot For Sale Page",
+      "notes": "Checking down payment readiness.",
+      "createdAt": "2026-09-09T05:49:58.755Z",
+      "updatedAt": "2026-09-10T17:49:58.755Z"
+    }
+  ],
+  "plots": [
+    {
+      "id": "plt-a-01",
+      "plotNumber": "A-101",
+      "sector": "Sector A",
+      "category": "5 Marla",
+      "type": "Residential",
+      "totalPrice": 4500000,
+      "downPayment": 450000,
+      "monthlyInst": 45000,
+      "status": "Available",
+      "features": "Underground Utilities, Near Central Park",
+      "image": "/images/sectors/sector-a-luxury.jpg"
+    },
+    {
+      "id": "plt-a-02",
+      "plotNumber": "A-102",
+      "sector": "Sector A",
+      "category": "10 Marla",
+      "type": "Residential",
+      "totalPrice": 8200000,
+      "downPayment": 820000,
+      "monthlyInst": 82000,
+      "status": "Reserved",
+      "features": "Main Boulevard, Underground Electrification",
+      "image": "/images/sectors/sector-a-luxury.jpg"
+    },
+    {
+      "id": "plt-a-03",
+      "plotNumber": "A-105",
+      "sector": "Sector A",
+      "category": "1 Kanal",
+      "type": "Residential",
+      "totalPrice": 15500000,
+      "downPayment": 1550000,
+      "monthlyInst": 155000,
+      "status": "Available",
+      "features": "Corner Plot, Park Facing, 60-ft Road",
+      "image": "/images/sectors/sector-a-luxury.jpg"
+    },
+    {
+      "id": "plt-b-01",
+      "plotNumber": "B-201",
+      "sector": "Sector B",
+      "category": "5 Marla",
+      "type": "Residential",
+      "totalPrice": 4500000,
+      "downPayment": 450000,
+      "monthlyInst": 45000,
+      "status": "Available",
+      "features": "Near Community Mosque, 40-ft Wide Road",
+      "image": "/images/sectors/sector-b-residential.jpg"
+    },
+    {
+      "id": "plt-b-02",
+      "plotNumber": "B-205",
+      "sector": "Sector B",
+      "category": "10 Marla",
+      "type": "Residential",
+      "totalPrice": 8200000,
+      "downPayment": 820000,
+      "monthlyInst": 82000,
+      "status": "Available",
+      "features": "Family Zone, Green Belt Adjacent",
+      "image": "/images/sectors/sector-b-residential.jpg"
+    },
+    {
+      "id": "plt-com-01",
+      "plotNumber": "COM-01",
+      "sector": "Commercial Block",
+      "category": "4 Marla",
+      "type": "Commercial",
+      "totalPrice": 18000000,
+      "downPayment": 1800000,
+      "monthlyInst": 180000,
+      "status": "Available",
+      "features": "Main GT Road Frontage, High Footfall Plaza Plot",
+      "image": "/images/sectors/commercial-plaza.jpg"
+    },
+    {
+      "id": "plt-com-02",
+      "plotNumber": "COM-04",
+      "sector": "Commercial Block",
+      "category": "8 Marla",
+      "type": "Commercial",
+      "totalPrice": 34000000,
+      "downPayment": 3400000,
+      "monthlyInst": 340000,
+      "status": "Booked",
+      "features": "Corporate Plaza Hub, Multi-Storey Approved",
+      "image": "/images/sectors/commercial-plaza.jpg"
+    }
+  ],
+  "settings": {
+    "siteName": "Saffron City Islamabad",
+    "contactPhone": "+92 321 5554321",
+    "secondaryPhone": "+92 51 111 723 376",
+    "whatsappPhone": "923215554321",
+    "officialEmail": "info@saffroncity.pk",
+    "officeAddress": "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
+    "googleMapsUrl": "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
+    "rdaNocStatus": "RDA Approved (Full 15,000 Kanal)",
+    "rdaVerificationUrl": "https://punjab.gov.pk",
+    "announcement": "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
+    "activePreLaunchDiscount": true,
+    "smtpEnabled": false,
+    "smtpHost": "smtp.gmail.com",
+    "smtpPort": 465,
+    "smtpSecure": true,
+    "smtpUser": "notifications@saffroncity.pk",
+    "smtpPass": "",
+    "smtpFromEmail": "no-reply@saffroncity.pk",
+    "leadNotificationEmail": "leads@saffroncity.pk",
+    "metaTitle": "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
+    "metaDescription": "Invest in Saffron City Islamabad — a premier 15,000 Kanal RDA NOC-approved housing society on Main GT Road near Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments.",
+    "metaKeywords": "Saffron City, Saffron City Islamabad, RDA approved plots, GT Road Rawat, SKB Builders, 5 Marla plot, 10 Marla plot, 1 Kanal plot, Rawalpindi Ring Road",
+    "ogTitle": "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
+    "ogDescription": "15,000 Kanal RDA NOC Approved housing society on Main GT Road, Rawat. Flexible 3-year installment plans with 10% down payment.",
+    "ogImage": "/images/hero-bg.jpg",
+    "canonicalUrl": "https://saffroncity.pk",
+    "googleSiteVerification": "",
+    "heroTitle": "Invest in Premium Living at",
+    "heroHighlightedWord": "Saffron City",
+    "heroSubtitle": "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
+    "heroBgImage": "/images/hero-bg.jpg",
+    "heroButtonText": "Book Your Plot",
+    "chairmanName": "Malik Tariq Mehmood",
+    "chairmanTitle": "Chairman & Founder",
+    "chairmanBioShort": "Saffron City Islamabad, developed by Saadullah Khan and Brothers (SKB Group), is a thoughtfully planned gated community located on GT Road, Rawat. Backed by over 70 years of engineering pedigree, the project sets a new benchmark in luxury, security, and transparent real estate.",
+    "chairmanBioFull": "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
+    "chairmanPortrait": "/images/chairman_portrait_hd.png",
+    "masterPlanImage": "/images/saffron-city-master-plan.webp",
+    "masterPlanFullImage": "/images/saffron-city-master-plan-full.jpg",
+    "masterPlanPdf": "/images/saffron-city-master-plan.webp",
+    "masterPlanDescription": "The master plan divides Saffron City into residential blocks alongside dedicated space for commercial area, mosque, schools, and parks.",
+    "sectorATitle": "Sector A (Block B - New Rates)",
+    "sectorATagline": "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
+    "sectorAPlots": "5M, 10M & 1 Kanal",
+    "sectorAPrice": "From PKR 45 Lakh",
+    "sectorAImage": "/images/sectors/sector-a-luxury.jpg",
+    "sectorBTitle": "Sector B (Affordable Block)",
+    "sectorBTagline": "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
+    "sectorBPlots": "5M, 10M & 1 Kanal",
+    "sectorBPrice": "From PKR 45 Lakh",
+    "sectorBImage": "/images/sectors/sector-b-residential.jpg",
+    "residentialPaymentPlanImage": "/images/payment-plans/official-residential-payment-plan.jpg",
+    "commercialPaymentPlanImage": "/images/payment-plans/official-commercial-payment-plan.jpg",
+    "officialPaymentPlanPdf": "/images/saffron-city-master-plan.webp",
+    "amenities": [
+      {
+        "id": "am-1",
+        "title": "Grand Jamia Mosque",
+        "desc": "A central, magnificent mosque sized for the entire community.",
+        "image": "/images/amenities/amenity_mosque.jpg"
+      },
+      {
+        "id": "am-2",
+        "title": "Modern Hospital & Trauma",
+        "desc": "On-site 24/7 healthcare access for everyday medical needs.",
+        "image": "/images/amenities/amenity_hospital.jpg"
+      },
+      {
+        "id": "am-3",
+        "title": "International Standard Schools",
+        "desc": "Top-tier schools planned within safe walking distance.",
+        "image": "/images/amenities/amenity_school.jpg"
+      },
+      {
+        "id": "am-4",
+        "title": "24/7 Gated Security & CCTV",
+        "desc": "3-tier gated perimeter with biometric checkpoints.",
+        "image": "/images/amenities/amenity_security.jpg"
+      },
+      {
+        "id": "am-5",
+        "title": "Commercial Shopping Plazas",
+        "desc": "Retail centers and supermarkets within each sector.",
+        "image": "/images/amenities/amenity_shopping.jpg"
+      },
+      {
+        "id": "am-6",
+        "title": "250ft Main Boulevard",
+        "desc": "Wide arterial road network designed for signal-free flow.",
+        "image": "/images/amenities/amenity_boulevard.jpg"
+      },
+      {
+        "id": "am-7",
+        "title": "Underground Utilities & Water",
+        "desc": "Underground electrification, gas, and dedicated water filtration.",
+        "image": "/images/amenities/amenity_water.jpg"
+      },
+      {
+        "id": "am-8",
+        "title": "Family Parks & Sports Courts",
+        "desc": "Lush green belts, walking tracks, and children play grounds.",
+        "image": "/images/amenities/amenity_park.jpg"
+      }
+    ],
+    "landmarks": [
+      {
+        "id": "lm-1",
+        "title": "T-Chowk, Rawat",
+        "subtitle": "Main GT Road Junction",
+        "driveTime": "5 Mins Drive",
+        "image": "/images/landmark_t_chowk.jpg"
+      },
+      {
+        "id": "lm-2",
+        "title": "Giga Mall & DHA",
+        "subtitle": "Premier Shopping & Dining",
+        "driveTime": "12 Mins Drive",
+        "image": "/images/landmark_giga_mall.jpg"
+      },
+      {
+        "id": "lm-3",
+        "title": "DHA Islamabad",
+        "subtitle": "Executive Housing Society",
+        "driveTime": "10 Mins Drive",
+        "image": "/images/landmark_dha_islamabad.jpg"
+      },
+      {
+        "id": "lm-4",
+        "title": "Zero Point & Blue Area",
+        "subtitle": "Capital Business District",
+        "driveTime": "20 Mins Drive",
+        "image": "/images/hero-bg.jpg"
+      },
+      {
+        "id": "lm-5",
+        "title": "Bahria Town",
+        "subtitle": "Gated Residential Community",
+        "driveTime": "10 Mins Drive",
+        "image": "/images/imgi_25_saffron-city-islamabad.jpg"
+      },
+      {
+        "id": "lm-6",
+        "title": "Islamabad Airport",
+        "subtitle": "International Air Terminal",
+        "driveTime": "30 Mins Drive",
+        "image": "/images/landmark_t_chowk.jpg"
+      },
+      {
+        "id": "lm-7",
+        "title": "Rawalpindi Ring Road",
+        "subtitle": "Direct Bypass Interchange",
+        "driveTime": "2 Mins Drive",
+        "image": "/images/imgi_25_saffron-city-islamabad.jpg"
+      },
+      {
+        "id": "lm-8",
+        "title": "Islamabad Expressway",
+        "subtitle": "Signal-Free Arterial Route",
+        "driveTime": "15 Mins Drive",
+        "image": "/images/hero-bg.jpg"
+      }
+    ],
+    "paymentTiers": [
+      {
+        "size": "5 Marla",
+        "type": "Residential",
+        "totalPrice": "PKR 4,500,000",
+        "downPayment": "PKR 450,000 (10%)",
+        "confirmation": "PKR 450,000 (10%)",
+        "monthlyInstallment": "PKR 45,000 × 30",
+        "balloonPayment": "PKR 350,000 × 4",
+        "possession": "PKR 850,000",
+        "duration": "30 Months"
+      },
+      {
+        "size": "10 Marla",
+        "type": "Residential",
+        "totalPrice": "PKR 8,200,000",
+        "downPayment": "PKR 820,000 (10%)",
+        "confirmation": "PKR 820,000 (10%)",
+        "monthlyInstallment": "PKR 82,000 × 30",
+        "balloonPayment": "PKR 650,000 × 4",
+        "possession": "PKR 1,500,000",
+        "duration": "30 Months"
+      },
+      {
+        "size": "1 Kanal",
+        "type": "Residential",
+        "totalPrice": "PKR 15,500,000",
+        "downPayment": "PKR 1,550,000 (10%)",
+        "confirmation": "PKR 1,550,000 (10%)",
+        "monthlyInstallment": "PKR 155,000 × 30",
+        "balloonPayment": "PKR 1,200,000 × 4",
+        "possession": "PKR 3,000,000",
+        "duration": "30 Months"
+      },
+      {
+        "size": "4 Marla",
+        "type": "Commercial",
+        "totalPrice": "PKR 18,000,000",
+        "downPayment": "PKR 1,800,000 (10%)",
+        "confirmation": "PKR 1,800,000 (10%)",
+        "monthlyInstallment": "PKR 180,000 × 30",
+        "balloonPayment": "PKR 1,500,000 × 4",
+        "possession": "PKR 3,000,000",
+        "duration": "30 Months"
+      },
+      {
+        "size": "8 Marla",
+        "type": "Commercial",
+        "totalPrice": "PKR 34,000,000",
+        "downPayment": "PKR 3,400,000 (10%)",
+        "confirmation": "PKR 3,400,000 (10%)",
+        "monthlyInstallment": "PKR 340,000 × 30",
+        "balloonPayment": "PKR 2,800,000 × 4",
+        "possession": "PKR 6,000,000",
+        "duration": "30 Months"
+      }
+    ]
+  }
+}

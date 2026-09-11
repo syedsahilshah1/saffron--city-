@@ -57,8 +57,12 @@ import SectorsAccordion from "@/components/home/SectorsAccordion";
 import PlotsForSaleGrid from "@/components/home/PlotsForSaleGrid";
 import FaqAccordion from "@/components/home/FaqAccordion";
 
-export default function HomePage() {
-  const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
+import { db } from "@/lib/db";
+
+export default async function HomePage() {
+  const settings = await db.getSettings();
+
+  const whatsappUrl = `https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
     "Hi, I want to start booking a plot in Saffron City."
   )}`;
 
@@ -72,7 +76,7 @@ export default function HomePage() {
         {/* Full-Cover Background Image extending behind headline and form on mobile and desktop */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
-            src="/images/hero-bg.jpg"
+            src={settings.heroBgImage || "/images/hero-bg.jpg"}
             alt="Saffron City Master Community"
             className="w-full h-full object-cover object-center scale-105"
           />
@@ -87,8 +91,16 @@ export default function HomePage() {
               <div className="space-y-6 relative max-w-xl pb-3 sm:pb-5 lg:pb-0">
                 {/* Headline */}
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight font-heading leading-tight">
-                  Invest in Premium Living at <span className="text-[#D4A017]">Saffron City</span>
+                  {settings.heroTitle || "Invest in Premium Living at"}{" "}
+                  <span className="text-[#D4A017]">{settings.heroHighlightedWord || "Saffron City"}</span>
                 </h1>
+
+                {/* Subtitle */}
+                {settings.heroSubtitle && (
+                  <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                    {settings.heroSubtitle}
+                  </p>
+                )}
 
                 {/* Action Buttons (Desktop view - below headline) */}
                 <div className="pt-2 hidden lg:flex flex-wrap items-center gap-3">
@@ -96,11 +108,11 @@ export default function HomePage() {
                     href="#hero-booking-form"
                     className="shimmer-gold-btn inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
                   >
-                    <span>Book Your Plot</span>
+                    <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </a>
                   <a
-                    href={SITE_CONFIG.masterPlanPdf}
+                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
                     download="Saffron-City-Master-Plan-Model.pdf"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/70 backdrop-blur-md border border-amber-300/80 text-slate-800 hover:bg-white font-bold text-sm shadow-sm transition-all"
                   >
@@ -124,11 +136,11 @@ export default function HomePage() {
                     href="#hero-booking-form"
                     className="shimmer-gold-btn inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white font-bold text-xs shadow-md transition-all text-center"
                   >
-                    <span>Book Your Plot</span>
+                    <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </a>
                   <a
-                    href={SITE_CONFIG.masterPlanPdf}
+                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
                     download="Saffron-City-Master-Plan-Model.pdf"
                     className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-white/90 backdrop-blur-md border border-amber-300 text-slate-800 font-bold text-xs shadow-sm transition-all text-center"
                   >
@@ -147,11 +159,11 @@ export default function HomePage() {
       ========================================================= */}
       <ScrollingTextButtons />
 
-      <div className="space-y-24 lg:space-y-32 mt-16 lg:mt-24">
+      <div className="space-y-16 sm:space-y-20 lg:space-y-24 mt-6 sm:mt-8 lg:mt-10">
         {/* =========================================================
             SECTION 2 — Chairman & Developer Leadership
         ========================================================= */}
-        <ChairmanSection />
+        <ChairmanSection initialSettings={settings} />
 
         {/* =========================================================
             SECTION 3 — Location & Accessibility
@@ -357,7 +369,7 @@ export default function HomePage() {
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <a
-                    href={SITE_CONFIG.masterPlanPdf}
+                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
                     download="Saffron-City-Master-Plan-Model.pdf"
                     className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
                   >
@@ -369,7 +381,7 @@ export default function HomePage() {
             }
             rightContent={
               <div className="relative">
-                <MasterPlanViewer />
+                <MasterPlanViewer initialImage={settings.masterPlanImage} />
               </div>
             }
           />
@@ -389,7 +401,20 @@ export default function HomePage() {
           </ScrollReveal>
 
           <ScrollReveal animation="fade-up" delay={100}>
-            <SectorsAccordion />
+            <SectorsAccordion
+              sectorA={{
+                name: settings.sectorATitle,
+                tagline: settings.sectorATagline,
+                image: settings.sectorAImage || "/images/sectors/sector-a-luxury.jpg",
+                plots: settings.sectorAPlots,
+              }}
+              sectorB={{
+                name: settings.sectorBTitle,
+                tagline: settings.sectorBTagline,
+                image: settings.sectorBImage || "/images/sectors/sector-b-residential.jpg",
+                plots: settings.sectorBPlots,
+              }}
+            />
           </ScrollReveal>
         </section>
 
@@ -428,15 +453,10 @@ export default function HomePage() {
                 </div>
 
                 {/* Amenity Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between bg-white border-t border-slate-100 space-y-2">
-                  <div>
-                    <h4 className="text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors font-heading">
-                      {item.title}
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed mt-1">
-                      {item.desc}
-                    </p>
-                  </div>
+                <div className="p-4 sm:p-5 flex-1 flex items-center justify-center text-center bg-white border-t border-slate-100">
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors font-heading">
+                    {item.title}
+                  </h4>
                 </div>
               </div>
             ))}
@@ -491,7 +511,7 @@ export default function HomePage() {
 
                 <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group my-2">
                   <img
-                    src={SITE_CONFIG.residentialPaymentPlanImg}
+                    src={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
                     alt="Saffron City Residential Payment Plan Sector A Block B"
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -499,7 +519,7 @@ export default function HomePage() {
 
                 <div className="flex items-center gap-3 pt-2">
                   <a
-                    href={SITE_CONFIG.residentialPaymentPlanImg}
+                    href={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
                     download="Saffron-City-Residential-Payment-Plan.jpg"
                     className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
                   >
@@ -536,7 +556,7 @@ export default function HomePage() {
 
                 <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group my-2">
                   <img
-                    src={SITE_CONFIG.commercialPaymentPlanImg}
+                    src={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
                     alt="Saffron City Signature Commercial Payment Plan"
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -544,7 +564,7 @@ export default function HomePage() {
 
                 <div className="flex items-center gap-3 pt-2">
                   <a
-                    href={SITE_CONFIG.commercialPaymentPlanImg}
+                    href={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
                     download="Saffron-City-Commercial-Payment-Plan.jpg"
                     className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
                   >
@@ -552,7 +572,7 @@ export default function HomePage() {
                     <span>Download Commercial Flyer</span>
                   </a>
                   <a
-                    href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent("Hi, I want to book a Signature Commercial 30x40 plot in Saffron City.")}`}
+                    href={`https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent("Hi, I want to book a Signature Commercial 30x40 plot in Saffron City.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"

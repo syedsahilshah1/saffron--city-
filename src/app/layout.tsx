@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
-import ScrollProgressBar from "@/components/animations/ScrollProgressBar";
+import AppShell from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
   title: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
@@ -27,6 +24,8 @@ export const metadata: Metadata = {
     title: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
     description:
       "15,000 Kanal RDA NOC Approved housing society on Main GT Road, Rawat. Flexible 3-year installment plans with 10% down payment.",
+    images: ["/images/hero-bg.jpg"],
+    url: "https://saffroncity.pk",
     type: "website",
     locale: "en_PK",
   },
@@ -39,12 +38,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-white">
-      <body className="min-h-screen flex flex-col bg-white text-slate-900 antialiased selection:bg-[#82132b] selection:text-white">
-        <ScrollProgressBar />
-        <Navbar />
-        <main className="flex-grow bg-white">{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
+      <body className="min-h-screen flex flex-col bg-white text-slate-900 antialiased selection:bg-[#D4A017] selection:text-slate-950">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

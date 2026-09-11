@@ -1,15 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, ChevronUp, Award } from "lucide-react";
 import ScrollReveal from "@/components/animations/ScrollReveal";
+import { StoredSettings } from "@/lib/types";
 
-export default function ChairmanSection() {
+export default function ChairmanSection({ initialSettings }: { initialSettings?: Partial<StoredSettings> }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [settings, setSettings] = useState<Partial<StoredSettings> | null>(initialSettings || null);
+
+  useEffect(() => {
+    // If not provided from parent, fetch current settings
+    if (!initialSettings) {
+      fetch("/api/settings")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data) {
+            setSettings(data.data);
+          }
+        })
+        .catch((err) => console.warn("Could not load dynamic chairman settings:", err));
+    }
+  }, [initialSettings]);
+
+  const name = settings?.chairmanName || "Malik Tariq Mehmood";
+  const title = settings?.chairmanTitle || "Chairman & Founder";
+  const bioShort =
+    settings?.chairmanBioShort ||
+    "Saffron City Islamabad, developed by Saadullah Khan and Brothers (SKB Group), is a thoughtfully planned gated community located on GT Road, Rawat. Backed by over 70 years of engineering pedigree, the project sets a new benchmark in luxury, security, and transparent real estate.";
+  const bioFull =
+    settings?.chairmanBioFull ||
+    "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.";
+  const portrait = settings?.chairmanPortrait || "/images/chairman_portrait_hd.png";
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12 lg:py-16 relative">
+    <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-2 sm:py-4 relative">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
         {/* Left Column: Content */}
         <ScrollReveal
@@ -25,16 +51,16 @@ export default function ChairmanSection() {
           {/* Title */}
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-[1.15]">
             <span className="text-[#D4A017]">
-              Chairman &amp; Founder &mdash;
+              {title} &mdash;
             </span>
             <br />
-            <span className="text-slate-900">Malik Tariq Mehmood</span>
+            <span className="text-slate-900">{name}</span>
           </h2>
 
           {/* Description Text */}
           <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
             <p>
-              Saffron City Islamabad, developed by Saadullah Khan and Brothers (SKB Group), is a thoughtfully planned gated community located on GT Road, Rawat. Backed by over 70 years of engineering pedigree, the project sets a new benchmark in luxury, security, and transparent real estate.
+              {bioShort}
               {!isExpanded && (
                 <button
                   onClick={() => setIsExpanded(true)}
@@ -51,10 +77,7 @@ export default function ChairmanSection() {
             {isExpanded && (
               <div className="space-y-4 pt-3 border-t border-slate-200 animate-in fade-in duration-300">
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Saadullah Khan &amp; Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia.
-                </p>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.
+                  {bioFull}
                 </p>
                 <button
                   onClick={() => setIsExpanded(false)}
@@ -89,9 +112,9 @@ export default function ChairmanSection() {
         >
           <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg flex justify-center lg:justify-end">
             <img
-              src="/images/chairman_portrait_hd.png"
-              alt="Malik Tariq Mehmood - Chairman Saffron City"
-              className="w-full h-auto object-contain select-none pointer-events-none"
+              src={portrait}
+              alt={`${name} - ${title} Saffron City`}
+              className="w-full h-auto object-contain select-none pointer-events-none transition-all duration-500"
             />
           </div>
         </ScrollReveal>

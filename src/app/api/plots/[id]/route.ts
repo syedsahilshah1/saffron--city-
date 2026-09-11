@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { plotsDb } from "@/lib/db";
+import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export async function PATCH(
   req: NextRequest,
@@ -8,15 +10,8 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { status, totalPrice, downPayment, monthlyInst } = body;
 
-    let updated = null;
-    if (status) {
-      updated = plotsDb.updateStatus(id, status);
-    }
-    if (totalPrice !== undefined) {
-      updated = plotsDb.updatePrice(id, totalPrice, downPayment, monthlyInst);
-    }
+    const updated = await db.updatePlot(id, body);
 
     if (!updated) {
       return NextResponse.json(
@@ -26,9 +21,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Plot PATCH error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update plot" },
+      { success: false, message: error.message || "Failed to update plot" },
       { status: 500 }
     );
   }
@@ -40,7 +36,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const deleted = plotsDb.delete(id);
+    const deleted = await db.deletePlot(id);
     if (!deleted) {
       return NextResponse.json(
         { success: false, message: "Plot not found" },
@@ -48,7 +44,8 @@ export async function DELETE(
       );
     }
     return NextResponse.json({ success: true, message: "Plot removed" });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Plot DELETE error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to delete plot" },
       { status: 500 }

@@ -5,6 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+interface SectorData {
+  name?: string;
+  tagline?: string;
+  image?: string;
+  plots?: string;
+  badge?: string;
+  href?: string;
+}
+
+export interface SectorsAccordionProps {
+  sectorA?: SectorData;
+  sectorB?: SectorData;
+}
+
 interface BlockItem {
   id: string;
   name: string;
@@ -16,37 +30,41 @@ interface BlockItem {
   href: string;
 }
 
-const BLOCKS_DATA: BlockItem[] = [
-  {
-    id: "block-a",
-    name: "Sector A (Block B - New Rates)",
-    shortLabel: "Sector A",
-    badge: "Sector A • Premium Living",
-    tagline: "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
-    plots: "5M, 10M & 1 Kanal",
-    image: "/images/amenities/amenity_mosque.jpg",
-    href: "/sectors/sector-a",
-  },
-  {
-    id: "block-b",
-    name: "Sector B (Affordable Block)",
-    shortLabel: "Sector B",
-    badge: "Sector B • Family Friendly",
-    tagline: "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
-    plots: "5M, 10M & 1 Kanal",
-    image: "/images/hero-bg.jpg",
-    href: "/sectors/sector-b",
-  },
-];
-
-export default function SectorsAccordion() {
+export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionProps) {
   const [activeId, setActiveId] = useState<string>("block-a");
+
+  const blocks: BlockItem[] = [
+    {
+      id: "block-a",
+      name: sectorA?.name || "Sector A (Block B - New Rates)",
+      shortLabel: "Sector A",
+      badge: sectorA?.badge || "Sector A • Premium Living",
+      tagline:
+        sectorA?.tagline ||
+        "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
+      plots: sectorA?.plots || "5M, 10M & 1 Kanal",
+      image: sectorA?.image || "/images/sectors/sector-a-luxury.jpg",
+      href: sectorA?.href || "/sectors/sector-a",
+    },
+    {
+      id: "block-b",
+      name: sectorB?.name || "Sector B (Affordable Block)",
+      shortLabel: "Sector B",
+      badge: sectorB?.badge || "Sector B • Family Friendly",
+      tagline:
+        sectorB?.tagline ||
+        "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
+      plots: sectorB?.plots || "5M, 10M & 1 Kanal",
+      image: sectorB?.image || "/images/sectors/sector-b-residential.jpg",
+      href: sectorB?.href || "/sectors/sector-b",
+    },
+  ];
 
   return (
     <div className="w-full">
       {/* Desktop & Tablet Expanding Horizontal Accordion */}
       <div className="hidden md:flex w-full h-[460px] lg:h-[500px] rounded-2xl lg:rounded-3xl overflow-hidden border border-amber-200/90 bg-white shadow-2xl relative">
-        {BLOCKS_DATA.map((block) => {
+        {blocks.map((block) => {
           const isActive = activeId === block.id;
 
           return (
@@ -66,19 +84,17 @@ export default function SectorsAccordion() {
                 alt={block.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 800px"
-                className={`object-cover object-center transition-transform duration-700 ease-out ${
-                  isActive ? "scale-105 filter-none" : "scale-100 brightness-75 contrast-95"
-                }`}
+                className={`object-cover object-center transition-transform duration-700 ease-out ${isActive ? "scale-105 filter-none" : "scale-100 brightness-75 contrast-95"
+                  }`}
                 priority={block.id === "block-a"}
               />
 
               {/* Inactive Overlay */}
               <div
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                  isActive
+                className={`absolute inset-0 transition-opacity duration-500 ${isActive
                     ? "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
                     : "bg-black/50 hover:bg-black/35"
-                }`}
+                  }`}
               />
 
               {/* Inactive Collapsed Label */}
@@ -138,7 +154,7 @@ export default function SectorsAccordion() {
 
       {/* Mobile View */}
       <div className="md:hidden space-y-3">
-        {BLOCKS_DATA.map((block) => {
+        {blocks.map((block) => {
           const isActive = activeId === block.id;
 
           return (

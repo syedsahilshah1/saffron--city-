@@ -7,17 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  AGENT
+  EDITOR
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  name           String
+  passwordHash   String
+  salt           String
+  role           Role      @default(AGENT)
+  permissions    String    @default("[\"overview\",\"leads\"]") // JSON string array of granted tabs
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  sessionToken   String?   @db.VarChar(512)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  auditLogs      AuditLog[]
+  resetTokens    PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // e.g. LOGIN_SUCCESS, LOGIN_FAILED, ACCOUNT_LOCKED, USER_CREATED, PERMISSION_UPDATED
+  details   String?  @db.Text
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
 model LeadInquiry {
   id          String   @id @default(uuid())
   name        String
   phone       String
-  message     String?
+  message     String?  @db.Text
   plotSize    String?  @default("5 Marla")
   plotType    String?  @default("Residential")
   sector      String?  @default("Sector A")
   status      String   @default("New") // New, Contacted, FollowUp, Booked, Closed
   source      String   @default("Website Form")
-  notes       String?
+  notes       String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -32,19 +79,43 @@ model PlotInventory {
   downPayment    Float
   monthlyInst    Float
   status         String   @default("Available") // Available, Reserved, Sold
-  features       String?  // Corner, Main Boulevard, Park Facing
+  features       String?  @db.Text
+  image          String?  @db.VarChar(512)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model SiteSetting {
-  id          String   @id @default("default")
-  siteName    String   @default("Saffron City Islamabad")
-  contactPhone String  @default("+92 300 0000000")
-  whatsappPhone String @default("+923000000000")
-  officialEmail String @default("info@saffroncity.org")
-  officeAddress String @default("Main GT Road, Rawat, Islamabad/Rawalpindi")
-  rdaNocStatus String  @default("Approved - January 2025")
-  announcement String? @default("Pre-launch plot bookings currently open with 10% down payment")
-  updatedAt   DateTime @updatedAt
+  id                   String   @id @default("default")
+  siteName             String   @default("Saffron City Islamabad")
+  contactPhone         String   @default("+92 300 0000000")
+  secondaryPhone       String?  @default("+92 51 111 723 376")
+  whatsappPhone        String   @default("+923000000000")
+  officialEmail        String   @default("info@saffroncity.pk")
+  officeAddress        String   @default("Main GT Road, Rawat, Islamabad/Rawalpindi")
+  rdaNocStatus         String   @default("RDA Approved (Full 15,000 Kanal)")
+  announcement         String?  @db.Text
+  activePreLaunchDiscount Boolean @default(true)
+  
+  // SMTP Settings
+  smtpEnabled          Boolean  @default(false)
+  smtpHost             String?  @default("smtp.gmail.com")
+  smtpPort             Int?     @default(465)
+  smtpSecure           Boolean  @default(true)
+  smtpUser             String?
+  smtpPass             String?
+  smtpFromEmail        String?  @default("no-reply@saffroncity.pk")
+  leadNotificationEmail String? @default("ubaidnasir401@gmail.com")
+
+  // Raw JSON fields for flexible CMS content
+  metaSettingsJson     String?  @db.Text
+  heroSettingsJson     String?  @db.Text
+  chairmanSettingsJson String?  @db.Text
+  masterPlanJson       String?  @db.Text
+  sectorsJson          String?  @db.Text
+  amenitiesJson        String?  @db.Text
+  landmarksJson        String?  @db.Text
+  paymentTiersJson     String?  @db.Text
+
+  updatedAt            DateTime @updatedAt
 }

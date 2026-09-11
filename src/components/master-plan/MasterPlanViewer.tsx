@@ -1,12 +1,33 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
-import { Maximize2, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Maximize2, X, ZoomIn, ZoomOut, RotateCcw, Download } from "lucide-react";
 import { SITE_CONFIG } from "@/data/saffron-data";
+import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
 
-export default function MasterPlanViewer({ className = "" }: { className?: string }) {
+export default function MasterPlanViewer({
+  className = "",
+  initialImage,
+}: {
+  className?: string;
+  initialImage?: string;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const masterPlanImg = SITE_CONFIG.masterPlanImage || "/images/saffron-city-master-plan.webp";
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [masterPlanImg, setMasterPlanImg] = useState(
+    initialImage || SITE_CONFIG.masterPlanImage || "/images/saffron-city-master-plan.webp"
+  );
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data?.masterPlanImage) {
+          setMasterPlanImg(data.data.masterPlanImage);
+        }
+      })
+      .catch((err) => console.warn("Could not load dynamic master plan:", err));
+  }, []);
 
   // Card Viewer Pan & Zoom State
   const [scale, setScale] = useState(1);
@@ -278,6 +299,18 @@ export default function MasterPlanViewer({ className = "" }: { className?: strin
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
+                setIsDownloadModalOpen(true);
+              }}
+              className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer"
+              title="Download Master Plan"
+            >
+              <Download className="w-4 h-4 text-[#D4A017]" />
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
                 setModalScale(2);
                 setModalPosition({ x: 0, y: 0 });
                 setIsModalOpen(true);
@@ -353,6 +386,16 @@ export default function MasterPlanViewer({ className = "" }: { className?: strin
 
                 <button
                   type="button"
+                  onClick={() => setIsDownloadModalOpen(true)}
+                  className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                  title="Download Master Plan"
+                >
+                  <Download className="w-4 h-4 text-[#D4A017]" />
+                  <span className="hidden sm:inline">Save HD</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 transition-colors ml-2 cursor-pointer"
                   title="Close"
@@ -403,12 +446,16 @@ export default function MasterPlanViewer({ className = "" }: { className?: strin
           </div>
         </div>
       )}
+
+      {/* Gated Lead Capture Download Modal for Master Plan */}
+      <DownloadLeadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+        downloadUrl={masterPlanImg}
+        downloadFileName="saffron-city-official-master-plan.jpg"
+        documentTitle="Master Plan Layout"
+        documentType="Master Plan"
+      />
     </>
   );
 }
-
-
-
-
-
-

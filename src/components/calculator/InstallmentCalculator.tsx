@@ -3,16 +3,19 @@
 import React, { useState } from "react";
 import { Calculator, Download, MessageCircle, Sparkles } from "lucide-react";
 import { RESIDENTIAL_PRICES, COMMERCIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
+import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
 
 export default function InstallmentCalculator() {
   const allPlots = [...RESIDENTIAL_PRICES, ...COMMERCIAL_PRICES];
   const [selectedSize, setSelectedSize] = useState<string>("5 Marla");
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   const currentPlot = allPlots.find((p) => p.size === selectedSize) || allPlots[0];
 
   const isCommercial = currentPlot.category === "commercial";
 
   const whatsappMsg = `Hi, I am interested in the ${currentPlot.size} (${currentPlot.category}) plot in Saffron City. Total price is ${currentPlot.totalPriceFormatted} with ${currentPlot.bookingAmountFormatted} booking. Please send me the official booking plan.`;
+  const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`;
 
   return (
     <div className="relative w-full rounded-3xl border border-amber-200/90 bg-white shadow-2xl overflow-hidden p-6 sm:p-8 lg:p-10 space-y-6 group">
@@ -141,11 +144,10 @@ export default function InstallmentCalculator() {
           </div>
         </div>
 
-        {/* Bottom Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          {/* Get Plan on WhatsApp */}
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <a
-            href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all"
@@ -154,17 +156,27 @@ export default function InstallmentCalculator() {
             <span>Get Official Plan on WhatsApp</span>
           </a>
 
-          {/* Download Official Flyer */}
-          <a
-            href={isCommercial ? SITE_CONFIG.commercialPaymentPlanImg : SITE_CONFIG.residentialPaymentPlanImg}
-            download={`saffron-city-${currentPlot.size.toLowerCase().replace(/\s+/g, "-")}-plan.jpg`}
-            className="w-full py-3.5 px-6 rounded-2xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg"
+          {/* Download Official Flyer with Lead Capture */}
+          <button
+            type="button"
+            onClick={() => setIsDownloadModalOpen(true)}
+            className="w-full py-3.5 px-6 rounded-2xl bg-[#D4A017] hover:bg-amber-600 text-slate-950 font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Download Official Rate Flyer</span>
-          </a>
+          </button>
         </div>
       </div>
+
+      {/* Gated Lead Capture Modal */}
+      <DownloadLeadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+        downloadUrl={isCommercial ? SITE_CONFIG.commercialPaymentPlanImg : SITE_CONFIG.residentialPaymentPlanImg}
+        downloadFileName={`saffron-city-${currentPlot.size.toLowerCase().replace(/\s+/g, "-")}-plan.jpg`}
+        documentTitle={`Saffron City ${currentPlot.size} Payment Plan`}
+        documentType="Payment Plan"
+      />
     </div>
   );
 }

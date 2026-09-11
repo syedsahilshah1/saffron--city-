@@ -14,6 +14,7 @@ import {
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import WordReveal from "@/components/animations/WordReveal";
 import EnquiryForm from "@/components/forms/EnquiryForm";
+import LocationMapViewer from "@/components/location/LocationMapViewer";
 import { LANDMARKS, ACCESS_ROUTES, SITE_CONFIG } from "@/data/saffron-data";
 
 export const metadata = {
@@ -241,23 +242,9 @@ export default function LocationPage() {
               </div>
             </ScrollReveal>
 
-            {/* Google Maps Embed Right */}
+            {/* Interactive Location Map & Google Map Viewer Right */}
             <ScrollReveal animation="fade-left" className="lg:col-span-6">
-              <div className="w-full h-[450px] sm:h-[500px] rounded-3xl overflow-hidden border-2 border-amber-300 shadow-2xl relative bg-slate-100 group">
-                <iframe
-                  title="Saffron City Google Map Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                />
-                <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded-full bg-white/95 border border-amber-300 text-amber-900 text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-md">
-                  <MapPin className="w-4 h-4 text-[#D4A017]" />
-                  <span>Main GT Road &amp; Rawat Hub</span>
-                </div>
-              </div>
+              <LocationMapViewer imageSrc="/images/imgi_87_LOCATION.jpg" />
             </ScrollReveal>
           </div>
         </section>

@@ -21,8 +21,8 @@ export const SITE_CONFIG = {
   masterPlanPdf: "/images/saffron-city-master-plan.webp",
   masterPlanImage: "/images/saffron-city-master-plan.webp",
   masterPlanFullImage: "/images/saffron-city-master-plan-full.jpg",
-  residentialPaymentPlanImg: "/images/c32e5714-63e2-4d87-8dd3-6a181eeb190d.jpg",
-  commercialPaymentPlanImg: "/images/ff015abe-6b37-400c-8c44-e0b6d6420f2e.jpg",
+  residentialPaymentPlanImg: "/images/payment-plans/official-residential-payment-plan.jpg",
+  commercialPaymentPlanImg: "/images/payment-plans/official-commercial-payment-plan.jpg",
 };
 
 export const RESIDENTIAL_PRICES: PlotPriceInfo[] = [

@@ -1,9 +1,34 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { SITE_CONFIG } from "@/data/saffron-data";
+import { Phone, Mail, MapPin, ExternalLink, ShieldCheck, Clock, Award, Building2 } from "lucide-react";
+import { StoredSettings } from "@/lib/types";
 
 export default function Footer() {
+  const [settings, setSettings] = useState<Partial<StoredSettings>>({
+    contactPhone: SITE_CONFIG.phone,
+    officialEmail: SITE_CONFIG.email,
+    officeAddress: SITE_CONFIG.address,
+    rdaVerificationUrl: SITE_CONFIG.rdaVerificationUrl,
+  });
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setSettings(data.data);
+        }
+      })
+      .catch((err) => console.warn("Could not load dynamic footer settings:", err));
+  }, []);
+
+  const phone = settings.contactPhone || SITE_CONFIG.phone;
+  const email = settings.officialEmail || SITE_CONFIG.email;
+  const address = settings.officeAddress || SITE_CONFIG.address;
+  const rdaUrl = settings.rdaVerificationUrl || SITE_CONFIG.rdaVerificationUrl;
   return (
     <footer className="relative bg-[#fbfaf8] border-t border-amber-200/80 text-slate-600 text-sm overflow-hidden">
       {/* Subtle top golden glow line */}
@@ -77,9 +102,6 @@ export default function Footer() {
               <li>
                 <Link href="/plots/residential" className="hover:text-[#D4A017] transition-colors">Residential Plots (5, 10, 1 Kanal)</Link>
               </li>
-              <li>
-                <Link href="/dashboard" className="text-[#D4A017] font-semibold hover:underline">Staff Management Portal</Link>
-              </li>
             </ul>
           </div>
 
@@ -91,23 +113,23 @@ export default function Footer() {
             <div className="space-y-2.5 text-xs text-slate-600">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#D4A017] shrink-0 mt-0.5" />
-                <span>{SITE_CONFIG.address}</span>
+                <span>{address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#D4A017] shrink-0" />
-                <a href={`tel:${SITE_CONFIG.phone}`} className="hover:text-slate-900 font-semibold transition-colors">
-                  {SITE_CONFIG.phone}
+                <a href={`tel:${phone}`} className="hover:text-slate-900 font-semibold transition-colors">
+                  {phone}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#D4A017] shrink-0" />
-                <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-slate-900 transition-colors">
-                  {SITE_CONFIG.email}
+                <a href={`mailto:${email}`} className="hover:text-slate-900 transition-colors">
+                  {email}
                 </a>
               </div>
               <div className="pt-2">
                 <a
-                  href={SITE_CONFIG.rdaVerificationUrl}
+                  href={rdaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-[#D4A017] hover:text-amber-700 font-semibold text-xs underline underline-offset-2"
@@ -129,9 +151,6 @@ export default function Footer() {
             </Link>
             <Link href="/noc-status" className="hover:text-slate-800 transition-colors">
               RDA Approval
-            </Link>
-            <Link href="/dashboard" className="text-slate-600 hover:text-[#D4A017] transition-colors">
-              Staff Dashboard
             </Link>
           </div>
         </div>

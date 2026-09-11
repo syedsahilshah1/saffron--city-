@@ -15,10 +15,22 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [phone, setPhone] = useState(SITE_CONFIG.phone);
   const lastScrollY = useRef(0);
   const [blocksDropdown, setBlocksDropdown] = useState(false);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data?.contactPhone) {
+          setPhone(data.data.contactPhone);
+        }
+      })
+      .catch((err) => console.warn("Could not load dynamic navbar settings:", err));
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,7 +112,7 @@ export default function Navbar() {
       {/* Top Scroll Indicator Line */}
       <div className="absolute top-0 inset-x-0 h-[3px] bg-amber-100/30 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-amber-600 via-[#D4A017] via-yellow-400 to-amber-300 transition-[width] duration-150 ease-out shadow-[0_0_12px_rgba(212,160,23,0.9)] relative"
+          className="h-full bg-gradient-to-r from-amber-600 via-[#D4A017] to-amber-300 transition-[width] duration-150 ease-out shadow-[0_0_12px_rgba(212,160,23,0.9)] relative"
           style={{ width: `${scrollProgress}%` }}
         >
           {/* Subtle glowing tip on the progress line */}
@@ -195,14 +207,14 @@ export default function Navbar() {
           {/* Right Side: Gold Call Button Pill */}
           <div className="hidden lg:flex items-center flex-shrink-0">
             <a
-              href={`tel:${SITE_CONFIG.phone}`}
+              href={`tel:${phone}`}
               className="inline-flex items-center gap-2 pl-3 pr-4 py-2 rounded-full bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold border border-amber-400 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all whitespace-nowrap"
             >
               <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                 <Phone className="w-3.5 h-3.5 text-white fill-white" />
               </div>
               <span className="font-bold text-xs tracking-wider text-white">
-                {SITE_CONFIG.phone}
+                {phone}
               </span>
             </a>
           </div>
@@ -221,11 +233,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {/* Quick Call Pill on Mobile */}
             <a
-              href={`tel:${SITE_CONFIG.phone}`}
+              href={`tel:${phone}`}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-[#D4A017] text-white text-xs font-bold shadow-sm"
             >
               <Phone className="w-3 h-3 fill-white text-white" />
-              <span className="hidden sm:inline">{SITE_CONFIG.phone}</span>
+              <span className="hidden sm:inline">{phone}</span>
             </a>
 
             <button

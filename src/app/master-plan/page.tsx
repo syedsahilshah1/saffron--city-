@@ -18,6 +18,7 @@ import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import WordReveal from "@/components/animations/WordReveal";
 import MasterPlanViewer from "@/components/master-plan/MasterPlanViewer";
+import MasterPlanDownloadButton from "@/components/master-plan/MasterPlanDownloadButton";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
@@ -179,14 +180,11 @@ export default function MasterPlanPage() {
 
 
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap gap-3 pt-2">
-            <a
-              href={SITE_CONFIG.masterPlanPdf}
-              download="Saffron-City-Master-Plan.webp"
-              className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download Master Plan</span>
-            </a>
+            <MasterPlanDownloadButton 
+              downloadUrl={SITE_CONFIG.masterPlanPdf} 
+              buttonText="Download Master Plan" 
+              documentTitle="Saffron City Master Plan Layout"
+            />
             <Link
               href="/payment-plan"
               className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition-colors"

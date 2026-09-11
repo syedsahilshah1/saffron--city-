@@ -23,6 +23,7 @@ import WordReveal from "@/components/animations/WordReveal";
 import AnimatedCounter from "@/components/animations/AnimatedCounter";
 import InstallmentCalculator from "@/components/calculator/InstallmentCalculator";
 import FaqAccordion from "@/components/ui/FaqAccordion";
+import DownloadButtonWithLeadModal from "@/components/ui/DownloadButtonWithLeadModal";
 import { RESIDENTIAL_PRICES, COMMERCIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
 export const metadata = {
@@ -132,14 +133,14 @@ export default function PaymentPlanPage() {
               <MessageCircle className="w-4 h-4" />
               <span>Get Plan on WhatsApp</span>
             </a>
-            <a
-              href={SITE_CONFIG.residentialPaymentPlanImg}
-              download="Saffron-City-Official-Payment-Plan.jpg"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download Rates Flyer</span>
-            </a>
+            <DownloadButtonWithLeadModal
+              downloadUrl={SITE_CONFIG.residentialPaymentPlanImg}
+              downloadFileName="Saffron-City-Official-Payment-Plan.jpg"
+              documentTitle="Saffron City Payment Plan"
+              documentType="Payment Plan"
+              buttonText="Download Rates Flyer"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
+            />
           </ScrollReveal>
         </div>
       </section>
@@ -180,14 +181,14 @@ export default function PaymentPlanPage() {
                     <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs uppercase">
                       Sector A (Block B)
                     </span>
-                    <a
-                      href={SITE_CONFIG.residentialPaymentPlanImg}
-                      download="Saffron-City-Residential-Payment-Plan.jpg"
-                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors"
-                      title="Download Residential Flyer"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
+                    <DownloadButtonWithLeadModal
+                      downloadUrl={SITE_CONFIG.residentialPaymentPlanImg}
+                      downloadFileName="Saffron-City-Residential-Payment-Plan.jpg"
+                      documentTitle="Residential Payment Plan (Sector A)"
+                      documentType="Payment Plan"
+                      iconOnly={true}
+                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors cursor-pointer"
+                    />
                   </div>
 
                   <h3 className="text-xl font-bold text-slate-900 font-heading">
@@ -228,14 +229,14 @@ export default function PaymentPlanPage() {
                     <span className="px-3 py-1 rounded-full bg-[#D4A017] text-slate-950 font-bold text-xs uppercase">
                       Signature Commercial
                     </span>
-                    <a
-                      href={SITE_CONFIG.commercialPaymentPlanImg}
-                      download="Saffron-City-Commercial-Payment-Plan.jpg"
-                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors"
-                      title="Download Commercial Flyer"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
+                    <DownloadButtonWithLeadModal
+                      downloadUrl={SITE_CONFIG.commercialPaymentPlanImg}
+                      downloadFileName="Saffron-City-Commercial-Payment-Plan.jpg"
+                      documentTitle="Signature Commercial Payment Plan"
+                      documentType="Payment Plan"
+                      iconOnly={true}
+                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors cursor-pointer"
+                    />
                   </div>
 
                   <h3 className="text-xl font-bold text-slate-900 font-heading">

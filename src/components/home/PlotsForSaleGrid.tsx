@@ -34,7 +34,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 45.0 Lac",
     trend: "Active",
-    image: "/images/landmark_dha_islamabad.jpg",
+    image: "/images/sectors/sector-a-luxury.jpg",
     href: "/sectors/sector-a",
   },
   {
@@ -48,7 +48,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "OFFICIAL RATE",
     priceFormatted: "PKR 45.0 Lac",
     trend: "Active",
-    image: "/images/imgi_25_saffron-city-islamabad.jpg",
+    image: "/images/sectors/sector-b-residential.jpg",
     href: "/sectors/sector-b",
   },
   {
@@ -62,7 +62,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 82.5 Lac",
     trend: "Hot",
-    image: "/images/amenities/amenity_mosque.jpg",
+    image: "/images/sectors/sector-a-luxury.jpg",
     href: "/sectors/sector-a",
   },
   {
@@ -76,7 +76,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "OFFICIAL RATE",
     priceFormatted: "PKR 82.5 Lac",
     trend: "Active",
-    image: "/images/amenities/amenity_park.jpg",
+    image: "/images/sectors/sector-b-residential.jpg",
     href: "/sectors/sector-b",
   },
   {
@@ -90,7 +90,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 1.55 Crore",
     trend: "Luxury",
-    image: "/images/hero-bg.jpg",
+    image: "/images/sectors/sector-a-luxury.jpg",
     href: "/sectors/sector-a",
   },
   {
@@ -104,7 +104,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "SPECIAL OFFER",
     priceFormatted: "PKR 1.55 Crore (Net)",
     trend: "Save 45 Lac",
-    image: "/images/ff015abe-6b37-400c-8c44-e0b6d6420f2e.jpg",
+    image: "/images/sectors/commercial-plaza.jpg",
     href: "/payment-plan",
   },
   {
@@ -118,7 +118,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "COMMERCIAL RATE",
     priceFormatted: "PKR 2.20 Crore",
     trend: "Prime",
-    image: "/images/landmark_giga_mall.jpg",
+    image: "/images/sectors/commercial-plaza.jpg",
     href: "/plots/commercial",
   },
   {
@@ -132,7 +132,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "COMMERCIAL RATE",
     priceFormatted: "PKR 4.20 Crore",
     trend: "Prime",
-    image: "/images/amenities/amenity_boulevard.jpg",
+    image: "/images/sectors/commercial-plaza.jpg",
     href: "/plots/commercial",
   },
 ];
