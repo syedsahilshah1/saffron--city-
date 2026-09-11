@@ -3,15 +3,12 @@
 import React, { useState, useRef, useCallback } from "react";
 import { 
   MapPin, 
-  Navigation, 
   Maximize2, 
   X, 
   ZoomIn, 
   ZoomOut, 
   RotateCcw, 
-  Download, 
-  Layers, 
-  Globe 
+  Download 
 } from "lucide-react";
 
 import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
@@ -25,7 +22,6 @@ export default function LocationMapViewer({
   className = "",
   imageSrc = "/images/imgi_87_LOCATION.jpg",
 }: LocationMapViewerProps) {
-  const [activeTab, setActiveTab] = useState<"official" | "google">("official");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
@@ -69,17 +65,6 @@ export default function LocationMapViewer({
       const next = Math.max(Math.round((prev - 0.6) * 10) / 10, 1);
       if (next === 1) setModalPosition({ x: 0, y: 0 });
       return next;
-    });
-  };
-
-  // Mouse Wheel Zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.2 : 0.82;
-    setScale((prev) => {
-      const next = Math.min(Math.max(prev * factor, 1), 8);
-      if (next <= 1) setPosition({ x: 0, y: 0 });
-      return Math.round(next * 100) / 100;
     });
   };
 
@@ -174,166 +159,114 @@ export default function LocationMapViewer({
 
   return (
     <>
-      <div className={`rounded-3xl border-2 border-amber-300/80 bg-white shadow-2xl overflow-hidden flex flex-col ${className}`}>
-        {/* Top Control Bar with View Mode Switching */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:px-5 bg-gradient-to-r from-amber-50 via-white to-amber-50/60 border-b border-amber-200/80">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab("official")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === "official"
-                  ? "bg-slate-900 text-[#D4A017] shadow-md ring-1 ring-amber-400/40"
-                  : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-              }`}
+      <div className={`relative w-full rounded-3xl bg-white border border-amber-200 shadow-xl overflow-hidden group ${className}`}>
+        {/* Content Canvas */}
+        <div className="relative w-full h-[520px] sm:h-[620px] lg:h-[720px] bg-slate-100 overflow-hidden">
+          <div
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onDoubleClick={handleDoubleClick}
+            className={`relative w-full h-full flex items-center justify-center p-3 bg-white select-none overflow-hidden ${
+              scale > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"
+            }`}
+          >
+            <div
+              style={{
+                transform: `translate3d(${position.x}px, ${position.y}px, 0px) scale(${scale})`,
+                transformOrigin: "center center",
+                transition: isDragging ? "none" : "transform 0.15s ease-out",
+                willChange: "transform",
+              }}
+              className="flex items-center justify-center w-full h-full pointer-events-none"
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Official Location Map</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("google")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === "google"
-                  ? "bg-slate-900 text-[#D4A017] shadow-md ring-1 ring-amber-400/40"
-                  : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Live Google Map</span>
-            </button>
-          </div>
+              <img
+                src={imageSrc}
+                alt="Saffron City Official Location and Access Map"
+                className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-100"
+                draggable={false}
+              />
+            </div>
 
-          {activeTab === "official" && (
-            <div className="flex items-center gap-1.5">
+            {/* Floating Map Zoom & Action Controls */}
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/95 border border-slate-200 shadow-xl backdrop-blur-md">
               <button
                 type="button"
-                onClick={() => setIsDownloadModalOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-950 text-xs font-bold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
-                title="Download Map"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  zoomIn();
+                }}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-900 transition-colors cursor-pointer"
+                title="Zoom In"
               >
-                <Download className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span className="hidden sm:inline">Save HD</span>
+                <ZoomIn className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  zoomOut();
+                }}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-900 transition-colors cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              {scale > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReset();
+                  }}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDownloadModalOpen(true);
+                }}
+                className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer"
+                title="Download Map"
+              >
+                <Download className="w-4 h-4 text-[#D4A017]" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
                   setModalScale(1.8);
                   setModalPosition({ x: 0, y: 0 });
                   setIsModalOpen(true);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="p-2 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 transition-colors cursor-pointer ml-0.5"
+                title="Fullscreen HD View"
               >
-                <Maximize2 className="w-3.5 h-3.5" />
-                <span>Enlarge Map</span>
+                <Maximize2 className="w-4 h-4" />
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Content Canvas */}
-        <div className="relative w-full h-[450px] sm:h-[520px] bg-slate-100 overflow-hidden">
-          {activeTab === "official" ? (
-            <div
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onDoubleClick={handleDoubleClick}
-              className={`relative w-full h-full flex items-center justify-center p-3 bg-white select-none overflow-hidden ${
-                scale > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"
-              }`}
-            >
-              <div
-                style={{
-                  transform: `translate3d(${position.x}px, ${position.y}px, 0px) scale(${scale})`,
-                  transformOrigin: "center center",
-                  transition: isDragging ? "none" : "transform 0.15s ease-out",
-                  willChange: "transform",
-                }}
-                className="flex items-center justify-center w-full h-full pointer-events-none"
-              >
-                <img
-                  src={imageSrc}
-                  alt="Saffron City Official Location and Access Map"
-                  className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-100"
-                  draggable={false}
-                />
-              </div>
-
-              {/* Floating Map Zoom Controls */}
-              <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/95 border border-slate-200 shadow-xl backdrop-blur-md">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    zoomIn();
-                  }}
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-900 transition-colors cursor-pointer"
-                  title="Zoom In"
-                >
-                  <ZoomIn className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    zoomOut();
-                  }}
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-900 transition-colors cursor-pointer"
-                  title="Zoom Out"
-                >
-                  <ZoomOut className="w-4 h-4" />
-                </button>
-                {scale > 1 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleReset();
-                    }}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-                    title="Reset Zoom"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Floating Bottom Info Tip */}
-              <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-                <span className="text-[11px] font-medium text-slate-600 bg-white/95 px-3 py-1 rounded-full border border-slate-200 shadow-md backdrop-blur-sm">
-                  Official Saffron City Master Highway Map • Scroll or pinch to zoom
+            {/* Floating Bottom Info Tip */}
+            <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
+              <span className="text-[11px] font-medium text-slate-600 bg-white/95 px-3 py-1 rounded-full border border-slate-200 shadow-md backdrop-blur-sm">
+                Official Saffron City Master Highway Map • Pinch or drag to pan • Click Full Screen for HD zoom
+              </span>
+              {scale > 1 && (
+                <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow">
+                  {Math.round(scale * 100)}%
                 </span>
-                {scale > 1 && (
-                  <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow">
-                    {Math.round(scale * 100)}%
-                  </span>
-                )}
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="w-full h-full relative">
-              <iframe
-                title="Saffron City Google Map Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                className="w-full h-full"
-              />
-              <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded-full bg-white/95 border border-amber-300 text-amber-900 text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-md">
-                <MapPin className="w-4 h-4 text-[#D4A017]" />
-                <span>Main GT Road &amp; Rawat Hub</span>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 

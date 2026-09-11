@@ -222,7 +222,6 @@ export default function MasterPlanViewer({
       >
         {/* Interactive Deep Pan & Zoom Canvas */}
         <div
-          onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}

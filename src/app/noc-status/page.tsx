@@ -4,7 +4,6 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   ExternalLink, 
-  AlertTriangle, 
   FileText, 
   Building2, 
   HelpCircle, 
@@ -23,8 +22,8 @@ import FaqAccordion from "@/components/ui/FaqAccordion";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
 export const metadata = {
-  title: "Saffron City NOC Status | 100% RDA Approved 2026",
-  description: "Saffron City holds a valid RDA NOC for 15,000 Kanal on Main GT Road Rawat. Check official legal approval status, verify on the Punjab portal, and inspect documents.",
+  title: "Saffron City NOC Status | Legal & Regulatory Approvals",
+  description: "Saffron City NOC status and legal verification on Main GT Road Rawat. Check official legal approval status, verify on the Punjab portal, and inspect documents.",
 };
 
 const NOC_LEGAL_DOCUMENTS = [
@@ -107,25 +106,12 @@ export default function NocStatusPage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>RDA NOC Approved • 15,000 Kanal Land</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
-            text="Saffron City NOC Status: 100% RDA Approved"
-            highlightWords={["NOC", "Status", "100%", "RDA", "Approved"]}
+            text="Saffron City NOC Status"
+            highlightWords={["NOC", "Status"]}
             as="h1"
             className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
           />
-
-          <ScrollReveal animation="fade-up" delay={100}>
-            <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Saffron City holds an authentic, issued No Objection Certificate (NOC) from the Rawalpindi Development Authority (RDA) for the full 15,000 Kanal project area on Main GT Road, Rawat.
-            </p>
-          </ScrollReveal>
 
           {/* Key Metrics Counter Grid */}
           <ScrollReveal animation="fade-up" delay={150}>
@@ -287,13 +273,6 @@ export default function NocStatusPage() {
               <p className="text-slate-600">Request the official signed clearance copies directly from our sales advisors.</p>
             </div>
           </StaggerReveal>
-
-          <div className="p-4 rounded-2xl bg-amber-100/80 border border-amber-300 flex items-start gap-3 text-xs text-amber-900">
-            <AlertTriangle className="w-5 h-5 text-[#D4A017] shrink-0 mt-0.5" />
-            <div>
-              <strong>Government Compliance Guarantee:</strong> Saffron City holds active sanctioned status with verified land demarcation and approved town planning, eliminating any legal ambiguity.
-            </div>
-          </div>
         </section>
 
         {/* 3. Redesigned Interactive Frequently Asked Questions */}

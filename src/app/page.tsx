@@ -48,7 +48,6 @@ import {
   REVIEWS,
   HOME_FAQS
 } from "@/data/saffron-data";
-import SeeMoreDrawer from "@/components/ui/SeeMoreDrawer";
 import ChairmanSection from "@/components/home/ChairmanSection";
 import ScrollingTextButtons from "@/components/ui/ScrollingTextButtons";
 import LocationMapCard from "@/components/home/LocationMapCard";
@@ -200,28 +199,6 @@ export default async function HomePage() {
               <LocationMapCard />
             }
           />
-
-          <ScrollReveal animation="fade-up" delay={100}>
-            <SeeMoreDrawer
-              moreButtonText="See More Location & Access Routes"
-              lessButtonText="Show Less Location Details"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs text-slate-600">
-                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
-                  <h5 className="font-bold text-slate-900 mb-1">Islamabad Expressway Access</h5>
-                  <p className="text-slate-600">Direct signal-free connectivity reaching Blue Area and Zero Point without interior city congestion.</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
-                  <h5 className="font-bold text-slate-900 mb-1">Rawat–Chakbeli Road Access</h5>
-                  <p className="text-slate-600">Fast connection to upcoming Ring Road interchanges and southern bypass networks.</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
-                  <h5 className="font-bold text-slate-900 mb-1">Kallar Syedan Route</h5>
-                  <p className="text-slate-600">Alternate northern approach keeping daily travel smooth during peak traffic hours.</p>
-                </div>
-              </div>
-            </SeeMoreDrawer>
-          </ScrollReveal>
         </section>
 
         {/* =========================================================

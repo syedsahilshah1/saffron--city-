@@ -178,75 +178,10 @@ export default function LocationPage() {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Overview Details Left */}
-            <ScrollReveal animation="fade-right" className="lg:col-span-6 space-y-6">
-              <div className="p-8 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-[#D4A017] text-xs font-bold">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>Main GT Road (N-5) Direct Highway Frontage</span>
-                </div>
-
-                <h3 className="text-2xl font-bold text-slate-900 font-heading">
-                  Prime Highway Frontage with Zero Detours
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Saffron City boasts direct primary frontage on the multi-lane National Highway (N-5 / GT Road). Residents enjoy instant access into the society through a grand 250-foot dedicated boulevard without encountering narrow side roads or congestion.
-                </p>
-
-                <div className="space-y-3 pt-2 text-xs text-slate-700">
-                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-amber-50/60 border border-amber-200">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Direct N-5 GT Road Access:</strong>
-                      Enter directly from the main highway without winding rural bypasses.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Proximity to Rawalpindi Ring Road:</strong>
-                      Guaranteed rapid connectivity to M-2 Motorway and Islamabad Airport.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Surrounded by Established Communities:</strong>
-                      Bordered by DHA Phase II, Bahria Town, and Rawat commercial zone.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex flex-wrap gap-3">
-                  <a
-                    href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 font-bold text-xs shadow transition-all flex items-center gap-2"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Open in Google Maps</span>
-                  </a>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all flex items-center gap-2"
-                  >
-                    <Navigation className="w-4 h-4" />
-                    <span>Live GPS Pin</span>
-                  </a>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Interactive Location Map & Google Map Viewer Right */}
-            <ScrollReveal animation="fade-left" className="lg:col-span-6">
-              <LocationMapViewer imageSrc="/images/imgi_87_LOCATION.jpg" />
-            </ScrollReveal>
-          </div>
+          {/* Full Screen Interactive Location Map & Google Map Viewer */}
+          <ScrollReveal animation="fade-up" delay={150} className="w-full">
+            <LocationMapViewer imageSrc="/images/imgi_87_LOCATION.jpg" className="w-full" />
+          </ScrollReveal>
         </section>
 
         {/* 2. DEDICATED SEPARATE SECTION: Nearby Landmarks & Travel Times with Image Thumbnails */}

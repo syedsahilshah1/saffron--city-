@@ -6,7 +6,7 @@ export const SITE_CONFIG = {
   subtitle: "A new residential community on GT Road, designed for families and investors who want secure ownership with easy installments.",
   eyebrow: "GT Road, Rawat — RDA NOC Approved",
   phone: "03331113551",
-  phoneFormatted: "+92 333 1113551",
+  phoneFormatted: "0333 1113551",
   whatsapp: "923331113551",
   whatsappDefaultMsg: "Hi, I am interested in booking a plot in Saffron City Islamabad.",
   email: "info@saffroncity.org",

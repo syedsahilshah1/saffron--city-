@@ -53,7 +53,8 @@ import {
   ShieldAlert,
   Shield,
   BadgeCheck,
-  Edit3
+  Edit3,
+  FileDown
 } from "lucide-react";
 import {
   StoredInquiry,
@@ -118,6 +119,8 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
+  const [testingSmtp, setTestingSmtp] = useState(false);
+  const [smtpTestResult, setSmtpTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sectorFilter, setSectorFilter] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -360,6 +363,36 @@ export default function AdminDashboardPage() {
       ...settings,
       [field]: value,
     });
+  };
+
+  // Test SMTP Email Dispatch
+  const handleTestSmtp = async () => {
+    if (!settings) return;
+    setTestingSmtp(true);
+    setSmtpTestResult(null);
+
+    try {
+      const res = await fetch("/api/settings/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetEmail: settings.leadNotificationEmail || settings.officialEmail || "info@saffroncity.org",
+          customSettings: settings,
+        }),
+      });
+      const data = await res.json();
+      setSmtpTestResult({
+        success: Boolean(data.success),
+        message: data.message || (data.success ? "Test email dispatched successfully!" : "SMTP test failed."),
+      });
+    } catch (err: any) {
+      setSmtpTestResult({
+        success: false,
+        message: "Network error testing SMTP server: " + (err.message || err),
+      });
+    } finally {
+      setTestingSmtp(false);
+    }
   };
 
   // User Management Actions
@@ -1060,16 +1093,17 @@ export default function AdminDashboardPage() {
                             <span>{lead.phone}</span>
                           </a>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 min-w-[150px]">
                           {lead.plotSize ? (
-                            <>
-                              <span className="font-bold text-slate-800">{lead.plotSize}</span>
+                            <div>
+                              <span className="font-bold text-slate-800 block">{lead.plotSize}</span>
                               {lead.sector && <span className="block text-[10px] text-slate-500">{lead.sector}</span>}
-                            </>
+                            </div>
                           ) : (
-                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold">
-                              {lead.source || "Document Download"}
-                            </span>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-200 text-[11px] font-semibold">
+                              <FileDown className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                              <span className="leading-snug">{lead.source?.replace(/^Map Download:\s*/i, "") || "Document Download"}</span>
+                            </div>
                           )}
                         </td>
                         <td className="py-3.5 px-4 max-w-xs text-slate-600 truncate" title={lead.message}>
@@ -1964,7 +1998,7 @@ export default function AdminDashboardPage() {
                       value={settings.whatsappPhone}
                       onChange={(e) => updateSettingField("whatsappPhone", e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-700"
-                      placeholder="e.g. 923215554321"
+                      placeholder="e.g. 923331113551"
                     />
                   </div>
 
@@ -2097,10 +2131,45 @@ export default function AdminDashboardPage() {
                     />
                   </div>
                 </div>
+
+                {/* SMTP Test Alert Message */}
+                {smtpTestResult && (
+                  <div
+                    className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 border ${
+                      smtpTestResult.success
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-red-50 border-red-200 text-red-800"
+                    }`}
+                  >
+                    {smtpTestResult.success ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 font-medium">{smtpTestResult.message}</div>
+                    <button
+                      type="button"
+                      onClick={() => setSmtpTestResult(null)}
+                      className="text-slate-400 hover:text-slate-600 font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Save Button for Settings */}
-              <div className="flex justify-end">
+              {/* Save & Test Buttons for Settings */}
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleTestSmtp}
+                  disabled={testingSmtp || !settings.smtpEnabled}
+                  className="px-5 py-3 rounded-2xl bg-slate-800 text-white font-bold text-xs shadow-sm hover:bg-slate-700 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${testingSmtp ? "animate-spin" : ""}`} />
+                  <span>{testingSmtp ? "Testing Connection..." : "Test SMTP Delivery"}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => handleSaveSettings()}

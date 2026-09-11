@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendPasswordResetOtpEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
-// Request password reset token or reset with token
+// Request password reset OTP or verify OTP & reset password
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, email, token, newPassword } = body;
+    const { action, email, otp, token, newPassword } = body;
+
+    const otpCode = otp || token;
 
     if (action === "request") {
       if (!email) {
@@ -19,23 +22,34 @@ export async function POST(req: NextRequest) {
 
       const result = await db.createPasswordResetRequest(email);
 
-      if (!result.success) {
+      if (!result.success || !result.token) {
         return NextResponse.json({ success: false, message: result.message }, { status: 404 });
       }
 
-      console.log(`[Forgot Password] Reset token generated for ${email}: ${result.token}`);
+      // Dispatch 6-Digit OTP securely via SMTP Email
+      const settings = await db.getSettings();
+      const mailResult = await sendPasswordResetOtpEmail(email, result.token, settings);
+
+      if (!mailResult.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: mailResult.message || "Failed to dispatch verification email. Please check your SMTP settings or try again.",
+          },
+          { status: 500 }
+        );
+      }
 
       return NextResponse.json({
         success: true,
-        message: "Password reset link and verification code generated successfully.",
-        token: result.token, // Returned for UI testing / preview
+        message: `A 6-digit OTP verification code has been sent directly to ${email}. Please check your email inbox.`,
       });
     }
 
     if (action === "reset") {
-      if (!token || !newPassword) {
+      if (!otpCode || !newPassword) {
         return NextResponse.json(
-          { success: false, message: "Reset token and new password are required." },
+          { success: false, message: "6-digit OTP code and new password are required." },
           { status: 400 }
         );
       }
@@ -47,7 +61,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const result = await db.resetPasswordWithToken(token, newPassword);
+      const result = await db.resetPasswordWithToken(otpCode.trim(), newPassword);
 
       if (!result.success) {
         return NextResponse.json({ success: false, message: result.message }, { status: 400 });

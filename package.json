@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev",
-    "build": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next build",
+    "dev": "next dev",
+    "dev:webpack": "next dev",
+    "dev:turbo": "next dev --turbo",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
@@ -21,6 +23,7 @@
     "gsap": "^3.12.7",
     "lucide-react": "^0.475.0",
     "next": "^15.1.7",
+    "nodemailer": "^10.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
@@ -28,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/three": "^0.173.0",

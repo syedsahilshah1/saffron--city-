@@ -39,14 +39,15 @@ export default function UbaidAdminLoginPage() {
   const [lockExpiresAt, setLockExpiresAt] = useState<string | null>(null);
   const [lockCountdown, setLockCountdown] = useState<string>("");
 
-  // Forgot Password Modal State
+  // Forgot Password Modal State (6-Digit SMTP OTP Flow)
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState("");
   const [forgotError, setForgotError] = useState("");
-  const [resetToken, setResetToken] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [resetStep, setResetStep] = useState<"request" | "reset">("request");
 
   // Lockout countdown timer
@@ -111,11 +112,8 @@ export default function UbaidAdminLoginPage() {
           if (rememberMe) {
             localStorage.setItem("saffron_admin_remember", "true");
           }
+          window.location.href = "/dashboard";
         }
-        setSuccessMsg("Access Granted! Cryptographic token verified. Redirecting...");
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 800);
       } else {
         if (data.locked) {
           setIsLocked(true);
@@ -138,7 +136,7 @@ export default function UbaidAdminLoginPage() {
     setErrorMsg("");
   };
 
-  // Forgot password handler
+  // Forgot password handler (SMTP 6-Digit OTP Flow)
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotError("");
@@ -154,11 +152,11 @@ export default function UbaidAdminLoginPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setForgotSuccess("Verification token generated!");
-        setResetToken(data.token);
+        setForgotSuccess(`6-digit OTP verification code sent to ${forgotEmail.trim()}! Please check your email inbox.`);
+        setOtpCode("");
         setResetStep("reset");
       } else {
-        setForgotError(data.message || "Could not find an account with this email.");
+        setForgotError(data.message || "Could not find an account with this email address.");
       }
     } catch (err) {
       setForgotError("Failed to communicate with authentication service.");
@@ -171,6 +169,22 @@ export default function UbaidAdminLoginPage() {
     e.preventDefault();
     setForgotError("");
     setForgotSuccess("");
+
+    if (!otpCode.trim() || otpCode.trim().length !== 6) {
+      setForgotError("Please enter the complete 6-digit OTP verification code sent to your email.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setForgotError("New password must be at least 6 characters long.");
+      return;
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      setForgotError("Passwords do not match. Please re-enter.");
+      return;
+    }
+
     setForgotLoading(true);
 
     try {
@@ -179,23 +193,27 @@ export default function UbaidAdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "reset",
-          token: resetToken.trim(),
+          email: forgotEmail.trim(),
+          otp: otpCode.trim(),
           newPassword: newPassword.trim(),
         }),
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setForgotSuccess("Password updated successfully! You can now sign in.");
+        setForgotSuccess("Password updated successfully! Please sign in with your new password.");
         setTimeout(() => {
           setShowForgotModal(false);
           setResetStep("request");
-          setPassword(newPassword);
+          setPassword("");
           setUsername(forgotEmail);
           setNewPassword("");
+          setConfirmPassword("");
+          setOtpCode("");
+          setSuccessMsg("Password reset successfully. Enter your new password to sign in.");
         }, 1200);
       } else {
-        setForgotError(data.message || "Failed to reset password.");
+        setForgotError(data.message || "Failed to reset password. Please check your OTP code.");
       }
     } catch (err) {
       setForgotError("Failed to update password.");
@@ -247,7 +265,7 @@ export default function UbaidAdminLoginPage() {
                 Sign In to Portal
               </h1>
               <p className="text-xs text-slate-500">
-                PBKDF2 Enforced &bull; Granular RBAC Permissions &bull; Auto-Lock Protection
+                Secure Executive Access &bull; Saffron City Management Portal
               </p>
             </div>
 
@@ -287,7 +305,7 @@ export default function UbaidAdminLoginPage() {
             )}
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               {/* Username Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 block">
@@ -296,13 +314,14 @@ export default function UbaidAdminLoginPage() {
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
-                    type="text"
+                    type="email"
+                    name="admin_email_auth"
+                    autoComplete="off"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="ubaidnasir401@gmail.com"
+                    placeholder="Enter administrator email"
                     required
                     disabled={isLocked}
-                    autoFocus
                     className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A017]/20 transition-all font-medium disabled:opacity-50"
                   />
                 </div>
@@ -312,7 +331,7 @@ export default function UbaidAdminLoginPage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-700 block">
-                    Encrypted Password
+                    Password
                   </label>
                   <button
                     type="button"
@@ -331,9 +350,11 @@ export default function UbaidAdminLoginPage() {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="admin_password_auth"
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="Enter your password"
                     required
                     disabled={isLocked}
                     className="w-full pl-10 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A017]/20 transition-all font-medium disabled:opacity-50"
@@ -375,7 +396,7 @@ export default function UbaidAdminLoginPage() {
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Verifying PBKDF2 Hash...</span>
+                    <span>Signing In...</span>
                   </>
                 ) : isLocked ? (
                   <>
@@ -391,17 +412,6 @@ export default function UbaidAdminLoginPage() {
               </button>
             </form>
 
-          </div>
-
-          {/* Security Subtext */}
-          <div className="mt-6 text-center space-y-1 text-slate-400 text-xs">
-            <div className="flex items-center justify-center gap-1.5">
-              <Lock className="w-3 h-3 text-[#D4A017]" />
-              <span>TLS HMAC-SHA256 &bull; 100k PBKDF2 Iterations</span>
-            </div>
-            <p className="text-[11px] text-slate-500">
-              Saffron City Islamabad &bull; SKB Engineering &amp; Technology
-            </p>
           </div>
         </div>
       </main>
@@ -422,11 +432,13 @@ export default function UbaidAdminLoginPage() {
               <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 text-[#D4A017] flex items-center justify-center mx-auto mb-3">
                 <HelpCircle className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold font-serif">Password Recovery</h3>
+              <h3 className="text-xl font-bold font-serif">
+                {resetStep === "request" ? "Password Recovery" : "Enter Verification OTP"}
+              </h3>
               <p className="text-xs text-slate-500 mt-1">
                 {resetStep === "request"
-                  ? "Enter your verified administrator email to receive a reset token."
-                  : "Enter the verification token and choose your new password."}
+                  ? "Enter your verified administrator email to receive a 6-digit OTP code."
+                  : `A 6-digit code was sent to ${forgotEmail}. Enter it below along with your new password.`}
               </p>
             </div>
 
@@ -471,10 +483,10 @@ export default function UbaidAdminLoginPage() {
                   {forgotLoading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Generating Token...</span>
+                      <span>Sending OTP Code via Email...</span>
                     </>
                   ) : (
-                    <span>Generate Reset Token</span>
+                    <span>Send 6-Digit OTP Code</span>
                   )}
                 </button>
               </form>
@@ -482,20 +494,28 @@ export default function UbaidAdminLoginPage() {
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Verification Reset Token
+                    6-Digit Email OTP Code
                   </label>
                   <input
                     type="text"
                     required
-                    value={resetToken}
-                    onChange={(e) => setResetToken(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono focus:border-[#D4A017] outline-none"
+                    maxLength={6}
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-center font-mono text-xl font-bold tracking-[0.3em] text-slate-900 focus:border-[#D4A017] focus:bg-white outline-none"
+                    autoFocus
                   />
+                  <p className="text-[11px] text-slate-400 mt-1 text-center">
+                    Check your email inbox or spam folder &bull; Valid for 15 minutes
+                  </p>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    New Encrypted Password (min 6 characters)
+                    New Password (min 6 characters)
                   </label>
                   <input
                     type="password"
@@ -504,7 +524,22 @@ export default function UbaidAdminLoginPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] focus:bg-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] focus:bg-white outline-none"
                   />
                 </div>
 
@@ -516,12 +551,35 @@ export default function UbaidAdminLoginPage() {
                   {forgotLoading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Encrypting &amp; Updating...</span>
+                      <span>Verifying &amp; Updating...</span>
                     </>
                   ) : (
-                    <span>Confirm &amp; Reset Password</span>
+                    <span>Verify OTP &amp; Reset Password</span>
                   )}
                 </button>
+
+                <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetStep("request");
+                      setForgotError("");
+                      setForgotSuccess("");
+                    }}
+                    className="text-[#D4A017] hover:underline cursor-pointer font-medium"
+                  >
+                    &larr; Change Email
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRequestReset}
+                    disabled={forgotLoading}
+                    className="text-[#D4A017] hover:underline cursor-pointer font-medium"
+                  >
+                    Resend OTP Code
+                  </button>
+                </div>
               </form>
             )}
           </div>

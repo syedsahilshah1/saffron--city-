@@ -4,8 +4,8 @@
       "id": "usr-superadmin-01",
       "email": "ubaidnasir401@gmail.com",
       "name": "Ubaid Nasir (Super Admin)",
-      "passwordHash": "cf85baab50ea15b9fc6a54ababa67fc429e5a183cd783b7d301bd946018a40df914bbbfc19f6eccd49c5017f435c016cfcbf315b23f6b000fe0b1c243e42fd66",
-      "salt": "485e2fdd0848da21cb8eeee11336fe6adbfbc0de904160537025aec3ac2de18e",
+      "passwordHash": "7bf8e2d0310061f6d03e6cf19385ce532f44bb66ee43c9fbec4093a9fc9e795ecdbb36960794f99c7b7a6aed9c5415fadcfdd4acc58fb5623b5d903feaec1488",
+      "salt": "99ec954631e595bf5186a79425b5214357e96c43356247b89e2b7ff288a3caea",
       "role": "SUPER_ADMIN",
       "permissions": [
         "overview",
@@ -22,22 +22,73 @@
       "lockedUntil": null,
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-09-11T06:35:11.612Z",
-      "lastLoginAt": "2026-09-11T06:35:11.609Z",
-      "sessionToken": "tls_saff_dXNyLXN1cGVyYWRtaW4tMDE6dWJhaWRuYXNpcjQwMUBnbWFpbC5jb206MTc4OTEwODUxMTYwOTo0ZTM2YjhmMTFkZTNjMjEwYWNkMWZmMjhkYjQxNzA2Zg.b24b4a91fbaf99bf0686bb030daf3f9fde6509162bd006f8f74aa5a18c304863"
+      "updatedAt": "2026-09-11T11:49:03.627Z",
+      "lastLoginAt": "2026-09-11T11:49:03.627Z",
+      "sessionToken": "tls_saff_dXNyLXN1cGVyYWRtaW4tMDE6dWJhaWRuYXNpcjQwMUBnbWFpbC5jb206MTc4OTEyNzM0MzYyNzpkMmQ3ZTZjYzU5OGIwMTg4NzA2NTBiNTk3ZWRmZjNjNw.b83d18cf6f47737eeae5e91bbca5d436c89a3f294b09df82fe699fbcb51fcce7"
     }
   ],
   "resetTokens": [
     {
-      "id": "rst-1789107840755",
+      "id": "rst-1789123354326",
       "email": "ubaidnasir401@gmail.com",
-      "token": "ff45f1d0185afaf045a6149fe24e633910340eb2c0430713eab23468beea4b4b",
-      "expiresAt": "2026-09-11T07:24:00.755Z",
+      "token": "540727f69d166126497a007a6c8f395de9b4a0528f0dc1bd22704967af4b48b8",
+      "expiresAt": "2026-09-11T11:42:34.326Z",
+      "used": false,
+      "createdAt": "2026-09-11T10:42:34.326Z"
+    },
+    {
+      "id": "rst-1789124056819",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "e907aefa149c711ebecc5052c50bcb242f5b87aa28763220c7057ad9e1f6b33e",
+      "expiresAt": "2026-09-11T11:54:16.819Z",
+      "used": false,
+      "createdAt": "2026-09-11T10:54:16.819Z"
+    },
+    {
+      "id": "otp-1789125066203",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "378780",
+      "expiresAt": "2026-09-11T11:26:06.203Z",
+      "used": false,
+      "createdAt": "2026-09-11T11:11:06.203Z"
+    },
+    {
+      "id": "otp-1789125478068",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "306808",
+      "expiresAt": "2026-09-11T11:32:58.068Z",
+      "used": false,
+      "createdAt": "2026-09-11T11:17:58.068Z"
+    },
+    {
+      "id": "otp-1789125707461",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "413364",
+      "expiresAt": "2026-09-11T11:36:47.461Z",
+      "used": false,
+      "createdAt": "2026-09-11T11:21:47.461Z"
+    },
+    {
+      "id": "otp-1789126079068",
+      "email": "ubaidnasir401@gmail.com",
+      "token": "787430",
+      "expiresAt": "2026-09-11T11:42:59.068Z",
       "used": true,
-      "createdAt": "2026-09-11T06:24:00.755Z"
+      "createdAt": "2026-09-11T11:27:59.068Z"
     }
   ],
   "inquiries": [
+    {
+      "id": "lead-1789119121922-h6p1",
+      "name": "Sahil Syed",
+      "phone": "03410472229",
+      "message": "Requested document download: Saffron City Location Map",
+      "status": "New",
+      "source": "Map Download: Saffron City Location Map",
+      "notes": "Lead received via Map Download: Saffron City Location Map",
+      "createdAt": "2026-09-11T09:32:01.922Z",
+      "updatedAt": "2026-09-11T09:32:01.922Z"
+    },
     {
       "id": "lead-001",
       "name": "Tariq Mehmood",
@@ -176,9 +227,9 @@
   ],
   "settings": {
     "siteName": "Saffron City Islamabad",
-    "contactPhone": "+92 321 5554321",
-    "secondaryPhone": "+92 51 111 723 376",
-    "whatsappPhone": "923215554321",
+    "contactPhone": "0333 1113551",
+    "secondaryPhone": "",
+    "whatsappPhone": "923331113551",
     "officialEmail": "info@saffroncity.pk",
     "officeAddress": "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
     "googleMapsUrl": "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
@@ -186,14 +237,14 @@
     "rdaVerificationUrl": "https://punjab.gov.pk",
     "announcement": "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
     "activePreLaunchDiscount": true,
-    "smtpEnabled": false,
-    "smtpHost": "smtp.gmail.com",
+    "smtpEnabled": true,
+    "smtpHost": "smtp.hostinger.com",
     "smtpPort": 465,
     "smtpSecure": true,
-    "smtpUser": "notifications@saffroncity.pk",
-    "smtpPass": "",
-    "smtpFromEmail": "no-reply@saffroncity.pk",
-    "leadNotificationEmail": "leads@saffroncity.pk",
+    "smtpUser": "info@saffroncity.org",
+    "smtpPass": "2igu-plh8-etms-ioqc",
+    "smtpFromEmail": "info@saffroncity.org",
+    "leadNotificationEmail": "info@saffroncity.org",
     "metaTitle": "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
     "metaDescription": "Invest in Saffron City Islamabad — a premier 15,000 Kanal RDA NOC-approved housing society on Main GT Road near Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments.",
     "metaKeywords": "Saffron City, Saffron City Islamabad, RDA approved plots, GT Road Rawat, SKB Builders, 5 Marla plot, 10 Marla plot, 1 Kanal plot, Rawalpindi Ring Road",

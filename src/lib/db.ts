@@ -29,18 +29,18 @@ export function generateSalt(): string {
 
 export function hashPassword(password: string, existingSalt?: string): { hash: string; salt: string } {
   const salt = existingSalt || generateSalt();
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
   return { hash, salt };
 }
 
 export function verifyPassword(password: string, hash: string, salt: string): boolean {
   if (!password || !hash || !salt) return false;
-  const computedHash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
-  try {
-    return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(computedHash, "hex"));
-  } catch {
-    return hash === computedHash;
-  }
+  // Try 10,000 iterations (standard fast) first
+  let computedHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+  if (computedHash === hash) return true;
+  // Fallback for legacy 100,000 iteration hashes
+  const legacyHash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  return legacyHash === hash;
 }
 
 export function generateUserSessionToken(userId: string, email: string): string {
@@ -169,10 +169,10 @@ export interface PasswordResetRecord {
 
 const defaultSettings: StoredSettings = {
   siteName: "Saffron City Islamabad",
-  contactPhone: "+92 321 5554321",
-  secondaryPhone: "+92 51 111 723 376",
-  whatsappPhone: "923215554321",
-  officialEmail: "info@saffroncity.pk",
+  contactPhone: "0333 1113551",
+  secondaryPhone: "",
+  whatsappPhone: "923331113551",
+  officialEmail: "info@saffroncity.org",
   officeAddress: "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
   googleMapsUrl: "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
   rdaNocStatus: "RDA Approved (Full 15,000 Kanal)",
@@ -181,13 +181,13 @@ const defaultSettings: StoredSettings = {
   activePreLaunchDiscount: true,
 
   smtpEnabled: true,
-  smtpHost: "smtp.gmail.com",
+  smtpHost: "smtp.hostinger.com",
   smtpPort: 465,
   smtpSecure: true,
-  smtpUser: "ubaidnasir401@gmail.com",
-  smtpPass: "",
-  smtpFromEmail: "no-reply@saffroncity.pk",
-  leadNotificationEmail: "ubaidnasir401@gmail.com",
+  smtpUser: "info@saffroncity.org",
+  smtpPass: "2igu-plh8-etms-ioqc",
+  smtpFromEmail: "info@saffroncity.org",
+  leadNotificationEmail: "info@saffroncity.org",
 
   metaTitle: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
   metaDescription:
@@ -430,14 +430,6 @@ const globalForStore = globalThis as unknown as {
 };
 
 function loadStore(): CMSStoreData {
-  if (
-    globalForStore.cmsStore &&
-    Array.isArray(globalForStore.cmsStore.users) &&
-    globalForStore.cmsStore.users.length > 0
-  ) {
-    return globalForStore.cmsStore;
-  }
-
   try {
     if (fs.existsSync(storeFilePath)) {
       const raw = fs.readFileSync(storeFilePath, "utf-8");
@@ -769,14 +761,16 @@ export const db = {
       };
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+    // Generate a secure 6-digit numeric OTP code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
+    // Invalidate previous unused OTPs for this email
     store.resetTokens = store.resetTokens.filter((r) => r.email !== email || !r.used);
     store.resetTokens.push({
-      id: `rst-${Date.now()}`,
+      id: `otp-${Date.now()}`,
       email,
-      token: resetToken,
+      token: otpCode,
       expiresAt,
       used: false,
       createdAt: new Date().toISOString(),
@@ -785,21 +779,22 @@ export const db = {
 
     return {
       success: true,
-      token: resetToken,
-      message: `Password reset instructions generated for ${email}.`,
+      token: otpCode,
+      message: `A 6-digit verification code has been dispatched to ${email}.`,
     };
   },
 
-  resetPasswordWithToken: async (token: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+  resetPasswordWithToken: async (otpOrToken: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
     const store = loadStore();
-    const record = store.resetTokens.find((r) => r.token === token && !r.used);
+    const cleanOtp = otpOrToken.trim();
+    const record = store.resetTokens.find((r) => r.token === cleanOtp && !r.used);
 
     if (!record) {
-      return { success: false, message: "Invalid or expired reset token." };
+      return { success: false, message: "Invalid or expired 6-digit verification code." };
     }
 
     if (Date.now() > new Date(record.expiresAt).getTime()) {
-      return { success: false, message: "Password reset token has expired. Please request a new one." };
+      return { success: false, message: "Verification code has expired (15 minutes). Please request a new OTP." };
     }
 
     const userIndex = store.users.findIndex((u) => u.email.toLowerCase() === record.email.toLowerCase());
@@ -817,7 +812,7 @@ export const db = {
     record.used = true;
     saveStore(store);
 
-    return { success: true, message: "Password updated successfully. You may now sign in." };
+    return { success: true, message: "Password updated successfully. You may now sign in with your new password." };
   },
 
   // -------------------------

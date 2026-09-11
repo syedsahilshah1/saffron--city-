@@ -146,7 +146,7 @@ export default function EnquiryForm({
             <input
               type="tel"
               required
-              placeholder="e.g. 0341 047 2229"
+              placeholder="e.g. 0333 111 3551"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className={`w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A017] transition-all ${

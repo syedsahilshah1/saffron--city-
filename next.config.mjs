@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       {
@@ -8,6 +8,18 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'gsap', 'three', '@gsap/react'],
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Use memory cache to avoid webpack PackFileCacheStrategy disk allocation heap crashes
+      config.cache = {
+        type: 'memory',
+      };
+    }
+    return config;
   },
 };
 
