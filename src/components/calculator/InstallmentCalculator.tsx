@@ -58,10 +58,10 @@ export default function InstallmentCalculator() {
                   key={plot.size}
                   type="button"
                   onClick={() => setSelectedSize(plot.size)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer select-none ${
                     isSelected
-                      ? "bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white shadow-md shadow-amber-500/30 scale-105"
-                      : "bg-slate-50 text-slate-700 border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50"
+                      ? "bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white shadow-lg shadow-amber-500/30 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
+                      : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm hover:scale-[1.03] active:scale-95"
                   }`}
                 >
                   {plot.size}

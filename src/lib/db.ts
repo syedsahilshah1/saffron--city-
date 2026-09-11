@@ -201,7 +201,7 @@ const defaultSettings: StoredSettings = {
   canonicalUrl: "https://saffroncity.pk",
   googleSiteVerification: "",
 
-  heroTitle: "Invest in Premium Living at",
+  heroTitle: "Invest in Premium Living",
   heroHighlightedWord: "Saffron City",
   heroSubtitle:
     "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
@@ -211,7 +211,7 @@ const defaultSettings: StoredSettings = {
   chairmanName: "Malik Tariq Mehmood",
   chairmanTitle: "Chairman & Founder",
   chairmanBioShort:
-    "Saffron City Islamabad, developed by Saadullah Khan and Brothers (SKB Group), is a thoughtfully planned gated community located on GT Road, Rawat. Backed by over 70 years of engineering pedigree, the project sets a new benchmark in luxury, security, and transparent real estate.",
+    "Saffron City's journey reflects vision, trust, and a dedication to excellence. Under Malik Tariq Mehmood's leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.",
   chairmanBioFull:
     "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
   chairmanPortrait: "/images/chairman_portrait_hd.png",

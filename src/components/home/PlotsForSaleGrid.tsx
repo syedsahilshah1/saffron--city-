@@ -156,10 +156,6 @@ export default function PlotsForSaleGrid() {
       {/* Section Header */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-            <span>Verified Inventory</span>
-          </div>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 tracking-tight">
             Plots for Sale in Saffron City
           </h2>

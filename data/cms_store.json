@@ -4,8 +4,8 @@
       "id": "usr-superadmin-01",
       "email": "ubaidnasir401@gmail.com",
       "name": "Ubaid Nasir (Super Admin)",
-      "passwordHash": "7bf8e2d0310061f6d03e6cf19385ce532f44bb66ee43c9fbec4093a9fc9e795ecdbb36960794f99c7b7a6aed9c5415fadcfdd4acc58fb5623b5d903feaec1488",
-      "salt": "99ec954631e595bf5186a79425b5214357e96c43356247b89e2b7ff288a3caea",
+      "passwordHash": "17f8c3f4f6359fda59ef64cbd4018751d76187651341567a5ceced54d950945c5e761dd697961fdfd87cb3e34a9fc8314055918000bff79c6487e847b4315c8f",
+      "salt": "44d7233f9fafd17a6883466056b5fbdb6e4fe8d72d7572f590ee8d7827d465d5",
       "role": "SUPER_ADMIN",
       "permissions": [
         "overview",
@@ -22,73 +22,11 @@
       "lockedUntil": null,
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-09-11T11:49:03.627Z",
-      "lastLoginAt": "2026-09-11T11:49:03.627Z",
-      "sessionToken": "tls_saff_dXNyLXN1cGVyYWRtaW4tMDE6dWJhaWRuYXNpcjQwMUBnbWFpbC5jb206MTc4OTEyNzM0MzYyNzpkMmQ3ZTZjYzU5OGIwMTg4NzA2NTBiNTk3ZWRmZjNjNw.b83d18cf6f47737eeae5e91bbca5d436c89a3f294b09df82fe699fbcb51fcce7"
+      "updatedAt": "2026-01-01T00:00:00.000Z"
     }
   ],
-  "resetTokens": [
-    {
-      "id": "rst-1789123354326",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "540727f69d166126497a007a6c8f395de9b4a0528f0dc1bd22704967af4b48b8",
-      "expiresAt": "2026-09-11T11:42:34.326Z",
-      "used": false,
-      "createdAt": "2026-09-11T10:42:34.326Z"
-    },
-    {
-      "id": "rst-1789124056819",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "e907aefa149c711ebecc5052c50bcb242f5b87aa28763220c7057ad9e1f6b33e",
-      "expiresAt": "2026-09-11T11:54:16.819Z",
-      "used": false,
-      "createdAt": "2026-09-11T10:54:16.819Z"
-    },
-    {
-      "id": "otp-1789125066203",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "378780",
-      "expiresAt": "2026-09-11T11:26:06.203Z",
-      "used": false,
-      "createdAt": "2026-09-11T11:11:06.203Z"
-    },
-    {
-      "id": "otp-1789125478068",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "306808",
-      "expiresAt": "2026-09-11T11:32:58.068Z",
-      "used": false,
-      "createdAt": "2026-09-11T11:17:58.068Z"
-    },
-    {
-      "id": "otp-1789125707461",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "413364",
-      "expiresAt": "2026-09-11T11:36:47.461Z",
-      "used": false,
-      "createdAt": "2026-09-11T11:21:47.461Z"
-    },
-    {
-      "id": "otp-1789126079068",
-      "email": "ubaidnasir401@gmail.com",
-      "token": "787430",
-      "expiresAt": "2026-09-11T11:42:59.068Z",
-      "used": true,
-      "createdAt": "2026-09-11T11:27:59.068Z"
-    }
-  ],
+  "resetTokens": [],
   "inquiries": [
-    {
-      "id": "lead-1789119121922-h6p1",
-      "name": "Sahil Syed",
-      "phone": "03410472229",
-      "message": "Requested document download: Saffron City Location Map",
-      "status": "New",
-      "source": "Map Download: Saffron City Location Map",
-      "notes": "Lead received via Map Download: Saffron City Location Map",
-      "createdAt": "2026-09-11T09:32:01.922Z",
-      "updatedAt": "2026-09-11T09:32:01.922Z"
-    },
     {
       "id": "lead-001",
       "name": "Tariq Mehmood",
@@ -100,8 +38,8 @@
       "status": "New",
       "source": "Website Hero Form",
       "notes": "Requires remote overseas booking guidance.",
-      "createdAt": "2026-09-11T01:49:58.754Z",
-      "updatedAt": "2026-09-11T01:49:58.755Z"
+      "createdAt": "2026-09-11T12:30:54.479Z",
+      "updatedAt": "2026-09-11T12:30:54.479Z"
     },
     {
       "id": "lead-002",
@@ -114,8 +52,8 @@
       "status": "Contacted",
       "source": "WhatsApp Lead",
       "notes": "Sent payment plan brochure. Follow-up scheduled for Friday.",
-      "createdAt": "2026-09-10T05:49:58.755Z",
-      "updatedAt": "2026-09-10T11:49:58.755Z"
+      "createdAt": "2026-09-10T16:30:54.479Z",
+      "updatedAt": "2026-09-10T22:30:54.479Z"
     },
     {
       "id": "lead-003",
@@ -128,8 +66,8 @@
       "status": "FollowUp",
       "source": "Plot For Sale Page",
       "notes": "Checking down payment readiness.",
-      "createdAt": "2026-09-09T05:49:58.755Z",
-      "updatedAt": "2026-09-10T17:49:58.755Z"
+      "createdAt": "2026-09-09T16:30:54.479Z",
+      "updatedAt": "2026-09-11T04:30:54.479Z"
     }
   ],
   "plots": [
@@ -230,7 +168,7 @@
     "contactPhone": "0333 1113551",
     "secondaryPhone": "",
     "whatsappPhone": "923331113551",
-    "officialEmail": "info@saffroncity.pk",
+    "officialEmail": "info@saffroncity.org",
     "officeAddress": "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
     "googleMapsUrl": "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
     "rdaNocStatus": "RDA Approved (Full 15,000 Kanal)",
@@ -253,14 +191,14 @@
     "ogImage": "/images/hero-bg.jpg",
     "canonicalUrl": "https://saffroncity.pk",
     "googleSiteVerification": "",
-    "heroTitle": "Invest in Premium Living at",
+    "heroTitle": "Invest in Premium Living",
     "heroHighlightedWord": "Saffron City",
     "heroSubtitle": "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
     "heroBgImage": "/images/hero-bg.jpg",
     "heroButtonText": "Book Your Plot",
     "chairmanName": "Malik Tariq Mehmood",
     "chairmanTitle": "Chairman & Founder",
-    "chairmanBioShort": "Saffron City Islamabad, developed by Saadullah Khan and Brothers (SKB Group), is a thoughtfully planned gated community located on GT Road, Rawat. Backed by over 70 years of engineering pedigree, the project sets a new benchmark in luxury, security, and transparent real estate.",
+    "chairmanBioShort": "Saffron City's journey reflects vision, trust, and a dedication to excellence. Under Malik Tariq Mehmood's leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.",
     "chairmanBioFull": "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
     "chairmanPortrait": "/images/chairman_portrait_hd.png",
     "masterPlanImage": "/images/saffron-city-master-plan.webp",

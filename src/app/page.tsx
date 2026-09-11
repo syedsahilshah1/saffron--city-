@@ -88,10 +88,12 @@ export default async function HomePage() {
             className="gap-8 sm:gap-10 lg:gap-12"
             leftContent={
               <div className="space-y-6 relative max-w-xl pb-3 sm:pb-5 lg:pb-0">
-                {/* Headline */}
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight font-heading leading-tight">
-                  {settings.heroTitle || "Invest in Premium Living at"}{" "}
-                  <span className="text-[#D4A017]">{settings.heroHighlightedWord || "Saffron City"}</span>
+                {/* Headline: Strictly 2 lines with uniform Playfair Display font weight */}
+                <h1 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-serif font-normal text-slate-900 tracking-normal leading-[1.2] max-w-xl">
+                  Invest in Premium Living
+                  <br />
+                  <span className="italic font-serif font-normal text-slate-800 pr-2">at</span>
+                  <span>{settings.heroHighlightedWord || "Saffron City"}</span>
                 </h1>
 
                 {/* Subtitle */}
@@ -126,7 +128,6 @@ export default async function HomePage() {
                 <EnquiryForm
                   id="hero-booking-form"
                   title="Book Your Plot"
-                  subtitle="Sector A (Block B) new rates with 10% down payment (PKR 450,000)."
                 />
 
                 {/* Action Buttons (Mobile view - below the form) */}
@@ -170,13 +171,18 @@ export default async function HomePage() {
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <GsapSplitReveal
             leftContent={
+              <LocationMapCard />
+            }
+            rightContent={
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                  <MapPin className="w-3.5 h-3.5 text-[#D4A017]" />
-                  <span>Prime Highway Access</span>
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight leading-tight">
-                  Located on GT Road, <span className="text-[#D4A017]">Between Islamabad and Rawalpindi</span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal leading-[1.18]">
+                  Located on GT Road,{" "}
+                  <span className="font-serif italic font-normal text-slate-800">
+                    Between
+                  </span>{" "}
+                  <span className="font-serif font-semibold text-slate-900">
+                    Islamabad &amp; Rawalpindi
+                  </span>
                 </h2>
                 <p className="text-sm text-slate-600 leading-relaxed">
                   Saffron City sits on Main GT Road near T-Chowk, Rawat, putting it within a reasonable drive of both Islamabad and Rawalpindi without being in the middle of either city&apos;s traffic. For residents, that means access to major commercial areas like Giga Mall and DHA without giving up the quieter pace that comes with being slightly outside the urban core.
@@ -195,9 +201,6 @@ export default async function HomePage() {
                 </div>
               </div>
             }
-            rightContent={
-              <LocationMapCard />
-            }
           />
         </section>
 
@@ -206,11 +209,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
           <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Proximity &amp; Transit Times</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               Nearby Landmarks &amp; Distances
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
@@ -327,8 +326,8 @@ export default async function HomePage() {
           <GsapSplitReveal
             leftContent={
               <div className="space-y-6">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight leading-tight">
-                  A Planned Layout, <span className="text-[#D4A017]">Not Just Open Land</span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal leading-tight">
+                  A Planned Layout, <span className="font-serif italic font-normal text-slate-800">Not Just</span> Open Land
                 </h2>
                 <p className="text-sm text-slate-600 leading-relaxed">
                   The master plan divides Saffron City into residential blocks alongside dedicated space for a commercial area, mosque, schools, and parks — the kind of layout that determines how a society actually functions once people move in, not just how it looks on a brochure.
@@ -369,7 +368,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
           <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               Saffron City Sectors &amp; Development Zones
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
@@ -399,8 +398,8 @@ export default async function HomePage() {
             SECTION 7 — World-Class Amenities
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto mb-12 sm:mb-14 space-y-3">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               What&apos;s Actually Included in the Community
             </h2>
             <p className="text-sm text-slate-600">
@@ -454,11 +453,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
           <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Official 2026 Payment Structure</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               Sector A (Block B) &amp; Signature Commercial Rates
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
@@ -604,11 +599,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
           <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Simple 6 Steps</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               How Booking Actually Works
             </h2>
             <p className="text-sm text-slate-600">
@@ -655,26 +646,22 @@ export default async function HomePage() {
         {/* =========================================================
             SECTION 11 — Reviews
         ========================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
-          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Quote className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Buyer Feedback</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 sm:space-y-10">
+          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-2">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               What Buyers Are Saying
             </h2>
           </ScrollReveal>
 
           <StaggerReveal
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch"
             staggerDelay={90}
             direction="up"
           >
             {REVIEWS.map((rev) => (
               <div
                 key={rev.id}
-                className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] transition-all duration-300 space-y-5 relative shadow-md hover:shadow-xl hover:-translate-y-1 group flex flex-col justify-between"
+                className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] transition-all duration-300 relative shadow-md hover:shadow-xl hover:-translate-y-1 group flex flex-col justify-between h-full"
               >
                 <div className="space-y-4">
                   {/* Header: Rating Stars & Quote Icon */}
@@ -684,17 +671,17 @@ export default async function HomePage() {
                         <Star key={i} className="w-4 h-4 fill-[#D4A017] text-[#D4A017]" />
                       ))}
                     </div>
-                    <Quote className="w-7 h-7 text-amber-200 group-hover:text-[#D4A017] transition-colors" />
+                    <Quote className="w-7 h-7 text-amber-200/80 group-hover:text-[#D4A017] transition-colors" />
                   </div>
 
-                  {/* Review Text */}
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic">
+                  {/* Review Text with consistent height */}
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic min-h-[64px] sm:min-h-[72px]">
                     &ldquo;{rev.quote}&rdquo;
                   </p>
                 </div>
 
                 {/* Author Info */}
-                <div className="pt-4 border-t border-slate-100 flex items-center gap-3.5">
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-3.5">
                   <div className="w-11 h-11 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] font-bold text-sm shrink-0">
                     {rev.author.charAt(0)}
                   </div>
@@ -723,11 +710,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-10">
           <ScrollReveal animation="fade-up" className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <HelpCircle className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Common Queries</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               Frequently Asked Questions
             </h2>
           </ScrollReveal>

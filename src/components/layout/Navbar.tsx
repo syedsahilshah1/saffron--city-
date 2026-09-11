@@ -17,8 +17,10 @@ export default function Navbar() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [phone, setPhone] = useState(SITE_CONFIG.phone);
   const lastScrollY = useRef(0);
+  const [projectDropdown, setProjectDropdown] = useState(false);
   const [blocksDropdown, setBlocksDropdown] = useState(false);
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const projectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const blocksTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -55,6 +57,7 @@ export default function Navbar() {
           // Scrolling down: hide navbar
           setVisible(false);
           setBlocksDropdown(false);
+          setProjectDropdown(false);
         } else {
           // Scrolling up: reveal navbar
           setVisible(true);
@@ -70,38 +73,45 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isOpen]);
 
-  const handleMouseEnter = () => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current);
-    }
+  const handleProjectEnter = () => {
+    if (projectTimeoutRef.current) clearTimeout(projectTimeoutRef.current);
+    setProjectDropdown(true);
+  };
+
+  const handleProjectLeave = () => {
+    projectTimeoutRef.current = setTimeout(() => {
+      setProjectDropdown(false);
+    }, 150);
+  };
+
+  const handleBlocksEnter = () => {
+    if (blocksTimeoutRef.current) clearTimeout(blocksTimeoutRef.current);
     setBlocksDropdown(true);
   };
 
-  const handleMouseLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
+  const handleBlocksLeave = () => {
+    blocksTimeoutRef.current = setTimeout(() => {
       setBlocksDropdown(false);
     }, 150);
   };
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About Us", href: "/about-us" },
+  const projectSubLinks = [
     { name: "Master Plan", href: "/master-plan" },
+    { name: "Location & Access", href: "/location" },
     { name: "Payment Plan", href: "/payment-plan" },
-  ];
-
-  const secondaryLinks = [
-    { name: "Location", href: "/location" },
-    { name: "NOC Status", href: "/noc-status" },
   ];
 
   const blockSubLinks = [
     { name: "Sector A (Block B - New Rates)", href: "/sectors/sector-a" },
     { name: "Sector B (Affordable Block)", href: "/sectors/sector-b" },
     { name: "Signature Commercial (30×40)", href: "/plots/commercial" },
-    { name: "Residential Plots (5, 10 Marla, 1 Kanal)", href: "/plots/residential" },
-    { name: "All Plots For Sale", href: "/plot-for-sale" },
+    { name: "Plots For Sale", href: "/plot-for-sale" },
   ];
+
+  const isProjectActive =
+    pathname === "/master-plan" || pathname === "/location" || pathname === "/payment-plan";
+  const isBlocksActive =
+    pathname.startsWith("/plot") || pathname.startsWith("/sector");
 
   return (
     <header
@@ -134,40 +144,88 @@ export default function Navbar() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-7">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
-                    isActive
-                      ? "text-[#D4A017] border-b-2 border-[#D4A017]"
-                      : "text-slate-700 hover:text-[#D4A017]"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
+            <Link
+              href="/"
+              className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                pathname === "/"
+                  ? "text-[#D4A017] border-b-2 border-[#D4A017]"
+                  : "text-slate-700 hover:text-[#D4A017]"
+              }`}
+            >
+              Home
+            </Link>
 
-            {/* Blocks Dropdown */}
+            <Link
+              href="/about-us"
+              className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                pathname === "/about-us"
+                  ? "text-[#D4A017] border-b-2 border-[#D4A017]"
+                  : "text-slate-700 hover:text-[#D4A017]"
+              }`}
+            >
+              About Us
+            </Link>
+
+            {/* Project Overview Dropdown */}
             <div
               className="relative"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={handleProjectEnter}
+              onMouseLeave={handleProjectLeave}
             >
               <button
                 type="button"
                 className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors py-1.5 ${
-                  pathname.startsWith("/plot") || pathname.startsWith("/sector")
+                  isProjectActive
+                    ? "text-[#D4A017] border-b-2 border-[#D4A017]"
+                    : "text-slate-700 hover:text-[#D4A017]"
+                }`}
+                onClick={() => setProjectDropdown((prev) => !prev)}
+              >
+                <span>Project Overview</span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    projectDropdown ? "rotate-180 text-[#D4A017]" : "opacity-70"
+                  }`}
+                />
+              </button>
+
+              {projectDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-56 rounded-2xl bg-white border border-amber-200 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150 z-50">
+                  {projectSubLinks.map((sub) => (
+                    <Link
+                      key={sub.name}
+                      href={sub.href}
+                      onClick={() => setProjectDropdown(false)}
+                      className="block px-3.5 py-2 text-xs font-semibold text-slate-700 rounded-xl hover:bg-amber-50 hover:text-[#D4A017] transition-colors"
+                    >
+                      {sub.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Blocks & Plots Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={handleBlocksEnter}
+              onMouseLeave={handleBlocksLeave}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                  isBlocksActive
                     ? "text-[#D4A017] border-b-2 border-[#D4A017]"
                     : "text-slate-700 hover:text-[#D4A017]"
                 }`}
                 onClick={() => setBlocksDropdown((prev) => !prev)}
               >
                 <span>Blocks & Plots</span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${blocksDropdown ? "rotate-180 text-[#D4A017]" : "opacity-70"}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    blocksDropdown ? "rotate-180 text-[#D4A017]" : "opacity-70"
+                  }`}
+                />
               </button>
 
               {blocksDropdown && (
@@ -186,22 +244,16 @@ export default function Navbar() {
               )}
             </div>
 
-            {secondaryLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
-                    isActive
-                      ? "text-[#D4A017] border-b-2 border-[#D4A017]"
-                      : "text-slate-700 hover:text-[#D4A017]"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
+            <Link
+              href="/noc-status"
+              className={`text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                pathname === "/noc-status"
+                  ? "text-[#D4A017] border-b-2 border-[#D4A017]"
+                  : "text-slate-700 hover:text-[#D4A017]"
+              }`}
+            >
+              NOC Status
+            </Link>
           </nav>
 
           {/* Right Side: Gold Call Button Pill */}
@@ -267,24 +319,45 @@ export default function Navbar() {
               Home
             </Link>
 
-            {[...navLinks.filter(l => l.href !== "/"), ...secondaryLinks].map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${
-                  pathname === link.href
-                    ? "bg-amber-50 text-[#D4A017]"
-                    : "text-slate-800 hover:bg-slate-50"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+            <Link
+              href="/about-us"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${
+                pathname === "/about-us"
+                  ? "bg-amber-50 text-[#D4A017]"
+                  : "text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              About Us
+            </Link>
 
+            {/* Project Overview Mobile Group */}
+            <div className="pt-2 border-t border-slate-100 mt-1">
+              <span className="text-[11px] uppercase tracking-wider text-[#D4A017] px-4 font-bold">
+                Project Overview
+              </span>
+              <div className="mt-1 space-y-1">
+                {projectSubLinks.map((sub) => (
+                  <Link
+                    key={sub.name}
+                    href={sub.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`block px-4 py-2 text-xs rounded-lg transition-colors font-medium ${
+                      pathname === sub.href
+                        ? "bg-amber-50 text-[#D4A017] font-bold"
+                        : "text-slate-700 hover:text-[#D4A017] hover:bg-amber-50"
+                    }`}
+                  >
+                    {sub.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Blocks & Plots Mobile Group */}
             <div className="pt-2 border-t border-slate-100 mt-2">
               <span className="text-[11px] uppercase tracking-wider text-[#D4A017] px-4 font-bold">
-                Blocks & Plots
+                Blocks &amp; Plots
               </span>
               <div className="mt-1 space-y-1">
                 {blockSubLinks.map((sub) => (
@@ -292,13 +365,29 @@ export default function Navbar() {
                     key={sub.name}
                     href={sub.href}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-2 text-xs text-slate-700 hover:text-[#D4A017] hover:bg-amber-50 rounded-lg transition-colors font-medium"
+                    className={`block px-4 py-2 text-xs rounded-lg transition-colors font-medium ${
+                      pathname === sub.href
+                        ? "bg-amber-50 text-[#D4A017] font-bold"
+                        : "text-slate-700 hover:text-[#D4A017] hover:bg-amber-50"
+                    }`}
                   >
                     {sub.name}
                   </Link>
                 ))}
               </div>
             </div>
+
+            <Link
+              href="/noc-status"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold mt-1 ${
+                pathname === "/noc-status"
+                  ? "bg-amber-50 text-[#D4A017]"
+                  : "text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              NOC Status
+            </Link>
 
             <div className="pt-4 flex flex-col gap-2">
               <a

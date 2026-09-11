@@ -69,6 +69,8 @@ export default {
         sans: ['var(--font-geist-sans)', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'monospace'],
         heading: ['var(--font-outfit)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
+        playfair: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',

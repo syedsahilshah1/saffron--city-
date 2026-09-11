@@ -17,7 +17,7 @@ interface EnquiryFormProps {
 export default function EnquiryForm({
   id,
   title = "Book Your Plot Today",
-  subtitle = "Send us your details and our official sales team will reach out with current availability, pricing, and allotment procedures.",
+  subtitle = "",
   defaultPlotSize = "5 Marla",
   defaultSector = "Sector A (Block B)",
   defaultPlotType = "Residential",
@@ -92,9 +92,11 @@ export default function EnquiryForm({
         <h3 className={`text-xl sm:text-2xl font-bold font-heading ${isDark ? "text-white" : "text-slate-900"}`}>
           {title}
         </h3>
-        <p className={`mt-1 text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
-          {subtitle}
-        </p>
+        {subtitle && (
+          <p className={`mt-1 text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+            {subtitle}
+          </p>
+        )}
       </div>
 
       {success ? (

@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
@@ -37,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-white">
+    <html lang="en" className={`${playfair.variable} bg-white`}>
       <body className="min-h-screen flex flex-col bg-white text-slate-900 antialiased selection:bg-[#D4A017] selection:text-slate-950">
         <AppShell>{children}</AppShell>
       </body>
