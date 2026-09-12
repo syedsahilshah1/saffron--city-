@@ -34,7 +34,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 45.0 Lac",
     trend: "Active",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
     href: "/sectors/sector-a",
   },
   {
@@ -48,7 +48,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "OFFICIAL RATE",
     priceFormatted: "PKR 45.0 Lac",
     trend: "Active",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     href: "/sectors/sector-b",
   },
   {
@@ -62,7 +62,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 82.5 Lac",
     trend: "Hot",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
     href: "/sectors/sector-a",
   },
   {
@@ -76,7 +76,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "OFFICIAL RATE",
     priceFormatted: "PKR 82.5 Lac",
     trend: "Active",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     href: "/sectors/sector-b",
   },
   {
@@ -90,7 +90,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "NEW RATE",
     priceFormatted: "PKR 1.55 Crore",
     trend: "Luxury",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
     href: "/sectors/sector-a",
   },
   {
@@ -104,7 +104,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "SPECIAL OFFER",
     priceFormatted: "PKR 1.55 Crore (Net)",
     trend: "Save 45 Lac",
-    image: "/images/sectors/commercial-plaza.jpg",
+    image: "/images/sectors/commercial-plaza.webp",
     href: "/payment-plan",
   },
   {
@@ -118,7 +118,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "COMMERCIAL RATE",
     priceFormatted: "PKR 2.20 Crore",
     trend: "Prime",
-    image: "/images/sectors/commercial-plaza.jpg",
+    image: "/images/sectors/commercial-plaza.webp",
     href: "/plots/commercial",
   },
   {
@@ -132,7 +132,7 @@ const PLOTS_INVENTORY: PlotCardItem[] = [
     marketPrice: "COMMERCIAL RATE",
     priceFormatted: "PKR 4.20 Crore",
     trend: "Prime",
-    image: "/images/sectors/commercial-plaza.jpg",
+    image: "/images/sectors/commercial-plaza.webp",
     href: "/plots/commercial",
   },
 ];
@@ -164,8 +164,8 @@ export default function PlotsForSaleGrid() {
           </p>
         </div>
 
-        {/* Action Button */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Action Button (Desktop/Tablet only) */}
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
           <Link
             href="/plot-for-sale"
             className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all shadow-md hover:shadow-lg active:scale-95"
@@ -297,27 +297,16 @@ export default function PlotsForSaleGrid() {
         </div>
 
         {/* Mobile "See More / Show Less" Action Button */}
-        {filteredPlots.length > 4 && (
-          <div className="pt-1 text-center">
-            <button
-              type="button"
-              onClick={() => setShowAllMobile(!showAllMobile)}
-              className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#D49E17] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer"
-            >
-              {showAllMobile ? (
-                <>
-                  <span>Show Less Plots</span>
-                  <ChevronUp className="w-4 h-4" />
-                </>
-              ) : (
-                <>
-                  <span>See More Plots ({remainingCount} more)</span>
-                  <ChevronDown className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        {/* Mobile Action Button Below Plots */}
+        <div className="pt-2">
+          <Link
+            href="/plot-for-sale"
+            className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold tracking-wider uppercase transition-all shadow-md active:scale-95"
+          >
+            <span>VIEW COMPLETE DIRECTORY</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
 
       {/* 2. TABLET & DESKTOP 4-COLUMN CARD GRID */}

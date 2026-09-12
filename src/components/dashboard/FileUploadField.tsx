@@ -110,7 +110,7 @@ export default function FileUploadField({
               type="text"
               value={currentValue || ""}
               onChange={(e) => onUploadSuccess(e.target.value)}
-              placeholder="e.g. /images/hero-bg.jpg or https://..."
+              placeholder="e.g. /images/hero-bg.webp or https://..."
               className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none transition-all"
             />
             <input

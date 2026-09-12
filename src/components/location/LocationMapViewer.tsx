@@ -20,7 +20,7 @@ interface LocationMapViewerProps {
 
 export default function LocationMapViewer({
   className = "",
-  imageSrc = "/images/imgi_87_LOCATION.jpg",
+  imageSrc = "/images/imgi_87_LOCATION.webp",
 }: LocationMapViewerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);

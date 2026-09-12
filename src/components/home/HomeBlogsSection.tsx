@@ -78,7 +78,7 @@ export default function HomeBlogsSection({
               {/* Featured Image */}
               <div className="relative w-full h-52 sm:h-56 overflow-hidden bg-slate-100">
                 <img
-                  src={blog.image || "/images/hero-bg.jpg"}
+                  src={blog.image || "/images/hero-bg.webp"}
                   alt={blog.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

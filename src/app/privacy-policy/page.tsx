@@ -102,7 +102,7 @@ export default function PrivacyPolicyPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/about/about-hero-banner.jpg"
+            src="/images/about/about-hero-banner.webp"
             alt="Saffron City Privacy Policy"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />

@@ -11,39 +11,49 @@ export async function GET(req: NextRequest) {
     const token = authHeader?.replace("Bearer ", "") || cookieToken;
 
     if (!token) {
-      return NextResponse.json(
+      const res = NextResponse.json(
         { success: false, message: "No active session found" },
         { status: 401 }
       );
+      res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      return res;
     }
 
-    const { valid, userId, email } = verifyUserSessionToken(token);
+    const { valid, userId } = verifyUserSessionToken(token);
 
     if (!valid || !userId) {
-      return NextResponse.json(
+      const res = NextResponse.json(
         { success: false, message: "Invalid or expired session token" },
         { status: 401 }
       );
+      res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      return res;
     }
 
     const user = await db.getUserById(userId);
 
     if (!user || !user.isActive) {
-      return NextResponse.json(
+      const res = NextResponse.json(
         { success: false, message: "User account not found or deactivated" },
         { status: 401 }
       );
+      res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      return res;
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       user,
     });
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   } catch (error: any) {
     console.error("Auth me error:", error);
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: false, message: "Failed to verify session" },
       { status: 500 }
     );
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   }
 }

@@ -49,25 +49,51 @@ export default function InstallmentCalculator() {
             </div>
           </div>
 
-          {/* Plot Selector Chips */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {allPlots.map((plot) => {
-              const isSelected = selectedSize === plot.size;
-              return (
-                <button
-                  key={plot.size}
-                  type="button"
-                  onClick={() => setSelectedSize(plot.size)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer select-none ${
-                    isSelected
-                      ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-lg shadow-amber-500/30 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
-                      : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm hover:scale-[1.03] active:scale-95"
-                  }`}
-                >
-                  {plot.size}
-                </button>
-              );
-            })}
+          {/* Plot Selector Chips - Strictly 2 Lines */}
+          <div className="flex flex-col gap-2 shrink-0 max-w-full">
+            {/* Line 1: Residential Plots */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pb-0.5">
+              <span className="text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Residential:</span>
+              {RESIDENTIAL_PRICES.map((plot) => {
+                const isSelected = selectedSize === plot.size;
+                return (
+                  <button
+                    key={plot.size}
+                    type="button"
+                    onClick={() => setSelectedSize(plot.size)}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-md shadow-amber-500/20 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
+                        : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm active:scale-95"
+                    }`}
+                  >
+                    {plot.size}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Line 2: Commercial Plots */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pb-0.5">
+              <span className="text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Commercial:</span>
+              {COMMERCIAL_PRICES.map((plot) => {
+                const isSelected = selectedSize === plot.size;
+                return (
+                  <button
+                    key={plot.size}
+                    type="button"
+                    onClick={() => setSelectedSize(plot.size)}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-md shadow-amber-500/20 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
+                        : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm active:scale-95"
+                    }`}
+                  >
+                    {plot.size}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

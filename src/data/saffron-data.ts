@@ -20,9 +20,9 @@ export const SITE_CONFIG = {
   downPaymentPercent: "10%",
   masterPlanPdf: "/images/saffron-city-master-plan.webp",
   masterPlanImage: "/images/saffron-city-master-plan.webp",
-  masterPlanFullImage: "/images/saffron-city-master-plan-full.jpg",
-  residentialPaymentPlanImg: "/images/payment-plans/official-residential-payment-plan.jpg",
-  commercialPaymentPlanImg: "/images/payment-plans/official-commercial-payment-plan.jpg",
+  masterPlanFullImage: "/images/saffron-city-master-plan-full.webp",
+  residentialPaymentPlanImg: "/images/payment-plans/official-residential-payment-plan.webp",
+  commercialPaymentPlanImg: "/images/payment-plans/official-commercial-payment-plan.webp",
 };
 
 export const RESIDENTIAL_PRICES: PlotPriceInfo[] = [
@@ -208,8 +208,8 @@ export const DEVELOPER_INFO = {
   ceoQuote: "We wanted to build an authentic, RDA-approved mega community that buyers and overseas Pakistanis can trust with complete transparency and peace of mind.",
   chairmanName: "Malik Tariq Mehmood",
   chairmanTitle: "Chairman, Saffron City & SKB Builders",
-  chairmanImage: "/images/chairman_official_clean.png",
-  projectImage: "/images/imgi_25_saffron-city-islamabad.jpg"
+  chairmanImage: "/images/chairman_portrait_hd.webp",
+  projectImage: "/images/imgi_25_saffron-city-islamabad.webp"
 };
 
 export const LANDMARKS: LandmarkDistance[] = [
@@ -252,49 +252,49 @@ export const AMENITIES = [
   {
     title: "Grand Mosque",
     icon: "Mosque",
-    image: "/images/amenities/amenity_mosque.jpg",
+    image: "/images/amenities/amenity_mosque.webp",
     desc: "A central, magnificent mosque sized for the entire community, not just a single sector, featuring prayer halls and Islamic center."
   },
   {
     title: "Medical Centres",
     icon: "HeartPulse",
-    image: "/images/amenities/amenity_hospital.jpg",
+    image: "/images/amenities/amenity_hospital.webp",
     desc: "On-site 24/7 healthcare access for everyday medical needs, diagnostic facilities, pharmacy, and rapid emergency response."
   },
   {
     title: "Educational Institutes",
     icon: "GraduationCap",
-    image: "/images/amenities/amenity_school.jpg",
+    image: "/images/amenities/amenity_school.webp",
     desc: "Top-tier schools planned within safe walking distance of residential blocks, eliminating long bus commutes for children."
   },
   {
     title: "Gated Security & CCTV",
     icon: "ShieldCheck",
-    image: "/images/amenities/amenity_security.jpg",
+    image: "/images/amenities/amenity_security.webp",
     desc: "3-tier gated perimeter with biometric checkpoints, round-the-clock patrol, and 24/7 CCTV surveillance at all entry points."
   },
   {
     title: "Shopping & F&B Hub",
     icon: "Store",
-    image: "/images/amenities/amenity_shopping.jpg",
+    image: "/images/amenities/amenity_shopping.webp",
     desc: "Retail and food outlets built into the community frontage on GT Road rather than requiring a drive into crowded city centers."
   },
   {
     title: "Wide Road Network",
     icon: "Navigation",
-    image: "/images/amenities/amenity_boulevard.jpg",
+    image: "/images/amenities/amenity_boulevard.webp",
     desc: "Planned 250-foot Main Boulevard and wide carpeted internal roads engineered to eliminate bottlenecks common in older societies."
   },
   {
     title: "Water Filtration Plant & Grid",
     icon: "Droplets",
-    image: "/images/amenities/amenity_water.jpg",
+    image: "/images/amenities/amenity_water.webp",
     desc: "Dedicated RO water filtration plant for safe drinking water, coupled with a dedicated power grid station for stable utility supply."
   },
   {
     title: "Family Parks & Green Belts",
     icon: "Trees",
-    image: "/images/amenities/amenity_park.jpg",
+    image: "/images/amenities/amenity_park.webp",
     desc: "Over 45% land allocated to greenery, parks, jogging tracks, and open play zones distributed across all residential sectors."
   }
 ];
@@ -403,7 +403,7 @@ export const REVIEWS: ReviewItem[] = [
     location: "Rawalpindi",
     role: "Verified Plot Buyer",
     rating: 5,
-    image: "/images/avatars/avatar_ahmed.jpg"
+    image: "/images/avatars/avatar_ahmed.webp"
   },
   {
     id: "2",
@@ -412,7 +412,7 @@ export const REVIEWS: ReviewItem[] = [
     location: "Islamabad",
     role: "Overseas Investor",
     rating: 5,
-    image: "/images/avatars/avatar_muhammad.jpg"
+    image: "/images/avatars/avatar_muhammad.webp"
   },
   {
     id: "3",
@@ -421,7 +421,7 @@ export const REVIEWS: ReviewItem[] = [
     location: "Islamabad",
     role: "Residential Buyer",
     rating: 5,
-    image: "/images/avatars/avatar_zainab.jpg"
+    image: "/images/avatars/avatar_zainab.webp"
   }
 ];
 
@@ -457,19 +457,19 @@ export const LEADERSHIP = [
     name: "Malik Tariq Mehmood",
     role: "Chairman",
     bio: "Guiding the strategic vision and institutional governance of Saffron City with over three decades of business and infrastructure leadership.",
-    image: "/images/chairman_portrait_hd.png"
+    image: "/images/chairman_portrait_hd.webp"
   },
   {
     name: "Ali Muhammad",
     role: "Chief Executive Officer",
     bio: "Leading day-to-day corporate operations, financial structuring, and transparent investor relations across domestic and overseas markets.",
-    image: "/images/imgi_8_ceo-150x150.png"
+    image: "/images/imgi_8_ceo-150x150.webp"
   },
   {
     name: "Haroon Awan",
     role: "Project Director",
     bio: "Overseeing on-site engineering, master planning execution, contractor coordination, and timely delivery of infrastructure.",
-    image: "/images/imgi_9_director-150x150.jpg"
+    image: "/images/imgi_9_director-150x150.webp"
   }
 ];
 

@@ -298,18 +298,6 @@ export default function MasterPlanViewer({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsDownloadModalOpen(true);
-              }}
-              className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer"
-              title="Download Master Plan"
-            >
-              <Download className="w-4 h-4 text-[#D49E17]" />
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
                 setModalScale(2);
                 setModalPosition({ x: 0, y: 0 });
                 setIsModalOpen(true);

@@ -118,7 +118,7 @@
       "monthlyInst": 45000,
       "status": "Available",
       "features": "Underground Utilities, Near Central Park",
-      "image": "/images/sectors/sector-a-luxury.jpg"
+      "image": "/images/sectors/sector-a-luxury.webp"
     },
     {
       "id": "plt-a-02",
@@ -131,7 +131,7 @@
       "monthlyInst": 82000,
       "status": "Reserved",
       "features": "Main Boulevard, Underground Electrification",
-      "image": "/images/sectors/sector-a-luxury.jpg"
+      "image": "/images/sectors/sector-a-luxury.webp"
     },
     {
       "id": "plt-a-03",
@@ -144,7 +144,7 @@
       "monthlyInst": 155000,
       "status": "Available",
       "features": "Corner Plot, Park Facing, 60-ft Road",
-      "image": "/images/sectors/sector-a-luxury.jpg"
+      "image": "/images/sectors/sector-a-luxury.webp"
     },
     {
       "id": "plt-b-01",
@@ -157,7 +157,7 @@
       "monthlyInst": 45000,
       "status": "Available",
       "features": "Near Community Mosque, 40-ft Wide Road",
-      "image": "/images/sectors/sector-b-residential.jpg"
+      "image": "/images/sectors/sector-b-residential.webp"
     },
     {
       "id": "plt-b-02",
@@ -170,7 +170,7 @@
       "monthlyInst": 82000,
       "status": "Available",
       "features": "Family Zone, Green Belt Adjacent",
-      "image": "/images/sectors/sector-b-residential.jpg"
+      "image": "/images/sectors/sector-b-residential.webp"
     },
     {
       "id": "plt-com-01",
@@ -183,7 +183,7 @@
       "monthlyInst": 180000,
       "status": "Available",
       "features": "Main GT Road Frontage, High Footfall Plaza Plot",
-      "image": "/images/sectors/commercial-plaza.jpg"
+      "image": "/images/sectors/commercial-plaza.webp"
     },
     {
       "id": "plt-com-02",
@@ -196,7 +196,7 @@
       "monthlyInst": 340000,
       "status": "Booked",
       "features": "Corporate Plaza Hub, Multi-Storey Approved",
-      "image": "/images/sectors/commercial-plaza.jpg"
+      "image": "/images/sectors/commercial-plaza.webp"
     },
     {
       "id": "plt-1789190993839-t16d",
@@ -209,7 +209,7 @@
       "monthlyInst": 0.45,
       "status": "Available",
       "features": "100% Underground Utilities, 50ft Wide Carpeted Road",
-      "image": "/uploads/1789190989041_ChatGPT_Image_Aug_25__2026__05_07_12_AM.png"
+      "image": "/uploads/1789190989041_ChatGPT_Image_Aug_25__2026__05_07_12_AM.webp"
     }
   ],
   "blogs": [
@@ -219,7 +219,7 @@
       "title": "Rawalpindi Ring Road Interchange — Transformative Value for Saffron City",
       "excerpt": "How the 2-minute direct bypass connection turns Saffron City on GT Road into a primary commercial and residential nexus for Islamabad & Rawalpindi.",
       "content": "The Rawalpindi Ring Road (RRR) project stands as one of the most critical economic game-changers for the twin cities. Saffron City's strategic positioning just 2 minutes from the Rawat interchange provides signal-free connectivity to the New Islamabad International Airport, M-2 Motorway, and Central Islamabad.\n\nInvestors are seeing rapid capital appreciation as infrastructure earthworks accelerate. With wide 250-foot boulevards and direct arterial links, Saffron City offers unmatched logistical convenience for overseas Pakistanis and local residents alike.",
-      "image": "/images/hero-bg.jpg",
+      "image": "/images/hero-bg.webp",
       "category": "Market Insights",
       "author": "Saffron City Research Desk",
       "readTime": "4 min read",
@@ -233,7 +233,7 @@
       "title": "Sector A (Block B) Fast-Track Infrastructure & Development Update",
       "excerpt": "On-ground progress report on underground utilities, Grand Jamia Mosque foundation, carpeted roads, and recreational park zones.",
       "content": "Development works across Sector A (Block B) have entered an advanced phase. Underground cabling for electrical distribution, water filtration plant earthworks, and modern sewerage systems are being installed with precision.\n\nThe project philosophy of 'infrastructure preceding residents' ensures that every allottee steps into a fully operational, secure community from day one. New official rates are now live with 10% down payment options.",
-      "image": "/images/sectors/sector-a-luxury.jpg",
+      "image": "/images/sectors/sector-a-luxury.webp",
       "category": "Development Update",
       "author": "SKB Engineering Team",
       "readTime": "5 min read",
@@ -247,7 +247,7 @@
       "title": "Why Saffron City is Ranked Among Top RDA-Approved Societies in 2026",
       "excerpt": "A deep-dive into legal security, 15,000 Kanal RDA NOC approval, 70-year construction pedigree of SKB Group, and high ROI potential.",
       "content": "Real estate investment requires two fundamental pillars: legal transparency and reliable developer pedigree. Saffron City boasts an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across its full 15,000 Kanal master plan.\n\nBacked by Saadullah Khan & Brothers (SKB Group) with over 70 years of nationwide mega-infrastructure achievements, Saffron City ensures zero-risk, high-growth investment for families and commercial developers.",
-      "image": "/images/facilities/gated-security.jpg",
+      "image": "/images/facilities/gated-security.webp",
       "category": "Legal & Investment",
       "author": "Official Advisory Board",
       "readTime": "6 min read",
@@ -285,15 +285,15 @@
     "defaultRobotsFollow": true,
     "ogTitle": "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
     "ogDescription": "15,000 Kanal RDA NOC Approved housing society on Main GT Road, Rawat. Flexible 3-year installment plans with 10% down payment.",
-    "ogImage": "/images/hero-bg.jpg",
+    "ogImage": "/images/hero-bg.webp",
     "twitterCard": "summary_large_image",
     "twitterSite": "@SaffronCityPk",
     "twitterCreator": "@SaffronCityPk",
     "twitterTitle": "Saffron City Islamabad | RDA Approved Housing Scheme",
     "twitterDescription": "Explore RDA approved plots on Main GT Road Rawat near Islamabad. 5, 10 Marla & 1 Kanal on 30-month easy installments.",
-    "twitterImage": "/images/hero-bg.jpg",
+    "twitterImage": "/images/hero-bg.webp",
     "orgName": "Saffron City Islamabad",
-    "orgLogo": "/images/logo.png",
+    "orgLogo": "/images/saffron-city-logo.webp",
     "orgLegalName": "Saffron City Developers (SKB Group)",
     "orgPriceRange": "PKR 4,500,000 - 35,000,000",
     "orgStreetAddress": "Main GT Road, Near T-Chowk, Rawat",
@@ -317,7 +317,7 @@
     "heroTitle": "Invest in Premium Living",
     "heroHighlightedWord": "Saffron City",
     "heroSubtitle": "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
-    "heroBgImage": "/images/hero-bg.jpg",
+    "heroBgImage": "/images/hero-bg.webp",
     "heroButtonText": "Book Your Plot",
     "chairmanHeadingTop": "A STORY",
     "chairmanHeadingSub": "of",
@@ -328,72 +328,72 @@
     "chairmanBioFull": "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
     "chairmanCtaText": "Discover More",
     "chairmanCtaLink": "/about-us",
-    "chairmanPortrait": "/images/chairman_portrait_hd.png",
+    "chairmanPortrait": "/images/chairman_portrait_hd.webp",
     "masterPlanImage": "/images/saffron-city-master-plan.webp",
-    "masterPlanFullImage": "/images/saffron-city-master-plan-full.jpg",
+    "masterPlanFullImage": "/images/saffron-city-master-plan-full.webp",
     "masterPlanPdf": "/images/saffron-city-master-plan.webp",
     "masterPlanDescription": "The master plan divides Saffron City into residential blocks alongside dedicated space for commercial area, mosque, schools, and parks.",
     "sectorATitle": "Sector A (Block B - New Rates)",
     "sectorATagline": "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
     "sectorAPlots": "5M, 10M & 1 Kanal",
     "sectorAPrice": "From PKR 45 Lakh",
-    "sectorAImage": "/images/sectors/sector-a-luxury.jpg",
+    "sectorAImage": "/images/sectors/sector-a-luxury.webp",
     "sectorBTitle": "Sector B (Affordable Block)",
     "sectorBTagline": "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
     "sectorBPlots": "5M, 10M & 1 Kanal",
     "sectorBPrice": "From PKR 45 Lakh",
-    "sectorBImage": "/images/sectors/sector-b-residential.jpg",
-    "residentialPaymentPlanImage": "/images/payment-plans/official-residential-payment-plan.jpg",
-    "commercialPaymentPlanImage": "/images/payment-plans/official-commercial-payment-plan.jpg",
+    "sectorBImage": "/images/sectors/sector-b-residential.webp",
+    "residentialPaymentPlanImage": "/images/payment-plans/official-residential-payment-plan.webp",
+    "commercialPaymentPlanImage": "/images/payment-plans/official-commercial-payment-plan.webp",
     "officialPaymentPlanPdf": "/images/saffron-city-master-plan.webp",
     "amenities": [
       {
         "id": "am-1",
         "title": "Grand Jamia Mosque",
         "desc": "A central, magnificent mosque sized for the entire community.",
-        "image": "/images/amenities/amenity_mosque.jpg"
+        "image": "/images/amenities/amenity_mosque.webp"
       },
       {
         "id": "am-2",
         "title": "Modern Hospital & Trauma",
         "desc": "On-site 24/7 healthcare access for everyday medical needs.",
-        "image": "/images/amenities/amenity_hospital.jpg"
+        "image": "/images/amenities/amenity_hospital.webp"
       },
       {
         "id": "am-3",
         "title": "International Standard Schools",
         "desc": "Top-tier schools planned within safe walking distance.",
-        "image": "/images/amenities/amenity_school.jpg"
+        "image": "/images/amenities/amenity_school.webp"
       },
       {
         "id": "am-4",
         "title": "24/7 Gated Security & CCTV",
         "desc": "3-tier gated perimeter with biometric checkpoints.",
-        "image": "/images/amenities/amenity_security.jpg"
+        "image": "/images/amenities/amenity_security.webp"
       },
       {
         "id": "am-5",
         "title": "Commercial Shopping Plazas",
         "desc": "Retail centers and supermarkets within each sector.",
-        "image": "/images/amenities/amenity_shopping.jpg"
+        "image": "/images/amenities/amenity_shopping.webp"
       },
       {
         "id": "am-6",
         "title": "250ft Main Boulevard",
         "desc": "Wide arterial road network designed for signal-free flow.",
-        "image": "/images/amenities/amenity_boulevard.jpg"
+        "image": "/images/amenities/amenity_boulevard.webp"
       },
       {
         "id": "am-7",
         "title": "Underground Utilities & Water",
         "desc": "Underground electrification, gas, and dedicated water filtration.",
-        "image": "/images/amenities/amenity_water.jpg"
+        "image": "/images/amenities/amenity_water.webp"
       },
       {
         "id": "am-8",
         "title": "Family Parks & Sports Courts",
         "desc": "Lush green belts, walking tracks, and children play grounds.",
-        "image": "/images/amenities/amenity_park.jpg"
+        "image": "/images/amenities/amenity_park.webp"
       }
     ],
     "landmarks": [
@@ -402,56 +402,56 @@
         "title": "T-Chowk, Rawat",
         "subtitle": "Main GT Road Junction",
         "driveTime": "5 Mins Drive",
-        "image": "/images/landmark_t_chowk.jpg"
+        "image": "/images/landmark_t_chowk.webp"
       },
       {
         "id": "lm-2",
         "title": "Giga Mall & DHA",
         "subtitle": "Premier Shopping & Dining",
         "driveTime": "12 Mins Drive",
-        "image": "/images/landmark_giga_mall.jpg"
+        "image": "/images/landmark_giga_mall.webp"
       },
       {
         "id": "lm-3",
         "title": "DHA Islamabad",
         "subtitle": "Executive Housing Society",
         "driveTime": "10 Mins Drive",
-        "image": "/images/landmark_dha_islamabad.jpg"
+        "image": "/images/landmark_dha_islamabad.webp"
       },
       {
         "id": "lm-4",
         "title": "Zero Point & Blue Area",
         "subtitle": "Capital Business District",
         "driveTime": "20 Mins Drive",
-        "image": "/images/hero-bg.jpg"
+        "image": "/images/hero-bg.webp"
       },
       {
         "id": "lm-5",
         "title": "Bahria Town",
         "subtitle": "Gated Residential Community",
         "driveTime": "10 Mins Drive",
-        "image": "/images/imgi_25_saffron-city-islamabad.jpg"
+        "image": "/images/imgi_25_saffron-city-islamabad.webp"
       },
       {
         "id": "lm-6",
         "title": "Islamabad Airport",
         "subtitle": "International Air Terminal",
         "driveTime": "30 Mins Drive",
-        "image": "/images/landmark_t_chowk.jpg"
+        "image": "/images/landmark_t_chowk.webp"
       },
       {
         "id": "lm-7",
         "title": "Rawalpindi Ring Road",
         "subtitle": "Direct Bypass Interchange",
         "driveTime": "2 Mins Drive",
-        "image": "/images/imgi_25_saffron-city-islamabad.jpg"
+        "image": "/images/imgi_25_saffron-city-islamabad.webp"
       },
       {
         "id": "lm-8",
         "title": "Islamabad Expressway",
         "subtitle": "Signal-Free Arterial Route",
         "driveTime": "15 Mins Drive",
-        "image": "/images/hero-bg.jpg"
+        "image": "/images/hero-bg.webp"
       }
     ],
     "paymentTiers": [
@@ -527,10 +527,10 @@
       "robotsFollow": true,
       "ogTitle": "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
       "ogDescription": "15,000 Kanal RDA NOC Approved housing society on Main GT Road, Rawat. Flexible 3-year installment plans with 10% down payment.",
-      "ogImage": "/images/hero-bg.jpg",
+      "ogImage": "/images/hero-bg.webp",
       "twitterTitle": "Saffron City Islamabad | RDA Approved Housing Scheme",
       "twitterDescription": "Explore RDA approved plots on Main GT Road Rawat near Islamabad. 5, 10 Marla & 1 Kanal on 30-month easy installments.",
-      "twitterImage": "/images/hero-bg.jpg",
+      "twitterImage": "/images/hero-bg.webp",
       "schemaType": "WebSite",
       "updatedAt": "2026-09-12T08:20:39.252Z"
     },

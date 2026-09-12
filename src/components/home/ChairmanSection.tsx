@@ -37,7 +37,7 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
     "Saffron City represents a benchmark in planned urban living on Main GT Road Rawat. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.";
   const ctaText = settings?.chairmanCtaText || "Discover More";
   const ctaLink = settings?.chairmanCtaLink || "/about-us";
-  const portrait = settings?.chairmanPortrait || "/images/chairman_portrait_hd.png";
+  const portrait = settings?.chairmanPortrait || "/images/chairman_portrait_hd.webp";
 
   return (
     <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-6 sm:py-10 relative">
@@ -90,8 +90,8 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
             )}
           </div>
 
-          {/* Discover More Link */}
-          <div className="pt-2">
+          {/* Discover More Link (Desktop view - below bio) */}
+          <div className="pt-2 hidden lg:block">
             <Link
               href={ctaLink}
               className="group inline-flex items-center gap-2.5 text-[#5C1D24] hover:text-[#7E2430] font-medium text-sm sm:text-base transition-colors border-b-2 border-[#5C1D24] pb-0.5"
@@ -107,7 +107,7 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           animation="fade-left"
           delay={150}
           duration={900}
-          className="lg:col-span-5 flex justify-center lg:justify-end items-center relative"
+          className="lg:col-span-5 flex flex-col justify-center items-center lg:items-end relative"
         >
           <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg flex justify-center lg:justify-end">
             <img
@@ -115,6 +115,17 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
               alt={`${title} ${name} - Saffron City`}
               className="w-full h-auto object-contain select-none pointer-events-none transition-all duration-500"
             />
+          </div>
+
+          {/* Discover More Link (Mobile view - below Chairman image) */}
+          <div className="pt-5 flex lg:hidden justify-center w-full">
+            <Link
+              href={ctaLink}
+              className="group inline-flex items-center justify-center gap-2.5 text-[#5C1D24] hover:text-[#7E2430] font-semibold text-sm sm:text-base transition-colors border-b-2 border-[#5C1D24] pb-1"
+            >
+              <span>{ctaText}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+            </Link>
           </div>
         </ScrollReveal>
       </div>

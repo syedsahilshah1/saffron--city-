@@ -34,7 +34,7 @@ const NOC_LEGAL_DOCUMENTS = [
     title: "Official RDA No Objection Certificate (NOC)",
     authority: "Rawalpindi Development Authority (RDA)",
     status: "100% Approved & Issued",
-    image: "/images/facilities/gated-security.jpg",
+    image: "/images/facilities/gated-security.webp",
     tag: "Primary Approval",
     description: "Confirms official regulatory clearance for Saffron City covering the entire 15,000 Kanal housing scheme on Main GT Road."
   },
@@ -42,7 +42,7 @@ const NOC_LEGAL_DOCUMENTS = [
     title: "Sanctioned Master Layout Plan (LOP)",
     authority: "Town Planning Directorate",
     status: "Approved Town Planning",
-    image: "/images/saffron-city-master-plan.jpg",
+    image: "/images/saffron-city-master-plan.webp",
     tag: "Layout Clearance",
     description: "Legally sanctioned road widths (up to 250ft), dedicated civic amenities, green belts, and plot demarcations."
   },
@@ -50,7 +50,7 @@ const NOC_LEGAL_DOCUMENTS = [
     title: "Clear Land Ownership & Revenue Registry",
     authority: "Punjab Land Records Authority",
     status: "Verified Clear Title",
-    image: "/images/about/about-hero-banner.jpg",
+    image: "/images/about/about-hero-banner.webp",
     tag: "Land Title",
     description: "Complete unencumbered legal title with transparent transfer and registry procedures for individual allottees."
   },
@@ -58,7 +58,7 @@ const NOC_LEGAL_DOCUMENTS = [
     title: "Underground Infrastructure Sanctions",
     authority: "IESCO, SNGPL & WASA Guidelines",
     status: "Civic Compliance",
-    image: "/images/facilities/underground-utilities.jpg",
+    image: "/images/facilities/underground-utilities.webp",
     tag: "Utility Clearance",
     description: "Sanctioned underground utility network for zero-load shedding power grid, gas piping, and water filtration plants."
   }
@@ -100,7 +100,7 @@ export default function NocStatusPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/about/about-hero-banner.jpg"
+            src="/images/about/about-hero-banner.webp"
             alt="Saffron City NOC Status RDA Approved"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />

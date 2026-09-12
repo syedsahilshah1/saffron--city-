@@ -32,7 +32,7 @@ const LOCATION_NEARBY_LANDMARKS = [
     timeHighlight: "text-[#D49E17]",
     distance: "Direct Frontage Access",
     bgClass: "bg-amber-50/70 border-amber-300",
-    image: "/images/amenities/amenity_boulevard.jpg",
+    image: "/images/amenities/amenity_boulevard.webp",
     description: "Instant access to the multi-lane National Highway with no secondary village roads."
   },
   {
@@ -41,7 +41,7 @@ const LOCATION_NEARBY_LANDMARKS = [
     timeHighlight: "text-slate-900",
     distance: "3.5 km via Main GT Road",
     bgClass: "bg-white border-slate-200 hover:border-amber-300",
-    image: "/images/landmark_t_chowk.jpg",
+    image: "/images/landmark_t_chowk.webp",
     description: "Strategic commercial and transit junction linking Rawalpindi, Islamabad Expressway, and GT Road."
   },
   {
@@ -50,7 +50,7 @@ const LOCATION_NEARBY_LANDMARKS = [
     timeHighlight: "text-slate-900",
     distance: "8.0 km Expressway Link",
     bgClass: "bg-white border-slate-200 hover:border-amber-300",
-    image: "/images/landmark_giga_mall.jpg",
+    image: "/images/landmark_giga_mall.webp",
     description: "Premier twin-city commercial shopping destination with hypermarkets, banks, and cinema complexes."
   },
   {
@@ -59,7 +59,7 @@ const LOCATION_NEARBY_LANDMARKS = [
     timeHighlight: "text-emerald-700",
     distance: "11.0 km Direct Bypass",
     bgClass: "bg-white border-slate-200 hover:border-emerald-400",
-    image: "/images/landmark_dha_islamabad.jpg",
+    image: "/images/landmark_dha_islamabad.webp",
     description: "Direct expressway link connecting Saffron City to New Islamabad Airport and M-2 Motorway."
   }
 ];
@@ -76,7 +76,7 @@ export default function LocationPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/landmark_dha_islamabad.jpg"
+            src="/images/landmark_dha_islamabad.webp"
             alt="Saffron City Prime Location GT Road Rawat"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
@@ -169,7 +169,7 @@ export default function LocationPage() {
 
           {/* Full Screen Interactive Location Map & Google Map Viewer */}
           <ScrollReveal animation="fade-up" delay={150} className="w-full">
-            <LocationMapViewer imageSrc="/images/imgi_87_LOCATION.jpg" className="w-full" />
+            <LocationMapViewer imageSrc="/images/imgi_87_LOCATION.webp" className="w-full" />
           </ScrollReveal>
         </section>
 

@@ -36,7 +36,7 @@ const RESIDENTIAL_PLOT_CARDS = [
     downPayment: "PKR 4,50,000 (10%)",
     monthly: "PKR 45,000 / month",
     possession: "PKR 9,00,000 (20%)",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
     tag: "Most Popular",
     desc: "Perfect for young families and smart investors seeking maximum ROI with high liquidity in Sector A & B."
   },
@@ -47,7 +47,7 @@ const RESIDENTIAL_PLOT_CARDS = [
     downPayment: "PKR 8,25,000 (10%)",
     monthly: "PKR 82,500 / month",
     possession: "PKR 16,50,000 (20%)",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     tag: "Spacious Family Living",
     desc: "Spacious luxury plots allowing for custom multi-storey villas, double car parking, and private front lawns."
   },
@@ -58,7 +58,7 @@ const RESIDENTIAL_PLOT_CARDS = [
     downPayment: "PKR 15,50,000 (10%)",
     monthly: "PKR 1,55,000 / month",
     possession: "PKR 31,00,000 (20%)",
-    image: "/images/about/about-hero-banner.jpg",
+    image: "/images/about/about-hero-banner.webp",
     tag: "Executive Boulevard",
     desc: "Flagship luxury estate plots facing extra-wide 250-foot boulevards and close to the central Grand Mosque."
   }
@@ -76,7 +76,7 @@ export default function ResidentialPlotsPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/sectors/sector-a-luxury.jpg"
+            src="/images/sectors/sector-a-luxury.webp"
             alt="Saffron City Residential Plots"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
@@ -311,7 +311,61 @@ export default function ResidentialPlotsPage() {
           </div>
           
           <ScrollReveal animation="fade-up" delay={100}>
-            <div className="overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
+            {/* 1. Mobile Cards View (Hidden on md and up) */}
+            <div className="block md:hidden space-y-3">
+              {RESIDENTIAL_PRICES.map((p) => (
+                <div
+                  key={`mob-plot-res-${p.size}`}
+                  className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+                    <div>
+                      <span className="text-base font-bold text-slate-900 font-heading block">
+                        {p.size}
+                      </span>
+                      <span className="text-[10px] font-semibold text-emerald-600">
+                        {p.sector || "Sector A (Block B)"}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        TOTAL PRICE
+                      </span>
+                      <span className="text-base font-bold text-[#D49E17] font-heading">
+                        {p.totalPriceFormatted}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-3 text-xs">
+                    <div className="p-2 rounded-xl bg-amber-50/60 border border-amber-100">
+                      <span className="text-[10px] text-amber-900/80 font-medium block">Booking (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.bookingAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Allocation (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.allocationAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Monthly (×30)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.monthlyInstallmentFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Bi-Annual (×6)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.biAnnualInstallmentFormatted}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 font-medium">Possession (20%):</span>
+                    <span className="font-bold text-emerald-700">{p.possessionAmountFormatted}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 2. Desktop Full Table View (Hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-amber-50 text-amber-900 uppercase text-[11px] font-bold border-b border-amber-200">
                   <tr>

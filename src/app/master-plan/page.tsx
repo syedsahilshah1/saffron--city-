@@ -36,7 +36,7 @@ const SECTOR_CARDS = [
     name: "Sector A Residential",
     type: "Premium Flagship",
     tagline: "Underground Utilities & Wide Boulevards",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
     features: [
       "Underground electricity, gas & optical fiber",
       "Extra-wide carpeted boulevards",
@@ -51,7 +51,7 @@ const SECTOR_CARDS = [
     name: "Sector B Residential",
     type: "Affordable Community",
     tagline: "Structured 3-Year Installments (10% Down)",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     features: [
       "10% down payment easy booking",
       "100% RDA NOC legal protection",
@@ -66,7 +66,7 @@ const SECTOR_CARDS = [
     name: "Signature Commercial Block",
     type: "Highway Frontage",
     tagline: "Direct GT Road (N-5 Highway) Exposure",
-    image: "/images/sectors/commercial-plaza.jpg",
+    image: "/images/sectors/commercial-plaza.webp",
     features: [
       "Direct frontage on premier N-5 corridor",
       "Multi-storey commercial plaza permissions",
@@ -81,7 +81,7 @@ const SECTOR_CARDS = [
     name: "Green & Community Belts",
     type: "Civic & Parks",
     tagline: "45% Allocated to Parks & Green Spaces",
-    image: "/images/sectors/green-community-park.jpg",
+    image: "/images/sectors/green-community-park.webp",
     features: [
       "Grand Community Mosque landmark",
       "Lakes, sports grounds & jogging tracks",
@@ -97,28 +97,28 @@ const CIVIC_FACILITIES = [
   {
     title: "Roads & Underground Utilities",
     desc: "Carpeted wide boulevards with complete underground electrical, optical fiber, and drainage networks.",
-    image: "/images/facilities/underground-utilities.jpg",
+    image: "/images/facilities/underground-utilities.webp",
     icon: Zap,
     tag: "Underground Wiring"
   },
   {
     title: "Water Filtration & Power Grid",
     desc: "Dedicated RO water filtration plant for 24/7 pure water and uninterrupted power grid station.",
-    image: "/images/facilities/water-filtration.jpg",
+    image: "/images/facilities/water-filtration.webp",
     icon: Droplets,
     tag: "RO Plant"
   },
   {
     title: "Green Parks & Sports Complexes",
     desc: "Over 45% land allocated to themed family parks, sports grounds, community gardens, and lakes.",
-    image: "/images/facilities/green-parks.jpg",
+    image: "/images/facilities/green-parks.webp",
     icon: Trees,
     tag: "45% Green Spaces"
   },
   {
     title: "Gated Smart 24/7 Security",
     desc: "Round-the-clock CCTV surveillance, biometric entrance barriers, and active security patrols.",
-    image: "/images/facilities/gated-security.jpg",
+    image: "/images/facilities/gated-security.webp",
     icon: ShieldCheck,
     tag: "Smart Security"
   }
@@ -172,10 +172,16 @@ export default function MasterPlanPage() {
               Explore the master layout model of Saffron City on Main GT Road, Rawat. Features dedicated residential sectors, 250-foot grand boulevard, commercial hub, and 45% open green spaces.
             </p>
           </ScrollReveal>
+        </div>
 
+        {/* Right Side: Master Plan Viewer with Action Buttons below it */}
+        <div className="lg:col-span-6 space-y-4">
+          <ScrollReveal animation="fade-left" duration={850}>
+            <MasterPlanViewer />
+          </ScrollReveal>
 
-
-          <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap gap-3 pt-2">
+          {/* Action Buttons placed below Master Map */}
+          <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
             <MasterPlanDownloadButton 
               downloadUrl={SITE_CONFIG.masterPlanPdf} 
               buttonText="Download Master Plan" 
@@ -187,13 +193,6 @@ export default function MasterPlanPage() {
             >
               View Payment Plans
             </Link>
-          </ScrollReveal>
-        </div>
-
-        {/* Right Side: Compact Master Plan Viewer */}
-        <div className="lg:col-span-6">
-          <ScrollReveal animation="fade-left" duration={850}>
-            <MasterPlanViewer />
           </ScrollReveal>
         </div>
       </section>

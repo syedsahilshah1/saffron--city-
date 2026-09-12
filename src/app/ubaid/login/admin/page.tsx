@@ -233,7 +233,7 @@ export default function UbaidAdminLoginPage() {
       <header className="relative z-10 max-w-7xl w-full mx-auto px-6 py-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <img
-            src="/images/saffron-city-logo.png"
+            src="/images/saffron-city-logo.webp"
             alt="Saffron City"
             className="h-12 w-auto object-contain brightness-110 drop-shadow-md group-hover:scale-105 transition-transform"
           />

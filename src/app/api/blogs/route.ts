@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       title,
       excerpt: excerpt || title,
       content,
-      image: image || "/images/hero-bg.jpg",
+      image: image || "/images/hero-bg.webp",
       category: category || "News & Updates",
       author: author || "Saffron City Official",
       readTime: readTime || "4 min read",
@@ -71,10 +71,10 @@ export async function POST(req: NextRequest) {
       imageAlt: body.imageAlt || title,
       ogTitle: body.ogTitle || body.seoTitle || title,
       ogDescription: body.ogDescription || body.metaDescription || excerpt || title,
-      ogImage: body.ogImage || image || "/images/hero-bg.jpg",
+      ogImage: body.ogImage || image || "/images/hero-bg.webp",
       twitterTitle: body.twitterTitle || body.seoTitle || title,
       twitterDescription: body.twitterDescription || body.metaDescription || excerpt || title,
-      twitterImage: body.twitterImage || image || "/images/hero-bg.jpg",
+      twitterImage: body.twitterImage || image || "/images/hero-bg.webp",
       customSchema: body.customSchema,
     });
 

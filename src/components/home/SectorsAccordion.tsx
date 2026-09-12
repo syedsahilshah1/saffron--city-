@@ -17,6 +17,7 @@ interface SectorData {
 export interface SectorsAccordionProps {
   sectorA?: SectorData;
   sectorB?: SectorData;
+  commercial?: SectorData;
 }
 
 interface BlockItem {
@@ -30,7 +31,7 @@ interface BlockItem {
   href: string;
 }
 
-export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionProps) {
+export default function SectorsAccordion({ sectorA, sectorB, commercial }: SectorsAccordionProps) {
   const [activeId, setActiveId] = useState<string>("block-a");
 
   const blocks: BlockItem[] = [
@@ -38,25 +39,37 @@ export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionP
       id: "block-a",
       name: sectorA?.name || "Sector A (Block B - New Rates)",
       shortLabel: "Sector A",
-      badge: sectorA?.badge || "Sector A • Premium Living",
+      badge: sectorA?.badge || "Sector A • Executive Living",
       tagline:
         sectorA?.tagline ||
-        "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
+        "Flagship executive sector featuring 100% underground utilities, Grand Jamia Mosque, and extra-wide boulevards.",
       plots: sectorA?.plots || "5M, 10M & 1 Kanal",
-      image: sectorA?.image || "/images/sectors/sector-a-luxury.jpg",
+      image: sectorA?.image || "/images/sectors/sector-a-luxury.webp",
       href: sectorA?.href || "/sectors/sector-a",
     },
     {
       id: "block-b",
-      name: sectorB?.name || "Sector B (Affordable Block)",
+      name: sectorB?.name || "Sector B (Affordable Family Block)",
       shortLabel: "Sector B",
       badge: sectorB?.badge || "Sector B • Family Friendly",
       tagline:
         sectorB?.tagline ||
-        "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
+        "Peaceful family-friendly neighborhood with accessible 10% booking, pocket parks, and dedicated community mosque.",
       plots: sectorB?.plots || "5M, 10M & 1 Kanal",
-      image: sectorB?.image || "/images/sectors/sector-b-residential.jpg",
+      image: sectorB?.image || "/images/sectors/sector-b-residential.webp",
       href: sectorB?.href || "/sectors/sector-b",
+    },
+    {
+      id: "block-comm",
+      name: commercial?.name || "Signature Commercial & Plazas",
+      shortLabel: "Commercial",
+      badge: commercial?.badge || "Commercial • High ROI",
+      tagline:
+        commercial?.tagline ||
+        "Direct GT Road (N-5) frontage with multi-storey permissions, customer parking, and exceptional footfall yields.",
+      plots: commercial?.plots || "30×40, 4M & 8M",
+      image: commercial?.image || "/images/sectors/commercial-plaza.webp",
+      href: commercial?.href || "/plots/commercial",
     },
   ];
 

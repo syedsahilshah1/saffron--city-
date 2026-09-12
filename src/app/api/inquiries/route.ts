@@ -7,13 +7,17 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const inquiries = await db.getInquiries();
-    return NextResponse.json({ success: true, count: inquiries.length, data: inquiries });
+    const res = NextResponse.json({ success: true, count: inquiries.length, data: inquiries });
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   } catch (error: any) {
     console.error("Inquiries GET error:", error);
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: false, message: "Failed to fetch inquiries" },
       { status: 500 }
     );
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   }
 }
 

@@ -37,6 +37,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} bg-white`}>
       <head>
+        {/* Preload Above-The-Fold / LCP Assets */}
+        <link rel="preload" href="/images/saffron-city-logo.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/images/hero-bg.webp" as="image" type="image/webp" fetchPriority="high" />
+
         {/* Google Analytics 4 Script */}
         {settings.googleAnalyticsId && (
           <>
@@ -83,7 +87,7 @@ export default async function RootLayout({
           name={settings.orgName || settings.siteName}
           legalName={settings.orgLegalName}
           url={settings.canonicalUrl || "https://saffroncity.org"}
-          logo={settings.orgLogo || "/images/logo.png"}
+          logo={settings.orgLogo || "/images/saffron-city-logo.webp"}
           phone={settings.contactPhone}
           email={settings.officialEmail}
           priceRange={settings.orgPriceRange}

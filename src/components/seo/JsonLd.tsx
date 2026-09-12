@@ -25,7 +25,7 @@ export function OrganizationSchema({
   name,
   legalName,
   url = "https://saffroncity.org",
-  logo = "/images/logo.png",
+  logo = "/images/saffron-city-logo.webp",
   phone,
   email,
   priceRange,
@@ -135,7 +135,7 @@ export function ArticleSchema({
   dateModified,
   authorName,
   publisherName = "Saffron City Islamabad",
-  publisherLogo = "https://saffroncity.org/images/logo.png",
+  publisherLogo = "https://saffroncity.org/images/saffron-city-logo.webp",
 }: ArticleSchemaProps) {
   const schema = {
     "@context": "https://schema.org",

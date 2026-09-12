@@ -32,7 +32,7 @@ export default function PlotForSalePage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/landmark_dha_islamabad.jpg"
+            src="/images/landmark_dha_islamabad.webp"
             alt="Saffron City All Plots For Sale"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />

@@ -40,7 +40,7 @@ export default function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3">
               <img
-                src="/images/saffron-city-logo.png"
+                src="/images/saffron-city-logo.webp"
                 alt="Saffron City Islamabad"
                 className="h-20 sm:h-24 w-auto object-contain drop-shadow-sm"
               />

@@ -136,9 +136,12 @@ export default function Navbar() {
           {/* Left Side: Brand Logo */}
           <Link href="/" className="flex items-center group flex-shrink-0" aria-label="Saffron City">
             <img
-              src="/images/saffron-city-logo.png"
+              src="/images/saffron-city-logo.webp"
               alt="Saffron City Islamabad"
               className="h-14 lg:h-16 w-auto object-contain group-hover:scale-105 transition-all flex-shrink-0 drop-shadow-sm"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
             />
           </Link>
 
@@ -287,9 +290,12 @@ export default function Navbar() {
         <div className="lg:hidden flex items-center justify-between min-h-[52px]">
           <Link href="/" className="flex items-center group" aria-label="Saffron City">
             <img
-              src="/images/saffron-city-logo.png"
+              src="/images/saffron-city-logo.webp"
               alt="Saffron City Islamabad"
               className="h-12 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0 drop-shadow-sm"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
             />
           </Link>
 

@@ -28,12 +28,14 @@ import {
   FileText
 } from "lucide-react";
 import MasterPlanViewer from "@/components/master-plan/MasterPlanViewer";
+import DownloadButtonWithLeadModal from "@/components/ui/DownloadButtonWithLeadModal";
 import GsapSplitReveal from "@/components/animations/GsapSplitReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import ScrollParallax from "@/components/animations/ScrollParallax";
 import AnimatedCounter from "@/components/animations/AnimatedCounter";
 import InstallmentCalculator from "@/components/calculator/InstallmentCalculator";
+import BookingStepsSection from "@/components/home/BookingStepsSection";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 import {
   SITE_CONFIG,
@@ -44,7 +46,6 @@ import {
   AMENITIES,
   RESIDENTIAL_PRICES,
   COMMERCIAL_PRICES,
-  BOOKING_STEPS,
   REVIEWS,
   HOME_FAQS
 } from "@/data/saffron-data";
@@ -57,6 +58,8 @@ import PlotsForSaleGrid from "@/components/home/PlotsForSaleGrid";
 import FaqAccordion from "@/components/home/FaqAccordion";
 import HomeBlogsSection from "@/components/home/HomeBlogsSection";
 import NocApprovalSection from "@/components/home/NocApprovalSection";
+import SeeMoreDrawer from "@/components/ui/SeeMoreDrawer";
+import PaymentPlanCard from "@/components/home/PaymentPlanCard";
 
 import { db } from "@/lib/db";
 
@@ -74,34 +77,37 @@ export default async function HomePage() {
       {/* =========================================================
           SECTION 1 — Hero & Overview
       ========================================================= */}
-      <section className="relative pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 flex flex-col justify-center overflow-hidden border-b border-amber-200/60 bg-transparent">
+      <section className="relative pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-20 flex flex-col justify-center overflow-hidden border-b border-amber-200/60 bg-transparent min-h-[92vh] sm:min-h-0">
         {/* Full-Cover Background Image extending behind headline and form on mobile and desktop */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
-            src={settings.heroBgImage || "/images/hero-bg.jpg"}
+            src={settings.heroBgImage || "/images/hero-bg.webp"}
             alt="Saffron City Master Community"
             className="w-full h-full object-cover object-center scale-105"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
           />
-          {/* Subtle dark gradient overlay so text is 100% crisp and readable while keeping background image vivid */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/45 sm:to-black/10" />
+          {/* Subtle dark gradient overlay so text is 100% crisp and readable while keeping background image vivid and visible in the center */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-black/75 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/45 sm:to-black/10" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <GsapSplitReveal
-            className="gap-8 sm:gap-10 lg:gap-12"
+            className="gap-24 sm:gap-28 lg:gap-12"
             leftContent={
-              <div className="space-y-6 relative max-w-xl pb-3 sm:pb-5 lg:pb-0">
+              <div className="space-y-6 relative max-w-xl pb-8 sm:pb-12 lg:pb-0 text-center lg:text-left mx-auto lg:mx-0 flex flex-col items-center lg:items-start">
                 {/* Headline: Strictly 2 lines with uniform Playfair Display font weight */}
-                <h1 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-serif font-normal text-white drop-shadow-md tracking-normal leading-[1.2] max-w-xl">
+                <h1 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-serif font-normal text-white drop-shadow-md tracking-normal leading-[1.2] max-w-xl text-center lg:text-left">
                   Invest in Premium Living
                   <br />
                   <span className="italic font-serif font-normal text-amber-200/90 pr-2">at</span>
                   <span className="text-amber-400 font-semibold">{settings.heroHighlightedWord || "Saffron City"}</span>
                 </h1>
 
-                {/* Subtitle */}
+                {/* Subtitle - hidden on mobile view, shown on desktop lg+ */}
                 {settings.heroSubtitle && (
-                  <p className="text-sm sm:text-base text-slate-100 drop-shadow leading-relaxed font-normal">
+                  <p className="hidden lg:block text-sm sm:text-base text-slate-100 drop-shadow leading-relaxed font-normal">
                     {settings.heroSubtitle}
                   </p>
                 )}
@@ -115,19 +121,19 @@ export default async function HomePage() {
                     <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </a>
-                  <a
-                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
-                    download="Saffron-City-Master-Plan-Model.pdf"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 border border-white/60 font-bold text-sm shadow-md hover:shadow-lg transition-all"
-                  >
-                    <Download className="w-4 h-4 text-[#D49E17]" />
-                    <span>Download Master Plan</span>
-                  </a>
+                  <DownloadButtonWithLeadModal
+                    downloadUrl={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
+                    downloadFileName="Saffron-City-Master-Plan-Model.pdf"
+                    documentTitle="Saffron City Master Plan Model"
+                    documentType="Master Plan"
+                    buttonText="Download Master Plan"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 border border-white/60 font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+                  />
                 </div>
               </div>
             }
             rightContent={
-              <div className="relative flex flex-col items-center lg:items-end pr-0 lg:pr-10 xl:pr-14 space-y-4 w-full">
+              <div className="relative flex flex-col items-center lg:items-end pr-0 lg:pr-10 xl:pr-14 space-y-4 w-full pt-4 sm:pt-6 lg:pt-0">
                 <EnquiryForm
                   id="hero-booking-form"
                   title="Book Your Plot"
@@ -142,14 +148,14 @@ export default async function HomePage() {
                     <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </a>
-                  <a
-                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
-                    download="Saffron-City-Master-Plan-Model.pdf"
-                    className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-white/90 backdrop-blur-md border border-amber-300 text-slate-800 font-bold text-xs shadow-sm transition-all text-center"
-                  >
-                    <Download className="w-4 h-4 text-[#D49E17]" />
-                    <span>Download Master Plan</span>
-                  </a>
+                  <DownloadButtonWithLeadModal
+                    downloadUrl={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
+                    downloadFileName="Saffron-City-Master-Plan-Model.pdf"
+                    documentTitle="Saffron City Master Plan Model"
+                    documentType="Master Plan"
+                    buttonText="Download Master Plan"
+                    className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-white/90 backdrop-blur-md border border-amber-300 text-slate-800 font-bold text-xs shadow-sm transition-all text-center cursor-pointer"
+                  />
                 </div>
               </div>
             }
@@ -174,9 +180,6 @@ export default async function HomePage() {
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <GsapSplitReveal
             leftContent={
-              <LocationMapCard />
-            }
-            rightContent={
               <div className="space-y-6">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal leading-[1.18]">
                   Located on GT Road,{" "}
@@ -190,8 +193,12 @@ export default async function HomePage() {
                 <p className="text-sm text-slate-600 leading-relaxed">
                   Saffron City sits on Main GT Road near T-Chowk, Rawat, putting it within a reasonable drive of both Islamabad and Rawalpindi without being in the middle of either city&apos;s traffic. For residents, that means access to major commercial areas like Giga Mall and DHA without giving up the quieter pace that comes with being slightly outside the urban core.
                 </p>
-
-                <div className="pt-2">
+              </div>
+            }
+            rightContent={
+              <div className="space-y-4">
+                <LocationMapCard />
+                <div className="flex flex-wrap items-center justify-center lg:justify-start pt-1">
                   <a
                     href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
                     target="_blank"
@@ -220,70 +227,68 @@ export default async function HomePage() {
             </p>
           </ScrollReveal>
 
-          {/* 4-Column Grid of Landmark Cards with Stagger Reveal */}
-          <StaggerReveal
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            staggerDelay={70}
-            direction="up"
-          >
-            {[
+          {/* 4-Item Row with See More Drawer for Remaining Landmarks */}
+          {(() => {
+            const allLandmarks = [
               {
                 title: "T-Chowk, Rawat",
                 subtitle: "Main GT Road Junction",
                 driveTime: "5 Mins Drive",
-                image: "/images/landmark_t_chowk.jpg",
+                image: "/images/landmark_t_chowk.webp",
                 icon: <Compass className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Giga Mall & DHA",
                 subtitle: "Premier Shopping & Dining",
                 driveTime: "12 Mins Drive",
-                image: "/images/landmark_giga_mall.jpg",
+                image: "/images/landmark_giga_mall.webp",
                 icon: <ShoppingBag className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "DHA Islamabad",
                 subtitle: "Executive Housing Society",
                 driveTime: "10 Mins Drive",
-                image: "/images/landmark_dha_islamabad.jpg",
+                image: "/images/landmark_dha_islamabad.webp",
                 icon: <Building2 className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Zero Point & Blue Area",
                 subtitle: "Capital Business District",
                 driveTime: "20 Mins Drive",
-                image: "/images/hero-bg.jpg",
+                image: "/images/hero-bg.webp",
                 icon: <TrendingUp className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Bahria Town",
                 subtitle: "Gated Residential Community",
                 driveTime: "10 Mins Drive",
-                image: "/images/imgi_25_saffron-city-islamabad.jpg",
+                image: "/images/imgi_25_saffron-city-islamabad.webp",
                 icon: <Landmark className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Islamabad Airport",
                 subtitle: "International Air Terminal",
                 driveTime: "30 Mins Drive",
-                image: "/images/landmark_t_chowk.jpg",
+                image: "/images/landmark_t_chowk.webp",
                 icon: <Plane className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Rawalpindi Ring Road",
                 subtitle: "Direct Bypass Interchange",
                 driveTime: "2 Mins Drive",
-                image: "/images/imgi_25_saffron-city-islamabad.jpg",
+                image: "/images/imgi_25_saffron-city-islamabad.webp",
                 icon: <Navigation className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Islamabad Expressway",
                 subtitle: "Signal-Free Arterial Route",
                 driveTime: "15 Mins Drive",
-                image: "/images/hero-bg.jpg",
+                image: "/images/hero-bg.webp",
                 icon: <ShieldCheck className="w-4 h-4 text-[#D49E17]" />,
               },
-            ].map((item, idx) => (
+            ];
+
+            const renderCard = (item: typeof allLandmarks[0], idx: number) => (
               <div
                 key={idx}
                 className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
@@ -318,8 +323,28 @@ export default async function HomePage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </StaggerReveal>
+            );
+
+            return (
+              <SeeMoreDrawer
+                moreButtonText="See More Landmarks"
+                lessButtonText="Show Fewer Landmarks"
+                previewContent={
+                  <StaggerReveal
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    staggerDelay={70}
+                    direction="up"
+                  >
+                    {allLandmarks.slice(0, 4).map((item, idx) => renderCard(item, idx))}
+                  </StaggerReveal>
+                }
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {allLandmarks.slice(4).map((item, idx) => renderCard(item, idx + 4))}
+                </div>
+              </SeeMoreDrawer>
+            );
+          })()}
         </section>
 
         {/* =========================================================
@@ -338,8 +363,13 @@ export default async function HomePage() {
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Spanning across 15,000 Kanal with clear RDA legal approval, the community incorporates underground electrification, water reservoirs, dedicated family recreation belts, and high-speed multi-lane access from Main GT Road Rawat.
                 </p>
-
-                <div className="pt-2 flex flex-wrap gap-3">
+              </div>
+            }
+            rightContent={
+              <div className="space-y-4">
+                <MasterPlanViewer initialImage={settings.masterPlanImage} />
+                {/* Action Buttons placed below Master Map */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
                   <Link
                     href="/master-plan"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
@@ -347,20 +377,15 @@ export default async function HomePage() {
                     <span>View Detailed Master Plan</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <a
-                    href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
-                    download="Saffron-City-Master-Plan-Model.pdf"
-                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
-                  >
-                    <Download className="w-4 h-4 text-[#D49E17]" />
-                    <span>Download Plan PDF</span>
-                  </a>
+                  <DownloadButtonWithLeadModal
+                    downloadUrl={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
+                    downloadFileName="Saffron-City-Master-Plan-Model.pdf"
+                    documentTitle="Saffron City Master Plan Model"
+                    documentType="Master Plan"
+                    buttonText="Download Plan PDF"
+                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors border border-slate-200 cursor-pointer"
+                  />
                 </div>
-              </div>
-            }
-            rightContent={
-              <div className="relative">
-                <MasterPlanViewer initialImage={settings.masterPlanImage} />
               </div>
             }
           />
@@ -384,14 +409,22 @@ export default async function HomePage() {
               sectorA={{
                 name: settings.sectorATitle,
                 tagline: settings.sectorATagline,
-                image: settings.sectorAImage || "/images/sectors/sector-a-luxury.jpg",
+                image: settings.sectorAImage || "/images/sectors/sector-a-luxury.webp",
                 plots: settings.sectorAPlots,
               }}
               sectorB={{
                 name: settings.sectorBTitle,
                 tagline: settings.sectorBTagline,
-                image: settings.sectorBImage || "/images/sectors/sector-b-residential.jpg",
+                image: settings.sectorBImage || "/images/sectors/sector-b-residential.webp",
                 plots: settings.sectorBPlots,
+              }}
+              commercial={{
+                name: "Signature & GT Road Commercial",
+                tagline: "Direct N-5 National Highway frontage with multi-storey permissions, customer parking, and exceptional footfall yields.",
+                image: "/images/sectors/commercial-plaza.webp",
+                plots: "30×40, 4M & 8M Plazas",
+                badge: "Commercial • High ROI",
+                href: "/plots/commercial",
               }}
             />
           </ScrollReveal>
@@ -400,8 +433,8 @@ export default async function HomePage() {
         {/* =========================================================
             SECTION 7 — World-Class Amenities
         ========================================================= */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto mb-12 sm:mb-14 space-y-3">
+        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+          <ScrollReveal animation="fade-up" className="text-center max-w-3xl mx-auto space-y-3">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal">
               What&apos;s Actually Included in the Community
             </h2>
@@ -410,13 +443,9 @@ export default async function HomePage() {
             </p>
           </ScrollReveal>
 
-          {/* Amenities Grid with Stagger Reveal */}
-          <StaggerReveal
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            staggerDelay={80}
-            direction="up"
-          >
-            {AMENITIES.map((item, idx) => (
+          {/* 4-Item Row with See More Drawer for Remaining Amenities */}
+          {(() => {
+            const renderAmenityCard = (item: typeof AMENITIES[0], idx: number) => (
               <div
                 key={idx}
                 className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
@@ -438,8 +467,28 @@ export default async function HomePage() {
                   </h4>
                 </div>
               </div>
-            ))}
-          </StaggerReveal>
+            );
+
+            return (
+              <SeeMoreDrawer
+                moreButtonText="See More Amenities"
+                lessButtonText="Show Fewer Amenities"
+                previewContent={
+                  <StaggerReveal
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    staggerDelay={80}
+                    direction="up"
+                  >
+                    {AMENITIES.slice(0, 4).map((item, idx) => renderAmenityCard(item, idx))}
+                  </StaggerReveal>
+                }
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {AMENITIES.slice(4).map((item, idx) => renderAmenityCard(item, idx + 4))}
+                </div>
+              </SeeMoreDrawer>
+            );
+          })()}
         </section>
 
         {/* =========================================================
@@ -464,104 +513,104 @@ export default async function HomePage() {
             </p>
           </ScrollReveal>
 
-          {/* Official Flyers Showcase Grid */}
+          {/* Official Flyers Showcase Grid with Click-to-Reveal */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
             {/* Residential Plan Flyer Card */}
             <ScrollReveal animation="fade-right" duration={850}>
-              <div className="p-6 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-4 flex flex-col justify-between h-full">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs uppercase tracking-wider">
-                      Residential (Sector A - Block B)
-                    </span>
-                    <span className="text-xs font-bold text-emerald-600">RDA Approved</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 font-heading">
-                    Official Residential Payment Plan
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1">
-                    5 Marla (PKR 45 Lac), 10 Marla (PKR 82.5 Lac), 1 Kanal (PKR 1.55 Crore) with easy 3-year installments.
-                  </p>
-                </div>
-
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group my-2">
-                  <img
-                    src={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
-                    alt="Saffron City Residential Payment Plan Sector A Block B"
-                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <a
-                    href={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
-                    download="Saffron-City-Residential-Payment-Plan.jpg"
-                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Residential Flyer</span>
-                  </a>
-                  <Link
-                    href="/payment-plan"
-                    className="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs"
-                  >
-                    Full Table
-                  </Link>
-                </div>
-              </div>
+              <PaymentPlanCard
+                badgeText="Residential (Sector A - Block B)"
+                badgeHighlight="RDA Approved"
+                title="Official Residential Payment Plan"
+                description="5 Marla (PKR 45 Lac), 10 Marla (PKR 82.5 Lac), 1 Kanal (PKR 1.55 Crore) with easy 3-year installments."
+                imageSrc={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
+                imageAlt="Saffron City Residential Payment Plan Sector A Block B"
+                downloadFilename="Saffron-City-Residential-Payment-Plan.jpg"
+                downloadButtonText="Download Flyer"
+                extraAction={{
+                  type: "link",
+                  href: "/payment-plan",
+                  label: "Full Table",
+                }}
+              />
             </ScrollReveal>
 
             {/* Commercial Plan Flyer Card */}
             <ScrollReveal animation="fade-left" delay={150} duration={850}>
-              <div className="p-6 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-4 flex flex-col justify-between h-full">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="px-3 py-1 rounded-full bg-[#D49E17] text-white font-bold text-xs uppercase tracking-wider">
-                      Signature Commercial (30×40)
-                    </span>
-                    <span className="text-xs font-bold text-amber-700">Save 45 Lac</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 font-heading">
-                    Signature Commercial 3-Year Plan
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1">
-                    5.33 Marla (30×40) — Total PKR 2 Crore, Discount PKR 45 Lac, Net PKR 1.55 Crore (Down Payment 35 Lac, Monthly 250,000).
-                  </p>
-                </div>
-
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group my-2">
-                  <img
-                    src={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
-                    alt="Saffron City Signature Commercial Payment Plan"
-                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <a
-                    href={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
-                    download="Saffron-City-Commercial-Payment-Plan.jpg"
-                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Commercial Flyer</span>
-                  </a>
-                  <a
-                    href={`https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent("Hi, I want to book a Signature Commercial 30x40 plot in Saffron City.")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
-                  >
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
+              <PaymentPlanCard
+                badgeText="Signature Commercial (30×40)"
+                badgeHighlight="Save 45 Lac"
+                title="Signature Commercial 3-Year Plan"
+                description="5.33 Marla (30×40) — Total PKR 2 Crore, Discount PKR 45 Lac, Net PKR 1.55 Crore (Down Payment 35 Lac, Monthly 250,000)."
+                imageSrc={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
+                imageAlt="Saffron City Signature Commercial Payment Plan"
+                downloadFilename="Saffron-City-Commercial-Payment-Plan.jpg"
+                downloadButtonText="Download Flyer"
+                extraAction={{
+                  type: "whatsapp",
+                  href: `https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent("Hi, I want to book a Signature Commercial 30x40 plot in Saffron City.")}`,
+                  label: "WhatsApp",
+                }}
+              />
             </ScrollReveal>
           </div>
 
-          {/* Pricing Table */}
+          {/* Responsive Pricing Table / Cards */}
           <ScrollReveal animation="fade-up" delay={100}>
-            <div className="overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
+            {/* 1. Mobile Cards View (Hidden on md and up) */}
+            <div className="block md:hidden space-y-3">
+              {RESIDENTIAL_PRICES.map((plot) => (
+                <div
+                  key={`mob-rate-${plot.size}`}
+                  className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+                    <div>
+                      <span className="text-base font-bold text-slate-900 font-heading block">
+                        {plot.size}
+                      </span>
+                      <span className="text-[10px] font-semibold text-emerald-600">
+                        Sector A (Block B)
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        TOTAL PRICE
+                      </span>
+                      <span className="text-base font-bold text-[#D49E17] font-heading">
+                        {plot.totalPriceFormatted}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-3 text-xs">
+                    <div className="p-2 rounded-xl bg-amber-50/60 border border-amber-100">
+                      <span className="text-[10px] text-amber-900/80 font-medium block">Booking (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{plot.bookingAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Allocation (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{plot.allocationAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">30 Monthly Inst.</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{plot.monthlyInstallmentFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">6 Bi-Annual Inst.</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{plot.biAnnualInstallmentFormatted}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 font-medium">Possession (20%):</span>
+                    <span className="font-bold text-slate-900">{plot.possessionAmountFormatted}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 2. Desktop Full Table View (Hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-amber-50 text-[11px] text-amber-900 uppercase tracking-wider font-bold border-b border-amber-200">
                   <tr>
@@ -610,39 +659,8 @@ export default async function HomePage() {
             </p>
           </ScrollReveal>
 
-          <StaggerReveal
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            staggerDelay={80}
-            direction="up"
-          >
-            {BOOKING_STEPS.map((step) => (
-              <div
-                key={step.step}
-                className="p-6 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] font-bold text-sm mb-4 group-hover:scale-110 transition-transform">
-                  {step.step}
-                </div>
-                <h4 className="text-base font-bold text-slate-900 mb-2 group-hover:text-[#D49E17] transition-colors">
-                  {step.title}
-                </h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </StaggerReveal>
-
-          <ScrollReveal animation="fade-up" className="text-center pt-2">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg hover:scale-105 transition-all"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Start Booking on WhatsApp</span>
-            </a>
+          <ScrollReveal animation="fade-up" delay={100}>
+            <BookingStepsSection whatsappUrl={whatsappUrl} />
           </ScrollReveal>
         </section>
 

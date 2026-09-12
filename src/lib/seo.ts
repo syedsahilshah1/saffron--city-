@@ -57,7 +57,7 @@ export async function getPageMetadata(
     // Social OpenGraph & Twitter
     const ogTitle = pageSeo?.ogTitle || metaTitle;
     const ogDesc = pageSeo?.ogDescription || metaDescription;
-    const ogImg = pageSeo?.ogImage || settings?.ogImage || "/images/hero-bg.jpg";
+    const ogImg = pageSeo?.ogImage || settings?.ogImage || "/images/hero-bg.webp";
     const fullOgImage = ogImg.startsWith("http") ? ogImg : `${canonicalBase}${ogImg}`;
 
     const twTitle = pageSeo?.twitterTitle || settings?.twitterTitle || ogTitle;

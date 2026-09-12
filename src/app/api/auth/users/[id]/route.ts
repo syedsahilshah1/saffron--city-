@@ -12,12 +12,18 @@ export async function GET(
     const user = await db.getUserById(id);
 
     if (!user) {
-      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+      const res = NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+      res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      return res;
     }
 
-    return NextResponse.json({ success: true, data: user });
+    const res = NextResponse.json({ success: true, data: user });
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    const res = NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   }
 }
 

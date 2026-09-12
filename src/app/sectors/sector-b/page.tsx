@@ -47,7 +47,7 @@ const SECTOR_B_PLOTS_FOR_SALE = [
     monthly: "PKR 45,000 / month (×30)",
     biAnnual: "PKR 2,25,000 (×6)",
     possession: "PKR 9,00,000 (20%)",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     tag: "Budget Friendly",
     description: "The most sought-after family plot size in Sector B, offering affordable monthly installments and close walking access to neighborhood parks.",
     whatsappText: "Hi, I want to book a 5 Marla Residential Plot in Saffron City Sector B."
@@ -62,7 +62,7 @@ const SECTOR_B_PLOTS_FOR_SALE = [
     monthly: "PKR 82,500 / month (×30)",
     biAnnual: "PKR 4,12,500 (×6)",
     possession: "PKR 16,50,000 (20%)",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     tag: "Spacious Living",
     description: "Ideal for growing families desiring a 4-5 bedroom home with spacious rooms, lawn area, and multi-vehicle parking.",
     whatsappText: "Hi, I want to book a 10 Marla Residential Plot in Saffron City Sector B."
@@ -77,7 +77,7 @@ const SECTOR_B_PLOTS_FOR_SALE = [
     monthly: "PKR 1,55,000 / month (×30)",
     biAnnual: "PKR 7,75,000 (×6)",
     possession: "PKR 31,00,000 (20%)",
-    image: "/images/about/about-hero-banner.jpg",
+    image: "/images/about/about-hero-banner.webp",
     tag: "Park Facing Option",
     description: "Generous 1 Kanal residential plots positioned along wide carpeted secondary boulevards with direct views of green community belts.",
     whatsappText: "Hi, I want to book a 1 Kanal Residential Plot in Saffron City Sector B."
@@ -88,25 +88,25 @@ const SECTOR_B_HIGHLIGHTS = [
   {
     title: "Dedicated Sector B Community Mosque",
     desc: "Built within the sector boundary for quick 2-minute daily walking access to prayers.",
-    image: "/images/amenities/amenity_mosque.jpg",
+    image: "/images/amenities/amenity_mosque.webp",
     tag: "Sector Mosque"
   },
   {
     title: "Family Neighborhood Parks",
     desc: "Lush landscaped gardens, children's play area, and shaded benches for peaceful evenings.",
-    image: "/images/sectors/green-community-park.jpg",
+    image: "/images/sectors/green-community-park.webp",
     tag: "Community Parks"
   },
   {
     title: "Budget-Friendly 3-Year Plan",
     desc: "Accessible 10% booking with manageable monthly installments spread over 36 months.",
-    image: "/images/sectors/sector-b-residential.jpg",
+    image: "/images/sectors/sector-b-residential.webp",
     tag: "Easy Payment"
   },
   {
     title: "Gated Security & CCTV Patrols",
     desc: "Manned security checkpoints, boundary wall, and round-the-clock motorized patrol units.",
-    image: "/images/facilities/gated-security.jpg",
+    image: "/images/facilities/gated-security.webp",
     tag: "24/7 Security"
   }
 ];
@@ -118,7 +118,7 @@ const SECTOR_B_NEARBY_LANDMARKS = [
     timeHighlight: "text-[#D49E17]",
     distance: "Direct Project Access",
     bgClass: "bg-emerald-50/70 border-emerald-300",
-    image: "/images/amenities/amenity_boulevard.jpg",
+    image: "/images/amenities/amenity_boulevard.webp",
     description: "Instant access to the multi-lane National Highway."
   },
   {
@@ -127,7 +127,7 @@ const SECTOR_B_NEARBY_LANDMARKS = [
     timeHighlight: "text-slate-900",
     distance: "3.5 km via Main GT Road",
     bgClass: "bg-white border-slate-200 hover:border-emerald-300",
-    image: "/images/landmark_t_chowk.jpg",
+    image: "/images/landmark_t_chowk.webp",
     description: "Major commercial and transit connection hub."
   },
   {
@@ -136,7 +136,7 @@ const SECTOR_B_NEARBY_LANDMARKS = [
     timeHighlight: "text-slate-900",
     distance: "8.0 km Expressway Link",
     bgClass: "bg-white border-slate-200 hover:border-emerald-300",
-    image: "/images/landmark_giga_mall.jpg",
+    image: "/images/landmark_giga_mall.webp",
     description: "Shopping mall, cinema, and retail center."
   },
   {
@@ -145,7 +145,7 @@ const SECTOR_B_NEARBY_LANDMARKS = [
     timeHighlight: "text-emerald-700",
     distance: "11.0 km Direct Bypass",
     bgClass: "bg-white border-slate-200 hover:border-emerald-400",
-    image: "/images/landmark_dha_islamabad.jpg",
+    image: "/images/landmark_dha_islamabad.webp",
     description: "Fast bypass route to Islamabad International Airport."
   }
 ];
@@ -185,7 +185,7 @@ export default function SectorBPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/sectors/sector-b-residential.jpg"
+            src="/images/sectors/sector-b-residential.webp"
             alt="Saffron City Sector B Family Living"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
@@ -438,7 +438,61 @@ export default function SectorBPage() {
           </div>
 
           <ScrollReveal animation="fade-up" delay={100}>
-            <div className="overflow-x-auto rounded-3xl border border-emerald-200 bg-white shadow-xl">
+            {/* 1. Mobile Cards View (Hidden on md and up) */}
+            <div className="block md:hidden space-y-3">
+              {RESIDENTIAL_PRICES.map((p) => (
+                <div
+                  key={`mob-sec-b-${p.size}`}
+                  className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-emerald-100">
+                    <div>
+                      <span className="text-base font-bold text-slate-900 font-heading block">
+                        {p.size}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500">
+                        {p.dimensions}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        TOTAL PRICE
+                      </span>
+                      <span className="text-base font-bold text-[#D49E17] font-heading">
+                        {p.totalPriceFormatted}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-3 text-xs">
+                    <div className="p-2 rounded-xl bg-emerald-50/60 border border-emerald-100">
+                      <span className="text-[10px] text-emerald-900/80 font-medium block">Booking (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.bookingAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Allocation (10%)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.allocationAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Monthly (×30)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.monthlyInstallmentFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Bi-Annual (×6)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.biAnnualInstallmentFormatted}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 font-medium">On Possession (20%):</span>
+                    <span className="font-bold text-emerald-700">{p.possessionAmountFormatted}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 2. Desktop Full Table View (Hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto rounded-3xl border border-emerald-200 bg-white shadow-xl">
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-emerald-50 text-emerald-900 uppercase font-bold text-[11px] border-b border-emerald-200">
                   <tr>
@@ -637,7 +691,7 @@ export default function SectorBPage() {
                   </div>
                 </div>
 
-                <div className="pt-3 flex flex-wrap gap-3">
+                <div className="hidden lg:flex pt-3 flex-wrap gap-3">
                   <a
                     href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
                     target="_blank"
@@ -661,8 +715,8 @@ export default function SectorBPage() {
             </ScrollReveal>
 
             {/* Embedded Google Map Right (fade-left) */}
-            <ScrollReveal animation="fade-left" className="lg:col-span-6">
-              <div className="w-full h-[450px] sm:h-[480px] rounded-3xl overflow-hidden border-2 border-emerald-300 shadow-2xl relative bg-slate-100">
+            <ScrollReveal animation="fade-left" className="lg:col-span-6 space-y-3">
+              <div className="w-full h-[360px] sm:h-[450px] rounded-3xl overflow-hidden border-2 border-emerald-300 shadow-2xl relative bg-slate-100">
                 <iframe
                   title="Sector B Saffron City Location"
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
@@ -676,6 +730,28 @@ export default function SectorBPage() {
                   <MapPin className="w-4 h-4 text-emerald-600" />
                   <span>Sector B • Family Residential Block</span>
                 </div>
+              </div>
+
+              {/* Action Buttons below location map on mobile view */}
+              <div className="flex lg:hidden flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-1">
+                <a
+                  href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs shadow transition-all flex items-center justify-center gap-2 text-center"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Open in Google Maps</span>
+                </a>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all flex items-center justify-center gap-2 text-center"
+                >
+                  <Navigation className="w-4 h-4" />
+                  <span>Schedule Site Visit</span>
+                </a>
               </div>
             </ScrollReveal>
           </div>

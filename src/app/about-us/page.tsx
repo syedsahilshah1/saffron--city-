@@ -20,6 +20,9 @@ import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import AnimatedCounter from "@/components/animations/AnimatedCounter";
 import WordReveal from "@/components/animations/WordReveal";
+import LegacyOverviewWithSeeMore from "@/components/about/LegacyOverviewWithSeeMore";
+import DifferentiatorsSection from "@/components/about/DifferentiatorsSection";
+import CoreValuesSection from "@/components/about/CoreValuesSection";
 import {
   SITE_CONFIG,
   LEADERSHIP,
@@ -35,96 +38,12 @@ export async function generateMetadata() {
   return await getPageMetadata("/about-us");
 }
 
-const DIFFERENTIATORS_WITH_IMAGES = [
-  {
-    number: "01",
-    title: "RDA Approved — Verified Legal Standing",
-    desc: "The NOC is officially approved and independently verifiable on the RDA portal, ensuring complete regulatory compliance.",
-    image: "/images/about/val-integrity.jpg",
-    badge: "100% Legal"
-  },
-  {
-    number: "02",
-    title: "Developer with 70+ Years Track Record",
-    desc: "SKB Builders has delivered mega civil and commercial infrastructure projects across Pakistan and the Middle East since 1954.",
-    image: "/images/about/val-quality.jpg",
-    badge: "Since 1954"
-  },
-  {
-    number: "03",
-    title: "Prime GT Road, Rawat Location",
-    desc: "Located on Main GT Road near Rawat, providing effortless access to Rawalpindi, Islamabad Expressway, and upcoming Ring Road.",
-    image: "/images/landmark_t_chowk.jpg",
-    badge: "Main GT Road"
-  },
-  {
-    number: "04",
-    title: "Master Plan Built for Community Life",
-    desc: "Integrated residential and commercial zones with educational hubs, healthcare, and 250-foot grand boulevards.",
-    image: "/images/amenities/amenity_boulevard.jpg",
-    badge: "250ft Boulevard"
-  },
-  {
-    number: "05",
-    title: "Infrastructure That Precedes Residents",
-    desc: "Underground utilities, boundary walls, and paved roads are constructed early so physical progress supports your plot investment.",
-    image: "/images/amenities/amenity_security.jpg",
-    badge: "Gated Security"
-  },
-  {
-    number: "06",
-    title: "Grand Mosque & Lush Green Belts",
-    desc: "Spacious family parks, lakes, and an architectural landmark Grand Mosque at the core of the community.",
-    image: "/images/amenities/amenity_mosque.jpg",
-    badge: "Green Belts"
-  }
-];
-
-const CORE_VALUES_WITH_IMAGES = [
-  {
-    title: "Transparency & Integrity",
-    desc: "Every buyer receives clear development timelines, verifiable legal documentation, and honest milestone progress.",
-    image: "/images/about/val-integrity.jpg",
-    tag: "Integrity"
-  },
-  {
-    title: "Engineering Excellence",
-    desc: "From 250-foot wide boulevards to underground utilities, every structure is built with top-tier civil engineering precision.",
-    image: "/images/about/val-quality.jpg",
-    tag: "Excellence"
-  },
-  {
-    title: "Family & Community Well-Being",
-    desc: "Neighborhoods designed with extensive parks, dedicated schools, and family recreation for lifelong comfort.",
-    image: "/images/amenities/amenity_park.jpg",
-    tag: "Community"
-  },
-  {
-    title: "Eco-Friendly & Green Living",
-    desc: "Generous green buffers, modern water filtration, and eco-friendly drainage systems embedded into the master plan.",
-    image: "/images/amenities/amenity_water.jpg",
-    tag: "Sustainability"
-  },
-  {
-    title: "Gated Security & Peace of Mind",
-    desc: "Round-the-clock gated security, CCTV surveillance, and dedicated perimeter security for peaceful living.",
-    image: "/images/amenities/amenity_security.jpg",
-    tag: "Security"
-  },
-  {
-    title: "Long-Term Capital Appreciation",
-    desc: "Strategic GT Road positioning designed to yield superior return on investment and solid generational asset growth.",
-    image: "/images/about/about-hero-banner.jpg",
-    tag: "Long-Term Value"
-  }
-];
-
 const COMMITMENTS = [
   {
     title: "For Families",
     subtitle: "A Secure Home for Generations",
     desc: "Infrastructure delivered on time, secure gated neighborhoods, top schools, and lush parks where your family can thrive with pride.",
-    image: "/images/amenities/amenity_park.jpg",
+    image: "/images/amenities/amenity_park.webp",
     icon: Home,
     accent: "text-amber-600",
     border: "border-amber-200"
@@ -133,7 +52,7 @@ const COMMITMENTS = [
     title: "For Investors",
     subtitle: "High Yield & Capital Growth",
     desc: "100% legal RDA standing, prime GT Road commercial exposure, and strong appreciation potential backed by SKB's 70-year delivery legacy.",
-    image: "/images/about/val-integrity.jpg",
+    image: "/images/about/val-integrity.webp",
     icon: TrendingUp,
     accent: "text-emerald-600",
     border: "border-emerald-200"
@@ -142,7 +61,7 @@ const COMMITMENTS = [
     title: "For Overseas Pakistanis",
     subtitle: "Seamless Remote Ownership",
     desc: "Digital remote booking, verified Power of Attorney support, transparent video updates, and dedicated overseas sales desks.",
-    image: "/images/about/about-hero-banner.jpg",
+    image: "/images/about/about-hero-banner.webp",
     icon: Globe2,
     accent: "text-blue-600",
     border: "border-blue-200"
@@ -162,7 +81,7 @@ export default function AboutUsPage() {
         {/* Background Hero Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/about/about-hero-banner.jpg"
+            src="/images/about/about-hero-banner.webp"
             alt="Saffron City Islamabad Master View"
             className="w-full h-full object-cover object-center opacity-100 scale-105 animate-pulse-slow"
           />
@@ -209,50 +128,8 @@ export default function AboutUsPage() {
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
 
-        {/* Introduction & Developer Overview */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7 space-y-6">
-          
-
-            <WordReveal
-              text="A Legacy Built on Quality & Trust"
-              highlightWords={["Quality", "Trust", "&"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight leading-tight block"
-            />
-
-            <ScrollReveal animation="fade-up" delay={150}>
-              <p className="text-base text-slate-600 leading-relaxed">
-                Islamabad has long set the benchmark for planned urban living in Pakistan. Saffron City is built to carry that standard forward — not as another speculative housing scheme, but as a structured, long-term residential and commercial community designed for families and forward-looking investors.
-              </p>
-            </ScrollReveal>
-
-            <ScrollReveal animation="fade-up" delay={250}>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Located on Main GT Road, Rawat, Saffron City sits at one of the most accessible addresses in the Islamabad-Rawalpindi corridor. RDA approved, actively developing, and backed by a developer with over seven decades of mega civil engineering experience across Pakistan, Dubai, and Saudi Arabia.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <div className="lg:col-span-5 space-y-4">
-            <ScrollReveal animation="zoom-in" duration={900}>
-              <div className="relative rounded-3xl overflow-hidden border border-amber-200 shadow-xl group">
-                <img
-                  src="/images/imgi_25_saffron-city-islamabad.jpg"
-                  alt="Saffron City Overview"
-                  className="w-full h-64 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
-                  <span className="px-3 py-1 rounded-full bg-[#D49E17] text-slate-950 text-xs font-bold shadow">
-                    Saffron City Project
-                  </span>
-                  <span className="text-xs font-medium">Main GT Road, Rawat</span>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
+        {/* Introduction & Developer Overview with See More */}
+        <LegacyOverviewWithSeeMore />
 
         {/* Leadership Section */}
         <section className="space-y-10">
@@ -350,122 +227,11 @@ export default function AboutUsPage() {
           </StaggerReveal>
         </section>
 
-        {/* What Makes Saffron City Different (With Images) */}
-        <section className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <WordReveal
-              text="What Makes Saffron City Different"
-              highlightWords={["Different", "Saffron", "City"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
+        {/* What Makes Saffron City Different (3 cards per line - 2 lines total) */}
+        <DifferentiatorsSection />
 
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600">
-                Engineered for transparency, prime connectivity, and superior living standards.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <StaggerReveal
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            staggerDelay={80}
-            direction="up"
-          >
-            {DIFFERENTIATORS_WITH_IMAGES.map((diff) => (
-              <div
-                key={diff.number}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
-              >
-                <div>
-                  {/* Card Image */}
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={diff.image}
-                      alt={diff.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold">
-                      <span>{diff.number}</span>
-                    </div>
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[11px] font-bold shadow">
-                        {diff.badge}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-6 space-y-2">
-                    <h4 className="text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors">
-                      {diff.title}
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {diff.desc}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </StaggerReveal>
-        </section>
-
-        {/* Our Core Values (With Images) */}
-        <section className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <WordReveal
-              text="Our Core Values"
-              highlightWords={["Core", "Values"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
-
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600">
-                The ethical and architectural pillars that guide every decision at Saffron City.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <StaggerReveal
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            staggerDelay={70}
-            direction="up"
-          >
-            {CORE_VALUES_WITH_IMAGES.map((val) => (
-              <div
-                key={val.title}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={val.image}
-                      alt={val.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                    <div className="absolute bottom-3 left-3">
-                      <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-slate-900 text-[11px] font-bold shadow">
-                        {val.tag}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-5 space-y-2">
-                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2 group-hover:text-[#D49E17] transition-colors">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <span>{val.title}</span>
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {val.desc}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </StaggerReveal>
-        </section>
+        {/* Our Core Values (3 cards per row - 2 rows total) */}
+        <CoreValuesSection />
 
         {/* Our Commitment to You (With Images & Icons) */}
         <section className="space-y-8">

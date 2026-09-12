@@ -34,7 +34,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 40.0 Lacs",
     bookingFormatted: "PKR 4,00,000",
     dimensions: "25 × 45 ft",
-    image: "/images/hero-bg.jpg",
+    image: "/images/hero-bg.webp",
     trend: "+0%",
     features: ["RDA Approved", "Underground Electricity", "3-Year Plan"],
     href: "/plots/residential"
@@ -50,7 +50,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 75.0 Lacs",
     bookingFormatted: "PKR 7,50,000",
     dimensions: "35 × 65 ft",
-    image: "/images/imgi_25_saffron-city-islamabad.jpg",
+    image: "/images/imgi_25_saffron-city-islamabad.webp",
     trend: "+0%",
     features: ["Wide Carpeted Road", "Near Central Mosque", "10% Down Payment"],
     href: "/plots/residential"
@@ -66,7 +66,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 1.40 Crore",
     bookingFormatted: "PKR 14,00,000",
     dimensions: "50 × 90 ft",
-    image: "/images/hero-bg.jpg",
+    image: "/images/hero-bg.webp",
     trend: "+0%",
     features: ["Park Facing", "Prime Frontage", "30 Monthly Installments"],
     href: "/plots/residential"
@@ -82,7 +82,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 40.0 Lacs",
     bookingFormatted: "PKR 4,00,000",
     dimensions: "25 × 45 ft",
-    image: "/images/imgi_25_saffron-city-islamabad.jpg",
+    image: "/images/imgi_25_saffron-city-islamabad.webp",
     trend: "+0%",
     features: ["Gated Security", "Near Community Center", "Easy Booking"],
     href: "/plots/residential"
@@ -98,7 +98,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 2.20 Crore",
     bookingFormatted: "PKR 22,00,000",
     dimensions: "30 × 30 ft",
-    image: "/images/hero-bg.jpg",
+    image: "/images/hero-bg.webp",
     trend: "+0%",
     features: ["Direct GT Road Frontage", "High Footfall Hub", "Multi-Storey Allowed"],
     href: "/plots/commercial"
@@ -114,7 +114,7 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
     priceShort: "PKR 4.20 Crore",
     bookingFormatted: "PKR 42,00,000",
     dimensions: "40 × 45 ft",
-    image: "/images/imgi_25_saffron-city-islamabad.jpg",
+    image: "/images/imgi_25_saffron-city-islamabad.webp",
     trend: "+0%",
     features: ["Corporate & Retail Hub", "Corner Frontage", "High ROI Asset"],
     href: "/plots/commercial"

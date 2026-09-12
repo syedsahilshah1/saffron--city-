@@ -39,7 +39,7 @@ const COMMERCIAL_PLOT_CARDS = [
     downPayment: "PKR 35,00,000",
     monthly: "PKR 2,50,000 / month",
     possession: "PKR 30,00,000",
-    image: "/images/sectors/commercial-plaza.jpg",
+    image: "/images/sectors/commercial-plaza.webp",
     tag: "Exclusive Launch Offer",
     desc: "Located on the dedicated commercial boulevard, ideal for multi-storey retail, banks, cafes, and business offices.",
     whatsappText: "Hi, I am interested in the Signature Commercial (5.33 Marla) 30x40 Plot with PKR 45 Lac Discount."
@@ -52,7 +52,7 @@ const COMMERCIAL_PLOT_CARDS = [
     downPayment: "PKR 22,00,000 (10%)",
     monthly: "PKR 4,69,333 / month",
     possession: "PKR 44,00,000 (20%)",
-    image: "/images/amenities/amenity_boulevard.jpg",
+    image: "/images/amenities/amenity_boulevard.webp",
     tag: "GT Road Frontage",
     desc: "Direct visibility to commuter traffic between Islamabad, Rawalpindi, and Rawat with customer parking.",
     whatsappText: "Hi, I am interested in the 4 Marla Commercial Plot on GT Road Frontage."
@@ -65,7 +65,7 @@ const COMMERCIAL_PLOT_CARDS = [
     downPayment: "PKR 42,00,000 (10%)",
     monthly: "PKR 8,96,000 / month",
     possession: "PKR 84,00,000 (20%)",
-    image: "/images/about/about-hero-banner.jpg",
+    image: "/images/about/about-hero-banner.webp",
     tag: "Flagship Corporate Plaza",
     desc: "Suited for mega supermarkets, healthcare facilities, shopping complexes, and multinational franchise outlets.",
     whatsappText: "Hi, I am interested in the 8 Marla Mega Commercial Plot in Saffron City."
@@ -84,7 +84,7 @@ export default function CommercialPlotsPage() {
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/sectors/commercial-plaza.jpg"
+            src="/images/sectors/commercial-plaza.webp"
             alt="Saffron City Commercial Plazas"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
@@ -307,7 +307,61 @@ export default function CommercialPlotsPage() {
           </div>
           
           <ScrollReveal animation="fade-up" delay={100}>
-            <div className="overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
+            {/* 1. Mobile Cards View (Hidden on md and up) */}
+            <div className="block md:hidden space-y-3">
+              {COMMERCIAL_PRICES.map((p) => (
+                <div
+                  key={`mob-plot-comm-${p.size}`}
+                  className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+                    <div>
+                      <span className="text-base font-bold text-slate-900 font-heading block">
+                        {p.size}
+                      </span>
+                      <span className="text-[10px] font-semibold text-amber-700">
+                        {p.sector || "Commercial Block"}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        NET PRICE
+                      </span>
+                      <span className="text-base font-bold text-[#D49E17] font-heading">
+                        {p.totalPriceFormatted}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-3 text-xs">
+                    <div className="p-2 rounded-xl bg-amber-50/60 border border-amber-100">
+                      <span className="text-[10px] text-amber-900/80 font-medium block">Down Payment</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.bookingAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Allocation</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{p.allocationAmountFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Monthly (×30/36)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.monthlyInstallmentFormatted}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] text-slate-500 font-medium block">Bi-Annual (×6)</span>
+                      <span className="font-bold text-slate-800 font-mono text-[11px]">{p.biAnnualInstallmentFormatted}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 font-medium">On Possession:</span>
+                    <span className="font-bold text-emerald-700">{p.possessionAmountFormatted}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 2. Desktop Full Table View (Hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-amber-50 text-amber-900 uppercase text-[11px] font-bold border-b border-amber-200">
                   <tr>

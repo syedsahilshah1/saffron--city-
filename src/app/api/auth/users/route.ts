@@ -6,18 +6,22 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const users = await db.getUsers();
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       count: users.length,
       data: users,
       availablePermissions: ALL_PERMISSIONS,
     });
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   } catch (error: any) {
     console.error("Get users error:", error);
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: false, message: "Failed to fetch users" },
       { status: 500 }
     );
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   }
 }
 
@@ -49,10 +53,12 @@ export async function POST(req: NextRequest) {
       isActive: true,
     });
 
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: true, message: "New administrative user created successfully.", data: newUser },
       { status: 201 }
     );
+    res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    return res;
   } catch (error: any) {
     console.error("Create user error:", error);
     return NextResponse.json(

@@ -59,13 +59,13 @@ export default function SectorComparison() {
             defaultPosition={50}
           >
             <ImageComparisonImage
-              src="/images/imgi_25_saffron-city-islamabad.jpg"
+              src="/images/imgi_25_saffron-city-islamabad.webp"
               alt="Saffron City Master Vision"
               position="left"
               label="Approved Master Layout (15,000 Kanal)"
             />
             <ImageComparisonImage
-              src="/images/hero-bg.jpg"
+              src="/images/hero-bg.webp"
               alt="Saffron City Master Community"
               position="right"
               label="Master Community Vision"
@@ -78,13 +78,13 @@ export default function SectorComparison() {
             defaultPosition={50}
           >
             <ImageComparisonImage
-              src="/images/imgi_25_saffron-city-islamabad.jpg"
+              src="/images/imgi_25_saffron-city-islamabad.webp"
               alt="Grand Entrance Gate GT Road"
               position="left"
               label="Main Entrance Gate (GT Road)"
             />
             <ImageComparisonImage
-              src="/images/hero-bg.jpg"
+              src="/images/hero-bg.webp"
               alt="250ft Main Boulevard & Community"
               position="right"
               label="250-Foot Main Boulevard"

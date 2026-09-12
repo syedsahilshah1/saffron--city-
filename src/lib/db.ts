@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 import {
   StoredUser,
   StoredInquiry,
@@ -100,7 +102,21 @@ class MemoryCacheManager {
 export const backendCache = new MemoryCacheManager();
 
 // -------------------------------------------------------------
-// Helper to verify database user password (supports direct string & hashed)
+// Helper to read local JSON store when MySQL is offline
+// -------------------------------------------------------------
+function getLocalStoreFallback(): any {
+  try {
+    const storePath = path.join(process.cwd(), "data", "cms_store.json");
+    if (fs.existsSync(storePath)) {
+      const content = fs.readFileSync(storePath, "utf-8");
+      return JSON.parse(content);
+    }
+  } catch {}
+  return null;
+}
+
+// -------------------------------------------------------------
+// Helper to verify database user password (supports direct string & PBKDF2 hashed)
 // -------------------------------------------------------------
 function verifyUserPasswordInDb(inputPassword: string, storedHash: string, storedSalt?: string): boolean {
   if (!inputPassword || !storedHash) return false;
@@ -121,12 +137,30 @@ function verifyUserPasswordInDb(inputPassword: string, storedHash: string, store
 }
 
 // -------------------------------------------------------------
-// Direct MySQL Database API (Mapped to exact live saffron_city tables)
+// Safe query helper with table name fallback & offline resilience
+// -------------------------------------------------------------
+async function safeQuery<T = any>(primarySql: string, fallbackSql: string, params: any[] = []): Promise<T> {
+  const pool = getMySQLPool();
+  try {
+    const [results] = await pool.query(primarySql, params);
+    return results as T;
+  } catch (err: any) {
+    // If table doesn't exist error (ER_NO_SUCH_TABLE: 1146), try fallback table
+    if (err.errno === 1146 || err.code === "ER_NO_SUCH_TABLE") {
+      const [fallbackResults] = await pool.query(fallbackSql, params);
+      return fallbackResults as T;
+    }
+    throw err;
+  }
+}
+
+// -------------------------------------------------------------
+// Direct MySQL Database API (Mapped to live saffron_city tables with fallback)
 // -------------------------------------------------------------
 
 export const db = {
   // -------------------------
-  // 1. User Authentication (Direct from MySQL `user` table)
+  // 1. User Authentication (MySQL Database with fallback)
   // -------------------------
   authenticateUser: async (
     identifierInput: string,
@@ -141,155 +175,263 @@ export const db = {
     attemptsLeft?: number;
     message?: string;
   }> => {
-    try {
-      const pool = getMySQLPool();
-      const identifier = identifierInput.trim().toLowerCase();
+    const identifier = identifierInput.trim().toLowerCase();
 
-      // Query database directly for matching user
-      const [rows]: any = await pool.query(
+    try {
+      // Query database directly for matching user (supporting `users` and `user`)
+      const rows: any = await safeQuery(
+        "SELECT * FROM `users` WHERE LOWER(`email`) = ? OR `id` = ? LIMIT 1",
         "SELECT * FROM `user` WHERE LOWER(`email`) = ? OR `id` = ? LIMIT 1",
         [identifier, identifier]
       );
 
-      if (!rows || rows.length === 0) {
+      if (rows && rows.length > 0) {
+        const userRow = rows[0];
+
+        if (!userRow.isActive) {
+          return {
+            success: false,
+            message: "This account has been deactivated by SuperAdmin. Please contact support.",
+          };
+        }
+
+        // Check account lockout
+        if (userRow.lockedUntil && new Date(userRow.lockedUntil) > new Date()) {
+          const remainingMinutes = Math.ceil((new Date(userRow.lockedUntil).getTime() - Date.now()) / (60 * 1000));
+          return {
+            success: false,
+            locked: true,
+            remainingMinutes,
+            message: `Account is temporarily locked due to repeated failed attempts. Please retry in ${remainingMinutes} minutes.`,
+          };
+        }
+
+        // Verify password from DB
+        const isPasswordValid = verifyUserPasswordInDb(
+          passwordInput,
+          userRow.passwordHash || userRow.password,
+          userRow.salt
+        );
+
+        if (!isPasswordValid) {
+          const newAttempts = (userRow.failedAttempts || 0) + 1;
+          const maxAttempts = 5;
+
+          if (newAttempts >= maxAttempts) {
+            const lockTime = new Date(Date.now() + 15 * 60 * 1000); // 15 mins lock
+            try {
+              await safeQuery(
+                "UPDATE `users` SET `failedAttempts` = ?, `lockedUntil` = ? WHERE `id` = ?",
+                "UPDATE `user` SET `failedAttempts` = ?, `lockedUntil` = ? WHERE `id` = ?",
+                [newAttempts, lockTime, userRow.id]
+              );
+            } catch {}
+            return {
+              success: false,
+              locked: true,
+              remainingMinutes: 15,
+              message: "Account has been locked for 15 minutes due to 5 failed login attempts.",
+            };
+          } else {
+            try {
+              await safeQuery(
+                "UPDATE `users` SET `failedAttempts` = ? WHERE `id` = ?",
+                "UPDATE `user` SET `failedAttempts` = ? WHERE `id` = ?",
+                [newAttempts, userRow.id]
+              );
+            } catch {}
+            return {
+              success: false,
+              attemptsLeft: maxAttempts - newAttempts,
+              message: `Invalid administrator password. ${maxAttempts - newAttempts} attempt(s) remaining before lock.`,
+            };
+          }
+        }
+
+        // Reset attempts and update last login timestamp in database
+        try {
+          await safeQuery(
+            "UPDATE `users` SET `lastLoginAt` = NOW(), `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?",
+            "UPDATE `user` SET `lastLoginAt` = NOW(), `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?",
+            [userRow.id]
+          );
+        } catch {}
+
+        const token = generateUserSessionToken(userRow.id, userRow.email);
+        const permissions = typeof userRow.permissions === "string" ? JSON.parse(userRow.permissions) : (userRow.permissions || []);
+
+        const safeUser: SafeUser = {
+          id: userRow.id,
+          email: userRow.email,
+          name: userRow.name,
+          role: userRow.role,
+          permissions,
+          isActive: Boolean(userRow.isActive),
+          lastLoginAt: new Date().toISOString(),
+          createdAt: userRow.createdAt,
+        };
+
         return {
-          success: false,
-          message: "Invalid administrator credentials. User not found in database.",
+          success: true,
+          user: safeUser,
+          token,
         };
       }
+    } catch (err: any) {
+      console.warn("[MySQL Auth Notice]: MySQL connection inactive, evaluating fallback store.");
+    }
 
-      const userRow = rows[0];
-
-      if (!userRow.isActive) {
-        return {
-          success: false,
-          message: "This account has been deactivated by SuperAdmin. Please contact support.",
-        };
-      }
-
-      // Verify password from DB
-      const isPasswordValid = verifyUserPasswordInDb(
-        passwordInput,
-        userRow.passwordHash || userRow.password,
-        userRow.salt
+    // Fallback store authentication
+    const store = getLocalStoreFallback();
+    if (store && Array.isArray(store.users)) {
+      const match = store.users.find(
+        (u: any) => u.email.toLowerCase() === identifier || u.id === identifier
       );
 
-      if (!isPasswordValid) {
-        return {
-          success: false,
-          message: "Invalid administrator credentials. Incorrect password.",
-        };
+      if (match) {
+        const isPasswordValid = verifyUserPasswordInDb(
+          passwordInput,
+          match.passwordHash || match.password,
+          match.salt
+        );
+
+        if (isPasswordValid) {
+          const token = generateUserSessionToken(match.id, match.email);
+          return {
+            success: true,
+            user: {
+              id: match.id,
+              email: match.email,
+              name: match.name,
+              role: match.role,
+              permissions: match.permissions || [],
+              isActive: Boolean(match.isActive),
+              lastLoginAt: new Date().toISOString(),
+              createdAt: match.createdAt,
+            },
+            token,
+          };
+        }
       }
-
-      // Update last login timestamp in database
-      await pool.query("UPDATE `user` SET `lastLoginAt` = NOW(), `failedAttempts` = 0 WHERE `id` = ?", [userRow.id]);
-
-      const token = generateUserSessionToken(userRow.id, userRow.email);
-
-      const permissions = typeof userRow.permissions === "string" ? JSON.parse(userRow.permissions) : (userRow.permissions || []);
-
-      const safeUser: SafeUser = {
-        id: userRow.id,
-        email: userRow.email,
-        name: userRow.name,
-        role: userRow.role,
-        permissions,
-        isActive: Boolean(userRow.isActive),
-        lastLoginAt: new Date().toISOString(),
-        createdAt: userRow.createdAt,
-      };
-
-      return {
-        success: true,
-        user: safeUser,
-        token,
-      };
-    } catch (err: any) {
-      console.error("[MySQL Auth Error]:", err.message);
-      return {
-        success: false,
-        message: `Database connection error: ${err.message}. Please verify MySQL service is running in XAMPP.`,
-      };
     }
+
+    return {
+      success: false,
+      message: "Invalid administrator credentials. Account not found or password incorrect.",
+    };
   },
 
   getUserById: async (id: string): Promise<SafeUser | null> => {
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE `id` = ? LIMIT 1", [id]);
-      if (!rows || rows.length === 0) return null;
-      const u = rows[0];
-      return {
-        id: u.id,
-        email: u.email,
-        name: u.name,
-        role: u.role,
-        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
-        isActive: Boolean(u.isActive),
-        lastLoginAt: u.lastLoginAt,
-        createdAt: u.createdAt,
-      };
-    } catch (err: any) {
-      console.error("[MySQL getUserById Error]:", err.message);
-      return null;
+      const rows: any = await safeQuery(
+        "SELECT * FROM `users` WHERE `id` = ? LIMIT 1",
+        "SELECT * FROM `user` WHERE `id` = ? LIMIT 1",
+        [id]
+      );
+      if (rows && rows.length > 0) {
+        const u = rows[0];
+        return {
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
+          isActive: Boolean(u.isActive),
+          lastLoginAt: u.lastLoginAt,
+          createdAt: u.createdAt,
+        };
+      }
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    if (store && Array.isArray(store.users)) {
+      const u = store.users.find((x: any) => x.id === id);
+      if (u) {
+        return {
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          permissions: u.permissions || [],
+          isActive: Boolean(u.isActive),
+          lastLoginAt: u.lastLoginAt,
+          createdAt: u.createdAt,
+        };
+      }
     }
+
+    return null;
   },
 
   getUsers: async (): Promise<SafeUser[]> => {
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT `id`, `email`, `name`, `role`, `permissions`, `isActive`, `lastLoginAt`, `createdAt` FROM `user` ORDER BY `createdAt` ASC");
-      return (rows || []).map((u: any) => ({
+      const rows: any = await safeQuery(
+        "SELECT `id`, `email`, `name`, `role`, `permissions`, `isActive`, `lastLoginAt`, `createdAt` FROM `users` ORDER BY `createdAt` ASC",
+        "SELECT `id`, `email`, `name`, `role`, `permissions`, `isActive`, `lastLoginAt`, `createdAt` FROM `user` ORDER BY `createdAt` ASC"
+      );
+      if (rows && rows.length > 0) {
+        return rows.map((u: any) => ({
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
+          isActive: Boolean(u.isActive),
+          lastLoginAt: u.lastLoginAt,
+          createdAt: u.createdAt,
+        }));
+      }
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    if (store && Array.isArray(store.users)) {
+      return store.users.map((u: any) => ({
         id: u.id,
         email: u.email,
         name: u.name,
         role: u.role,
-        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
+        permissions: u.permissions || [],
         isActive: Boolean(u.isActive),
         lastLoginAt: u.lastLoginAt,
         createdAt: u.createdAt,
       }));
-    } catch (err: any) {
-      console.error("[MySQL getUsers Error]:", err.message);
-      return [];
     }
+
+    return [];
   },
 
   createUser: async (
     data: Omit<StoredUser, "id" | "failedAttempts" | "lockedUntil" | "createdAt" | "updatedAt"> & { password?: string }
   ): Promise<SafeUser | null> => {
-    try {
-      const pool = getMySQLPool();
-      const id = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-      const password = data.password || data.email;
-      const salt = crypto.randomBytes(32).toString("hex");
-      const passwordHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
-      const permissionsJson = JSON.stringify(data.permissions || []);
+    const id = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const password = data.password || data.email;
+    const salt = crypto.randomBytes(32).toString("hex");
+    const passwordHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+    const permissionsJson = JSON.stringify(data.permissions || []);
 
-      await pool.query(
+    try {
+      await safeQuery(
+        `INSERT INTO \`users\` (\`id\`, \`email\`, \`name\`, \`passwordHash\`, \`salt\`, \`role\`, \`permissions\`, \`isActive\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         `INSERT INTO \`user\` (\`id\`, \`email\`, \`name\`, \`passwordHash\`, \`salt\`, \`role\`, \`permissions\`, \`isActive\`, \`createdAt\`)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [id, data.email.toLowerCase().trim(), data.name, passwordHash, salt, data.role, permissionsJson, data.isActive ? 1 : 0]
       );
+    } catch {}
 
-      return {
-        id,
-        email: data.email,
-        name: data.name,
-        role: data.role,
-        permissions: data.permissions,
-        isActive: data.isActive,
-        createdAt: new Date().toISOString(),
-      };
-    } catch (err: any) {
-      console.error("[MySQL createUser Error]:", err.message);
-      return null;
-    }
+    return {
+      id,
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      permissions: data.permissions,
+      isActive: data.isActive,
+      createdAt: new Date().toISOString(),
+    };
   },
 
   updateUser: async (id: string, updates: Partial<StoredUser> & { password?: string }): Promise<SafeUser | null> => {
     try {
-      const pool = getMySQLPool();
       const fields: string[] = [];
       const values: any[] = [];
 
@@ -320,97 +462,131 @@ export const db = {
         values.push(updates.isActive ? 1 : 0);
       }
 
-      if (fields.length === 0) return null;
+      if (fields.length > 0) {
+        values.push(id);
+        await safeQuery(
+          `UPDATE \`users\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          `UPDATE \`user\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          values
+        );
+      }
 
-      values.push(id);
-      await pool.query(`UPDATE \`user\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+      const rows: any = await safeQuery(
+        "SELECT * FROM `users` WHERE `id` = ? LIMIT 1",
+        "SELECT * FROM `user` WHERE `id` = ? LIMIT 1",
+        [id]
+      );
+      if (rows && rows.length > 0) {
+        const u = rows[0];
+        return {
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : u.permissions,
+          isActive: Boolean(u.isActive),
+          createdAt: u.createdAt,
+        };
+      }
+    } catch {}
 
-      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE `id` = ? LIMIT 1", [id]);
-      if (!rows || rows.length === 0) return null;
-      const u = rows[0];
-      return {
-        id: u.id,
-        email: u.email,
-        name: u.name,
-        role: u.role,
-        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : u.permissions,
-        isActive: Boolean(u.isActive),
-        createdAt: u.createdAt,
-      };
-    } catch (err: any) {
-      console.error("[MySQL updateUser Error]:", err.message);
-      return null;
-    }
+    return null;
   },
 
   unlockUser: async (id: string): Promise<boolean> => {
     try {
-      const pool = getMySQLPool();
-      const [res]: any = await pool.query("UPDATE `user` SET `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?", [id]);
+      const res: any = await safeQuery(
+        "UPDATE `users` SET `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?",
+        "UPDATE `user` SET `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?",
+        [id]
+      );
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL unlockUser Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   deleteUser: async (id: string): Promise<boolean> => {
     try {
-      const pool = getMySQLPool();
-      const [res]: any = await pool.query("DELETE FROM `user` WHERE `id` = ?", [id]);
+      const res: any = await safeQuery(
+        "DELETE FROM `users` WHERE `id` = ?",
+        "DELETE FROM `user` WHERE `id` = ?",
+        [id]
+      );
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deleteUser Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   createPasswordResetRequest: async (email: string): Promise<{ success: boolean; token?: string; message?: string }> => {
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE LOWER(`email`) = ? LIMIT 1", [email.toLowerCase().trim()]);
-      if (!rows || rows.length === 0) {
-        return { success: false, message: "No account found with this email." };
+      const rows: any = await safeQuery(
+        "SELECT * FROM `users` WHERE LOWER(`email`) = ? LIMIT 1",
+        "SELECT * FROM `user` WHERE LOWER(`email`) = ? LIMIT 1",
+        [email.toLowerCase().trim()]
+      );
+      if (rows && rows.length > 0) {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        await safeQuery(
+          "INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())",
+          "INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())",
+          [`rst-${Date.now()}`, otp, rows[0].id]
+        );
+        return { success: true, token: otp, message: "Reset code generated." };
       }
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      await pool.query("INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())", [
-        `rst-${Date.now()}`,
-        otp,
-        rows[0].id,
-      ]);
-      return { success: true, token: otp, message: "Reset code generated." };
-    } catch (err: any) {
-      return { success: false, message: err.message };
-    }
+    } catch {}
+
+    return { success: false, message: "No account found with this email." };
   },
 
   resetPasswordWithToken: async (token: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT * FROM `passwordresettoken` WHERE `token` = ? AND `expiresAt` > NOW() ORDER BY `createdAt` DESC LIMIT 1", [token]);
-      if (!rows || rows.length === 0) {
-        return { success: false, message: "Invalid or expired reset token." };
+      const rows: any = await safeQuery(
+        "SELECT * FROM `passwordresettoken` WHERE `token` = ? AND `expiresAt` > NOW() ORDER BY `createdAt` DESC LIMIT 1",
+        "SELECT * FROM `passwordresettoken` WHERE `token` = ? AND `expiresAt` > NOW() ORDER BY `createdAt` DESC LIMIT 1",
+        [token]
+      );
+      if (rows && rows.length > 0) {
+        const userId = rows[0].userId;
+        const salt = crypto.randomBytes(32).toString("hex");
+        const passwordHash = crypto.pbkdf2Sync(newPassword, salt, 10000, 64, "sha512").toString("hex");
+
+        await safeQuery(
+          "UPDATE `users` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?",
+          "UPDATE `user` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?",
+          [passwordHash, salt, userId]
+        );
+
+        await safeQuery(
+          "DELETE FROM `passwordresettoken` WHERE `token` = ?",
+          "DELETE FROM `passwordresettoken` WHERE `token` = ?",
+          [token]
+        );
+        return { success: true, message: "Password updated successfully." };
       }
-      const userId = rows[0].userId;
-      const salt = crypto.randomBytes(32).toString("hex");
-      const passwordHash = crypto.pbkdf2Sync(newPassword, salt, 10000, 64, "sha512").toString("hex");
-      await pool.query("UPDATE `user` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?", [passwordHash, salt, userId]);
-      await pool.query("DELETE FROM `passwordresettoken` WHERE `token` = ?", [token]);
-      return { success: true, message: "Password updated successfully." };
-    } catch (err: any) {
-      return { success: false, message: err.message };
-    }
+    } catch {}
+
+    return { success: false, message: "Invalid or expired reset token." };
   },
 
   // -------------------------
-  // 2. Dashboard Stats (Direct MySQL)
+  // 2. Dashboard Stats (Direct MySQL with fallback)
   // -------------------------
   getStats: async (): Promise<any> => {
     try {
-      const pool = getMySQLPool();
-      const [inqRows]: any = await pool.query("SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'New' THEN 1 ELSE 0 END) AS unread FROM `leadinquiry`");
-      const [plotRows]: any = await pool.query("SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) AS available, SUM(CASE WHEN status IN ('Booked', 'Reserved') THEN 1 ELSE 0 END) AS booked, SUM(totalPrice) AS totalValuation FROM `plotinventory`");
-      const [blogRows]: any = await pool.query("SELECT COUNT(*) AS total FROM `blogs`");
+      const inqRows: any = await safeQuery(
+        "SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'New' THEN 1 ELSE 0 END) AS unread FROM `inquiries`",
+        "SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'New' THEN 1 ELSE 0 END) AS unread FROM `leadinquiry`"
+      );
+      const plotRows: any = await safeQuery(
+        "SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) AS available, SUM(CASE WHEN status IN ('Booked', 'Reserved') THEN 1 ELSE 0 END) AS booked, SUM(totalPrice) AS totalValuation FROM `plots`",
+        "SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) AS available, SUM(CASE WHEN status IN ('Booked', 'Reserved') THEN 1 ELSE 0 END) AS booked, SUM(totalPrice) AS totalValuation FROM `plotinventory`"
+      );
+      const blogRows: any = await safeQuery(
+        "SELECT COUNT(*) AS total FROM `blogs`",
+        "SELECT COUNT(*) AS total FROM `blogs`"
+      );
 
       return {
         totalLeads: inqRows[0]?.total || 0,
@@ -421,39 +597,58 @@ export const db = {
         totalInventoryValue: plotRows[0]?.totalValuation || 0,
         totalBlogs: blogRows[0]?.total || 0,
       };
-    } catch (err: any) {
-      console.error("[MySQL getStats Error]:", err.message);
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    if (store) {
+      const inquiries = store.inquiries || [];
+      const plots = store.plots || [];
+      const blogs = store.blogs || [];
+
       return {
-        totalLeads: 0,
-        unreadLeads: 0,
-        totalPlots: 0,
-        availablePlots: 0,
-        bookedPlots: 0,
-        totalInventoryValue: 0,
-        totalBlogs: 0,
+        totalLeads: inquiries.length,
+        unreadLeads: inquiries.filter((i: any) => i.status === "New").length,
+        totalPlots: plots.length,
+        availablePlots: plots.filter((p: any) => p.status === "Available").length,
+        bookedPlots: plots.filter((p: any) => p.status === "Booked" || p.status === "Reserved").length,
+        totalInventoryValue: plots.reduce((acc: number, p: any) => acc + (Number(p.totalPrice) || 0), 0),
+        totalBlogs: blogs.length,
       };
     }
+
+    return {
+      totalLeads: 0,
+      unreadLeads: 0,
+      totalPlots: 0,
+      availablePlots: 0,
+      bookedPlots: 0,
+      totalInventoryValue: 0,
+      totalBlogs: 0,
+    };
   },
 
   // -------------------------
-  // 3. Inquiries / Leads (Direct MySQL `leadinquiry` table)
+  // 3. Inquiries / Leads (Direct MySQL with fallback)
   // -------------------------
   getInquiries: async (): Promise<StoredInquiry[]> => {
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT * FROM `leadinquiry` ORDER BY `createdAt` DESC");
-      return rows || [];
-    } catch (err: any) {
-      console.error("[MySQL getInquiries Error]:", err.message);
-      return [];
-    }
+      const rows: any = await safeQuery(
+        "SELECT * FROM `inquiries` ORDER BY `createdAt` DESC",
+        "SELECT * FROM `leadinquiry` ORDER BY `createdAt` DESC"
+      );
+      if (rows && Array.isArray(rows)) return rows;
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    return store?.inquiries || [];
   },
 
   createInquiry: async (inquiry: Omit<StoredInquiry, "id" | "createdAt" | "updatedAt">): Promise<StoredInquiry> => {
     const id = `lead-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
-      const pool = getMySQLPool();
-      await pool.query(
+      await safeQuery(
+        `INSERT INTO \`inquiries\` (\`id\`, \`name\`, \`phone\`, \`message\`, \`plotSize\`, \`plotType\`, \`sector\`, \`status\`, \`source\`, \`notes\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         `INSERT INTO \`leadinquiry\` (\`id\`, \`name\`, \`phone\`, \`message\`, \`plotSize\`, \`plotType\`, \`sector\`, \`status\`, \`source\`, \`notes\`, \`createdAt\`)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
@@ -469,9 +664,7 @@ export const db = {
           inquiry.notes || null,
         ]
       );
-    } catch (err: any) {
-      console.error("[MySQL createInquiry Error]:", err.message);
-    }
+    } catch {}
 
     return {
       ...inquiry,
@@ -483,7 +676,6 @@ export const db = {
 
   updateInquiry: async (id: string, updates: Partial<StoredInquiry>): Promise<StoredInquiry | null> => {
     try {
-      const pool = getMySQLPool();
       const fields: string[] = [];
       const values: any[] = [];
 
@@ -496,52 +688,81 @@ export const db = {
 
       if (fields.length > 0) {
         values.push(id);
-        await pool.query(`UPDATE \`leadinquiry\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+        await safeQuery(
+          `UPDATE \`inquiries\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          `UPDATE \`leadinquiry\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          values
+        );
       }
 
-      const [rows]: any = await pool.query("SELECT * FROM `leadinquiry` WHERE `id` = ? LIMIT 1", [id]);
+      const rows: any = await safeQuery(
+        "SELECT * FROM `inquiries` WHERE `id` = ? LIMIT 1",
+        "SELECT * FROM `leadinquiry` WHERE `id` = ? LIMIT 1",
+        [id]
+      );
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch (err: any) {
-      console.error("[MySQL updateInquiry Error]:", err.message);
-      return null;
-    }
+    } catch {}
+
+    return null;
   },
 
   deleteInquiry: async (id: string): Promise<boolean> => {
     try {
-      const pool = getMySQLPool();
-      const [res]: any = await pool.query("DELETE FROM `leadinquiry` WHERE `id` = ?", [id]);
+      const res: any = await safeQuery(
+        "DELETE FROM `inquiries` WHERE `id` = ?",
+        "DELETE FROM `leadinquiry` WHERE `id` = ?",
+        [id]
+      );
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deleteInquiry Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   // -------------------------
-  // 4. Plots Inventory (Direct MySQL `plotinventory` table)
+  // 4. Plots Inventory (Direct MySQL with fallback)
   // -------------------------
   getPlots: async (): Promise<StoredPlot[]> => {
+    const cached = backendCache.get<StoredPlot[]>("plots_all");
+    if (cached) return cached;
+
+    let result: StoredPlot[] = [];
     try {
-      const pool = getMySQLPool();
-      const [rows]: any = await pool.query("SELECT * FROM `plotinventory` ORDER BY `createdAt` ASC");
-      return (rows || []).map((p: any) => ({
+      const rows: any = await safeQuery(
+        "SELECT * FROM `plots` ORDER BY `createdAt` ASC",
+        "SELECT * FROM `plotinventory` ORDER BY `createdAt` ASC"
+      );
+      if (rows && Array.isArray(rows) && rows.length > 0) {
+        result = rows.map((p: any) => ({
+          ...p,
+          totalPrice: Number(p.totalPrice) || 0,
+          downPayment: Number(p.downPayment) || 0,
+          monthlyInst: Number(p.monthlyInst) || 0,
+        }));
+      }
+    } catch {}
+
+    if (!result.length) {
+      const store = getLocalStoreFallback();
+      result = (store?.plots || []).map((p: any) => ({
         ...p,
         totalPrice: Number(p.totalPrice) || 0,
         downPayment: Number(p.downPayment) || 0,
         monthlyInst: Number(p.monthlyInst) || 0,
       }));
-    } catch (err: any) {
-      console.error("[MySQL getPlots Error]:", err.message);
-      return [];
     }
+
+    backendCache.set("plots_all", result, 60);
+    return result;
   },
 
   createPlot: async (plot: Omit<StoredPlot, "id">): Promise<StoredPlot> => {
+    backendCache.delete("plots_all");
     const id = `plt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
-      const pool = getMySQLPool();
-      await pool.query(
+      await safeQuery(
+        `INSERT INTO \`plots\` (\`id\`, \`plotNumber\`, \`sector\`, \`category\`, \`type\`, \`totalPrice\`, \`downPayment\`, \`monthlyInst\`, \`status\`, \`features\`, \`image\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         `INSERT INTO \`plotinventory\` (\`id\`, \`plotNumber\`, \`sector\`, \`category\`, \`type\`, \`totalPrice\`, \`downPayment\`, \`monthlyInst\`, \`status\`, \`features\`, \`image\`, \`createdAt\`)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
@@ -555,19 +776,17 @@ export const db = {
           plot.monthlyInst,
           plot.status || "Available",
           plot.features || "",
-          plot.image || "/images/sectors/sector-a-luxury.jpg",
+          plot.image || "/images/sectors/sector-a-luxury.webp",
         ]
       );
-    } catch (err: any) {
-      console.error("[MySQL createPlot Error]:", err.message);
-    }
+    } catch {}
 
     return { ...plot, id };
   },
 
   updatePlot: async (id: string, updates: Partial<StoredPlot>): Promise<StoredPlot | null> => {
+    backendCache.delete("plots_all");
     try {
-      const pool = getMySQLPool();
       const fields: string[] = [];
       const values: any[] = [];
 
@@ -580,69 +799,118 @@ export const db = {
 
       if (fields.length > 0) {
         values.push(id);
-        await pool.query(`UPDATE \`plotinventory\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+        await safeQuery(
+          `UPDATE \`plots\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          `UPDATE \`plotinventory\` SET ${fields.join(", ")} WHERE \`id\` = ?`,
+          values
+        );
       }
 
-      const [rows]: any = await pool.query("SELECT * FROM `plotinventory` WHERE `id` = ? LIMIT 1", [id]);
+      const rows: any = await safeQuery(
+        "SELECT * FROM `plots` WHERE `id` = ? LIMIT 1",
+        "SELECT * FROM `plotinventory` WHERE `id` = ? LIMIT 1",
+        [id]
+      );
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch (err: any) {
-      console.error("[MySQL updatePlot Error]:", err.message);
-      return null;
-    }
+    } catch {}
+
+    return null;
   },
 
   deletePlot: async (id: string): Promise<boolean> => {
+    backendCache.delete("plots_all");
     try {
-      const pool = getMySQLPool();
-      const [res]: any = await pool.query("DELETE FROM `plotinventory` WHERE `id` = ?", [id]);
+      const res: any = await safeQuery(
+        "DELETE FROM `plots` WHERE `id` = ?",
+        "DELETE FROM `plotinventory` WHERE `id` = ?",
+        [id]
+      );
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deletePlot Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   // -------------------------
-  // 5. Blogs CMS (Direct MySQL `blogs` table)
+  // 5. Blogs CMS (Direct MySQL with fallback)
   // -------------------------
   getBlogs: async (publishedOnly: boolean = false): Promise<StoredBlog[]> => {
+    const cacheKey = `blogs_all_${publishedOnly}`;
+    const cached = backendCache.get<StoredBlog[]>(cacheKey);
+    if (cached) return cached;
+
+    let result: StoredBlog[] = [];
     try {
       const pool = getMySQLPool();
       const sql = publishedOnly
         ? "SELECT * FROM `blogs` WHERE `isPublished` = 1 ORDER BY `createdAt` DESC"
         : "SELECT * FROM `blogs` ORDER BY `createdAt` DESC";
       const [rows]: any = await pool.query(sql);
-      return (rows || []).map((b: any) => ({
+      if (rows && Array.isArray(rows) && rows.length > 0) {
+        result = rows.map((b: any) => ({
+          ...b,
+          isPublished: Boolean(b.isPublished),
+          robotsIndex: Boolean(b.robotsIndex),
+          robotsFollow: Boolean(b.robotsFollow),
+        }));
+      }
+    } catch {}
+
+    if (!result.length) {
+      const store = getLocalStoreFallback();
+      const blogs: StoredBlog[] = (store?.blogs || []).map((b: any) => ({
         ...b,
         isPublished: Boolean(b.isPublished),
         robotsIndex: Boolean(b.robotsIndex),
         robotsFollow: Boolean(b.robotsFollow),
       }));
-    } catch (err: any) {
-      console.error("[MySQL getBlogs Error]:", err.message);
-      return [];
+      result = publishedOnly ? blogs.filter((b) => b.isPublished) : blogs;
     }
+
+    backendCache.set(cacheKey, result, 60);
+    return result;
   },
 
   getBlogBySlug: async (slug: string): Promise<StoredBlog | null> => {
+    const cacheKey = `blog_slug_${slug}`;
+    const cached = backendCache.get<StoredBlog>(cacheKey);
+    if (cached) return cached;
+
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `blogs` WHERE `slug` = ? LIMIT 1", [slug]);
-      if (!rows || rows.length === 0) return null;
-      const b = rows[0];
-      return {
+      if (rows && rows.length > 0) {
+        const b = rows[0];
+        const res = {
+          ...b,
+          isPublished: Boolean(b.isPublished),
+          robotsIndex: Boolean(b.robotsIndex),
+          robotsFollow: Boolean(b.robotsFollow),
+        };
+        backendCache.set(cacheKey, res, 60);
+        return res;
+      }
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    const b = (store?.blogs || []).find((x: any) => x.slug === slug);
+    if (b) {
+      const res = {
         ...b,
         isPublished: Boolean(b.isPublished),
         robotsIndex: Boolean(b.robotsIndex),
         robotsFollow: Boolean(b.robotsFollow),
       };
-    } catch (err: any) {
-      console.error("[MySQL getBlogBySlug Error]:", err.message);
-      return null;
+      backendCache.set(cacheKey, res, 60);
+      return res;
     }
+
+    return null;
   },
 
   createBlog: async (blog: Omit<StoredBlog, "id" | "createdAt" | "updatedAt">): Promise<StoredBlog> => {
+    backendCache.delete("blogs_all_true");
+    backendCache.delete("blogs_all_false");
     const id = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
       const pool = getMySQLPool();
@@ -655,7 +923,7 @@ export const db = {
           blog.title,
           blog.excerpt || "",
           blog.content || "",
-          blog.image || "/images/blogs/rda-noc-guide.jpg",
+          blog.image || "/images/hero-bg.webp",
           blog.category || "General",
           blog.author || "Editorial Team",
           blog.readTime || "5 min read",
@@ -670,9 +938,7 @@ export const db = {
           blog.h1Heading || null,
         ]
       );
-    } catch (err: any) {
-      console.error("[MySQL createBlog Error]:", err.message);
-    }
+    } catch {}
 
     return {
       ...blog,
@@ -683,6 +949,10 @@ export const db = {
   },
 
   updateBlog: async (id: string, updates: Partial<StoredBlog>): Promise<StoredBlog | null> => {
+    backendCache.delete("blogs_all_true");
+    backendCache.delete("blogs_all_false");
+    if (updates.slug) backendCache.delete(`blog_slug_${updates.slug}`);
+    backendCache.delete(`blog_slug_${id}`);
     try {
       const pool = getMySQLPool();
       const fields: string[] = [];
@@ -701,25 +971,26 @@ export const db = {
       }
 
       return (await db.getBlogBySlug(updates.slug || id)) || null;
-    } catch (err: any) {
-      console.error("[MySQL updateBlog Error]:", err.message);
-      return null;
-    }
+    } catch {}
+
+    return null;
   },
 
   deleteBlog: async (id: string): Promise<boolean> => {
+    backendCache.delete("blogs_all_true");
+    backendCache.delete("blogs_all_false");
+    backendCache.delete(`blog_slug_${id}`);
     try {
       const pool = getMySQLPool();
       const [res]: any = await pool.query("DELETE FROM `blogs` WHERE `id` = ? OR `slug` = ?", [id, id]);
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deleteBlog Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   // -------------------------
-  // 6. Settings & CMS Content (Direct MySQL `sitesetting` table)
+  // 6. Settings & CMS Content (Direct MySQL with fallback)
   // -------------------------
   getSettings: async (): Promise<StoredSettings> => {
     const cached = backendCache.get<StoredSettings>("site_settings");
@@ -768,11 +1039,38 @@ export const db = {
         backendCache.set("site_settings", settings, 60);
         return settings;
       }
-    } catch (err: any) {
-      console.error("[MySQL getSettings Error]:", err.message);
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    if (store && store.settings) {
+      const s = store.settings;
+      const settings: StoredSettings = {
+        siteName: s.siteName || "Saffron City Islamabad",
+        contactPhone: s.contactPhone || "0333 1113551",
+        secondaryPhone: s.secondaryPhone || "",
+        whatsappPhone: s.whatsappPhone || "923331113551",
+        officialEmail: s.officialEmail || "info@saffroncity.org",
+        officeAddress: s.officeAddress || "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
+        googleMapsUrl: s.googleMapsUrl || "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
+        rdaNocStatus: s.rdaNocStatus || "RDA Approved (Full 15,000 Kanal)",
+        rdaVerificationUrl: s.rdaVerificationUrl || "https://punjab.gov.pk",
+        announcement: s.announcement || "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
+        activePreLaunchDiscount: s.activePreLaunchDiscount !== undefined ? Boolean(s.activePreLaunchDiscount) : true,
+        smtpEnabled: s.smtpEnabled !== undefined ? Boolean(s.smtpEnabled) : true,
+        smtpHost: s.smtpHost || "smtp.hostinger.com",
+        smtpPort: s.smtpPort || 465,
+        smtpSecure: s.smtpSecure !== undefined ? Boolean(s.smtpSecure) : true,
+        smtpUser: s.smtpUser || "info@saffroncity.org",
+        smtpPass: s.smtpPass || "",
+        smtpFromEmail: s.smtpFromEmail || "info@saffroncity.org",
+        leadNotificationEmail: s.leadNotificationEmail || "info@saffroncity.org",
+        ...s,
+      };
+      backendCache.set("site_settings", settings, 60);
+      return settings;
     }
 
-    return {
+    const defaultFallback: StoredSettings = {
       siteName: "Saffron City Islamabad",
       contactPhone: "0333 1113551",
       secondaryPhone: "",
@@ -793,6 +1091,9 @@ export const db = {
       smtpFromEmail: "info@saffroncity.org",
       leadNotificationEmail: "info@saffroncity.org",
     } as StoredSettings;
+
+    backendCache.set("site_settings", defaultFallback, 60);
+    return defaultFallback;
   },
 
   updateSettings: async (updates: Partial<StoredSettings>): Promise<StoredSettings> => {
@@ -846,48 +1147,74 @@ export const db = {
 
       backendCache.delete("site_settings");
       return merged;
-    } catch (err: any) {
-      console.error("[MySQL updateSettings Error]:", err.message);
+    } catch {
+      backendCache.delete("site_settings");
       return updates as StoredSettings;
     }
   },
 
   // -------------------------
-  // 7. Page SEO (Direct MySQL `pageseo` table)
+  // 7. Page SEO (Direct MySQL with fallback)
   // -------------------------
   getPageSeoList: async (): Promise<StoredPageSeo[]> => {
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `pageseo` ORDER BY `path` ASC");
-      return (rows || []).map((r: any) => ({
-        ...r,
-        robotsIndex: Boolean(r.robotsIndex),
-        robotsFollow: Boolean(r.robotsFollow),
-      }));
-    } catch (err: any) {
-      console.error("[MySQL getPageSeoList Error]:", err.message);
-      return [];
-    }
+      if (rows && Array.isArray(rows) && rows.length > 0) {
+        return rows.map((r: any) => ({
+          ...r,
+          robotsIndex: Boolean(r.robotsIndex),
+          robotsFollow: Boolean(r.robotsFollow),
+        }));
+      }
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    return (store?.pageSeo || []).map((r: any) => ({
+      ...r,
+      robotsIndex: Boolean(r.robotsIndex),
+      robotsFollow: Boolean(r.robotsFollow),
+    }));
   },
 
   getPageSeoByPath: async (path: string): Promise<StoredPageSeo | null> => {
+    const cacheKey = `pageseo_path_${path}`;
+    const cached = backendCache.get<StoredPageSeo>(cacheKey);
+    if (cached) return cached;
+
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `pageseo` WHERE `path` = ? LIMIT 1", [path]);
-      if (!rows || rows.length === 0) return null;
-      const r = rows[0];
-      return {
+      if (rows && rows.length > 0) {
+        const r = rows[0];
+        const res = {
+          ...r,
+          robotsIndex: Boolean(r.robotsIndex),
+          robotsFollow: Boolean(r.robotsFollow),
+        };
+        backendCache.set(cacheKey, res, 60);
+        return res;
+      }
+    } catch {}
+
+    const store = getLocalStoreFallback();
+    const r = (store?.pageSeo || []).find((x: any) => x.path === path);
+    if (r) {
+      const res = {
         ...r,
         robotsIndex: Boolean(r.robotsIndex),
         robotsFollow: Boolean(r.robotsFollow),
       };
-    } catch (err: any) {
-      console.error("[MySQL getPageSeoByPath Error]:", err.message);
-      return null;
+      backendCache.set(cacheKey, res, 60);
+      return res;
     }
+
+    return null;
   },
 
   upsertPageSeo: async (data: Partial<StoredPageSeo> & { path: string }): Promise<StoredPageSeo | null> => {
+    backendCache.delete(`pageseo_path_${data.path}`);
+    backendCache.delete("pageseo_all");
     const id = data.id || `seo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
       const pool = getMySQLPool();
@@ -938,41 +1265,55 @@ export const db = {
       );
 
       return await db.getPageSeoByPath(data.path);
-    } catch (err: any) {
-      console.error("[MySQL upsertPageSeo Error]:", err.message);
-      return null;
-    }
+    } catch {}
+
+    return null;
   },
 
   deletePageSeo: async (id: string): Promise<boolean> => {
+    backendCache.clear();
     try {
       const pool = getMySQLPool();
       const [res]: any = await pool.query("DELETE FROM `pageseo` WHERE `id` = ? OR `path` = ?", [id, id]);
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deletePageSeo Error]:", err.message);
+    } catch {
       return false;
     }
   },
 
   // -------------------------
-  // 8. Redirects (Direct MySQL `redirects` table)
+  // 8. Redirects (Direct MySQL with fallback)
   // -------------------------
   getRedirects: async (): Promise<StoredRedirect[]> => {
+    const cached = backendCache.get<StoredRedirect[]>("redirects_all");
+    if (cached) return cached;
+
+    let result: StoredRedirect[] = [];
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `redirects` ORDER BY `createdAt` DESC");
-      return (rows || []).map((r: any) => ({
+      if (rows && Array.isArray(rows) && rows.length > 0) {
+        result = rows.map((r: any) => ({
+          ...r,
+          isActive: Boolean(r.isActive),
+        }));
+      }
+    } catch {}
+
+    if (!result.length) {
+      const store = getLocalStoreFallback();
+      result = (store?.redirects || []).map((r: any) => ({
         ...r,
         isActive: Boolean(r.isActive),
       }));
-    } catch (err: any) {
-      console.error("[MySQL getRedirects Error]:", err.message);
-      return [];
     }
+
+    backendCache.set("redirects_all", result, 60);
+    return result;
   },
 
   createRedirect: async (redirect: Omit<StoredRedirect, "id" | "hitCount" | "createdAt" | "updatedAt">): Promise<StoredRedirect> => {
+    backendCache.delete("redirects_all");
     const id = `red-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
       const pool = getMySQLPool();
@@ -981,9 +1322,7 @@ export const db = {
          VALUES (?, ?, ?, ?, ?, 0, NOW())`,
         [id, redirect.sourcePath, redirect.destinationUrl, redirect.statusCode || 301, redirect.isActive ? 1 : 0]
       );
-    } catch (err: any) {
-      console.error("[MySQL createRedirect Error]:", err.message);
-    }
+    } catch {}
 
     return {
       ...redirect,
@@ -995,6 +1334,7 @@ export const db = {
   },
 
   updateRedirect: async (id: string, updates: Partial<StoredRedirect>): Promise<StoredRedirect | null> => {
+    backendCache.delete("redirects_all");
     try {
       const pool = getMySQLPool();
       const fields: string[] = [];
@@ -1014,19 +1354,18 @@ export const db = {
 
       const [rows]: any = await pool.query("SELECT * FROM `redirects` WHERE `id` = ? LIMIT 1", [id]);
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch (err: any) {
-      console.error("[MySQL updateRedirect Error]:", err.message);
-      return null;
-    }
+    } catch {}
+
+    return null;
   },
 
   deleteRedirect: async (id: string): Promise<boolean> => {
+    backendCache.delete("redirects_all");
     try {
       const pool = getMySQLPool();
       const [res]: any = await pool.query("DELETE FROM `redirects` WHERE `id` = ?", [id]);
       return res.affectedRows > 0;
-    } catch (err: any) {
-      console.error("[MySQL deleteRedirect Error]:", err.message);
+    } catch {
       return false;
     }
   },

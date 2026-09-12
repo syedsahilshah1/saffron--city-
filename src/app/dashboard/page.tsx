@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
     slug: "",
     excerpt: "",
     content: "",
-    image: "/images/hero-bg.jpg",
+    image: "/images/hero-bg.webp",
     category: "Market Update",
     author: "Saffron City Official",
     readTime: "4 min read",
@@ -171,10 +171,10 @@ export default function AdminDashboardPage() {
     imageAlt: "",
     ogTitle: "",
     ogDescription: "",
-    ogImage: "/images/hero-bg.jpg",
+    ogImage: "/images/hero-bg.webp",
     twitterTitle: "",
     twitterDescription: "",
-    twitterImage: "/images/hero-bg.jpg",
+    twitterImage: "/images/hero-bg.webp",
     customSchema: "",
   });
 
@@ -266,7 +266,7 @@ export default function AdminDashboardPage() {
     monthlyInst: 45000,
     status: "Available",
     features: "100% Underground Utilities, 50ft Wide Carpeted Road",
-    image: "/images/sectors/sector-a-luxury.jpg",
+    image: "/images/sectors/sector-a-luxury.webp",
   });
 
   // Permission Verification Helper
@@ -543,7 +543,7 @@ export default function AdminDashboardPage() {
       slug: "",
       excerpt: "",
       content: "",
-      image: "/images/hero-bg.jpg",
+      image: "/images/hero-bg.webp",
       category: "Market Update",
       author: currentUser?.name || "Saffron City Official",
       readTime: "4 min read",
@@ -559,10 +559,10 @@ export default function AdminDashboardPage() {
       imageAlt: "",
       ogTitle: "",
       ogDescription: "",
-      ogImage: "/images/hero-bg.jpg",
+      ogImage: "/images/hero-bg.webp",
       twitterTitle: "",
       twitterDescription: "",
-      twitterImage: "/images/hero-bg.jpg",
+      twitterImage: "/images/hero-bg.webp",
       customSchema: "",
     });
     setShowBlogModal(true);
@@ -576,7 +576,7 @@ export default function AdminDashboardPage() {
       slug: blog.slug,
       excerpt: blog.excerpt,
       content: blog.content,
-      image: blog.image || "/images/hero-bg.jpg",
+      image: blog.image || "/images/hero-bg.webp",
       category: blog.category,
       author: blog.author,
       readTime: blog.readTime || "4 min read",
@@ -592,10 +592,10 @@ export default function AdminDashboardPage() {
       imageAlt: blog.imageAlt || blog.title,
       ogTitle: blog.ogTitle || blog.seoTitle || blog.title,
       ogDescription: blog.ogDescription || blog.metaDescription || blog.excerpt,
-      ogImage: blog.ogImage || blog.image || "/images/hero-bg.jpg",
+      ogImage: blog.ogImage || blog.image || "/images/hero-bg.webp",
       twitterTitle: blog.twitterTitle || blog.seoTitle || blog.title,
       twitterDescription: blog.twitterDescription || blog.metaDescription || blog.excerpt,
-      twitterImage: blog.twitterImage || blog.image || "/images/hero-bg.jpg",
+      twitterImage: blog.twitterImage || blog.image || "/images/hero-bg.webp",
       customSchema: blog.customSchema || "",
     });
     setShowBlogModal(true);
@@ -745,7 +745,7 @@ export default function AdminDashboardPage() {
           monthlyInst: 45000,
           status: "Available",
           features: "100% Underground Utilities, 50ft Wide Carpeted Road",
-          image: "/images/sectors/sector-a-luxury.jpg",
+          image: "/images/sectors/sector-a-luxury.webp",
         });
       }
     } catch (err) {
@@ -2064,7 +2064,7 @@ export default function AdminDashboardPage() {
                               <div className="flex items-center gap-3 max-w-sm sm:max-w-md">
                                 <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                                   <img
-                                    src={blog.image || "/images/hero-bg.jpg"}
+                                    src={blog.image || "/images/hero-bg.webp"}
                                     alt={blog.title}
                                     className="w-full h-full object-cover"
                                   />
@@ -2803,7 +2803,7 @@ export default function AdminDashboardPage() {
                       <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 text-white shadow-sm">
                         <div className="h-32 bg-slate-800 relative overflow-hidden">
                           <img
-                            src={settings.ogImage || "/images/hero-bg.jpg"}
+                            src={settings.ogImage || "/images/hero-bg.webp"}
                             alt="Social Preview"
                             className="w-full h-full object-cover"
                           />

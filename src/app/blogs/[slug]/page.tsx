@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   const canonicalUrl = blog.canonicalUrl || `${baseUrl}/blogs/${slug}`;
   const title = blog.seoTitle || `${blog.title} | Saffron City Real Estate Portal`;
   const description = blog.metaDescription || blog.excerpt;
-  const image = blog.ogImage || blog.image || "/images/hero-bg.jpg";
+  const image = blog.ogImage || blog.image || "/images/hero-bg.webp";
   const fullImage = image.startsWith("http") ? image : `${baseUrl}${image}`;
 
   const isIndexable = blog.isPublished && blog.robotsIndex !== false;
@@ -121,9 +121,9 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
 
   const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
   const pageUrl = `${baseUrl}/blogs/${blog.slug}`;
-  const fullImage = (blog.image || "/images/hero-bg.jpg").startsWith("http")
+  const fullImage = (blog.image || "/images/hero-bg.webp").startsWith("http")
     ? blog.image
-    : `${baseUrl}${blog.image || "/images/hero-bg.jpg"}`;
+    : `${baseUrl}${blog.image || "/images/hero-bg.webp"}`;
 
   // Format paragraphs or parse sections
   const paragraphs = blog.content.split("\n\n").filter(Boolean);
@@ -150,9 +150,19 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
       />
       <CustomJsonLd jsonString={blog.customSchema} />
 
-      {/* 1. Header Banner / Hero inspired by Faisal Hills style */}
-      <section className="bg-gradient-to-r from-[#1a1109] via-[#2c1c0e] to-[#120803] text-white pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-16 relative border-b border-amber-900/30">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
+      {/* 1. Header Banner / Hero Section matching luxury site aesthetic */}
+      <section className="relative w-full pt-32 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-slate-950 text-white border-b border-amber-900/30">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img
+            src={blog.image || "/images/about/about-hero-banner.webp"}
+            alt={blog.imageAlt || blog.title}
+            className="w-full h-full object-cover opacity-25 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+        </div>
+
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-amber-400/90">
             <Link
               href="/"
@@ -174,7 +184,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
           </div>
 
           <div className="pt-2">
-            <span className="text-[10px] sm:text-xs font-bold text-[#fed65b] tracking-[0.2em] uppercase bg-white/10 border border-amber-400/30 px-3.5 py-1 rounded-full inline-block backdrop-blur-md">
+            <span className="text-[10px] sm:text-xs font-bold text-[#fed65b] tracking-[0.2em] uppercase bg-amber-500/20 border border-amber-400/40 px-3.5 py-1 rounded-full inline-block backdrop-blur-md">
               {blog.category || "Market Insight"}
             </span>
           </div>
@@ -223,12 +233,10 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             {/* Featured Image */}
             <div className="h-64 sm:h-[420px] rounded-2xl overflow-hidden shadow-sm bg-slate-900 shrink-0 relative group">
               <img
-                src={blog.image || "/images/hero-bg.jpg"}
+                src={blog.image || "/images/hero-bg.webp"}
                 alt={blog.imageAlt || blog.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-            </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
 
@@ -361,12 +369,11 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
               </div>
             </div>
           </div>
-
-
+        </div>
         {/* Right Column: Sticky Sidebar with Consultation Form & Recent Articles */}
-        <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
-          {/* Quick Direct Consultation Card */}
-          <div className="bg-white rounded-3xl border border-amber-300 shadow-xl overflow-hidden">
+        <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 flex flex-col">
+          {/* 1. Quick Direct Consultation Card (Bottom on Mobile, Top on Desktop) */}
+          <div className="order-3 lg:order-1 bg-white rounded-3xl border border-amber-300 shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-[#1c110a] via-[#352010] to-[#120803] p-5 text-white space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#fed65b] block">
                 Direct Booking Desk
@@ -384,9 +391,9 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
               <div className="grid grid-cols-2 gap-2">
                 <a
                   href="tel:03331113551"
-                  className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-slate-900 hover:bg-black text-amber-400 font-bold text-xs transition border border-amber-500/30"
+                  className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs transition shadow-md"
                 >
-                  <Phone className="w-3.5 h-3.5 text-[#fed65b]" />
+                  <Phone className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
                   <span>Call Now</span>
                 </a>
                 <a
@@ -406,8 +413,8 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             </div>
           </div>
 
-          {/* Project NOC & Location Summary Card */}
-          <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
+          {/* 2. Project NOC & Location Summary Card */}
+          <div className="order-2 lg:order-2 p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
             <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
                 <ShieldCheck className="w-4 h-4 text-[#D49E17]" />
@@ -435,9 +442,9 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             </Link>
           </div>
 
-          {/* Recent / Trending Articles */}
+          {/* 3. Recent / Trending Articles */}
           {relatedBlogs.length > 0 && (
-            <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
+            <div className="order-1 lg:order-3 p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
               <h4 className="font-bold text-slate-900 text-xs uppercase tracking-widest flex items-center gap-2 pb-2 border-b border-slate-100">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 <span>Trending Insights</span>
@@ -452,7 +459,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
                   >
                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                       <img
-                        src={rel.image || "/images/hero-bg.jpg"}
+                        src={rel.image || "/images/hero-bg.webp"}
                         alt={rel.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />

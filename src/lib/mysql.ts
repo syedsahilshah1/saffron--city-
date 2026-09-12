@@ -20,10 +20,12 @@ export function getMySQLPool(): Pool {
     password,
     database,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 15,
     queueLimit: 0,
-    connectTimeout: 4000,
+    connectTimeout: 1500,
     multipleStatements: true,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
   });
 
   return pool;

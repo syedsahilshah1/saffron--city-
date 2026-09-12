@@ -11,42 +11,28 @@ let lastFetchedAt = 0;
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Skip static files, Next internals, and APIs
+  // 1. Skip static files, Next internals, and asset files
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
     pathname.startsWith("/static") ||
-    pathname.includes(".") // image/pdf/css files
+    pathname.includes(".") // image/pdf/css/js files
   ) {
     return NextResponse.next();
   }
 
-  // Refresh redirects from internal API cache periodically (every 30s)
-  const now = Date.now();
-  if (now - lastFetchedAt > 30000) {
-    try {
-      const res = await fetch(new URL("/api/seo/redirects", req.url), {
-        next: { revalidate: 30 },
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          cachedRedirects = json.data
-            .filter((r: any) => r.isActive)
-            .map((r: any) => ({
-              sourcePath: r.sourcePath.trim(),
-              destinationUrl: r.destinationUrl.trim(),
-              statusCode: r.statusCode || 301,
-            }));
-          lastFetchedAt = now;
-        }
-      }
-    } catch {
-      // Fall back to existing cachedRedirects
+  // 2. Protected Route Authentication Check (/dashboard)
+  if (pathname.startsWith("/dashboard")) {
+    const sessionToken = req.cookies.get("saffron_session_token")?.value;
+    if (!sessionToken || !sessionToken.startsWith("tls_saff_")) {
+      const loginUrl = new URL("/ubaid/login/admin", req.url);
+      loginUrl.searchParams.set("from", pathname);
+      const res = NextResponse.redirect(loginUrl);
+      res.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      return res;
     }
   }
 
-  // Clean current path
+  // 3. Fast In-Memory Redirects Evaluation (Zero Network Blocking)
   const normalizedPath = pathname.endsWith("/") && pathname.length > 1
     ? pathname.slice(0, -1)
     : pathname;
@@ -60,23 +46,40 @@ export async function middleware(req: NextRequest) {
       ? match.destinationUrl
       : new URL(match.destinationUrl, req.url).toString();
 
-    return NextResponse.redirect(destination, {
+    const redirectRes = NextResponse.redirect(destination, {
       status: match.statusCode === 302 ? 302 : 301,
     });
+    redirectRes.headers.set("Cache-Control", "public, max-age=3600");
+    return redirectRes;
   }
 
-  return NextResponse.next();
+  // 4. Default Response with Standard Security & TLS Headers
+  const response = NextResponse.next();
+
+  // Security Headers
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
+  // Private vs Public Cache Control
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/auth") || pathname.startsWith("/api/dashboard")) {
+    response.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
