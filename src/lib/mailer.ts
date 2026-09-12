@@ -127,10 +127,12 @@ export async function sendLeadNotificationEmail(
             <div class="field-value">${new Date(lead.createdAt).toLocaleString("en-PK", { timeZone: "Asia/Karachi" })} PKT</div>
           </div>
 
+          ${lead.message ? `
           <div class="message-box">
-            <div class="field-label" style="margin-bottom: 6px;">Customer Message / Interest:</div>
-            "${lead.message || "Requested information / document download."}"
+            <div class="field-label" style="margin-bottom: 6px;">Customer Message:</div>
+            "${lead.message}"
           </div>
+          ` : ""}
 
           <div style="text-align: center;">
             <a href="https://saffroncity.pk/ubaid/login" class="button">Open Executive CRM Dashboard</a>
@@ -147,7 +149,7 @@ export async function sendLeadNotificationEmail(
 
   console.log(`[SMTP Mailer Engine] 🚀 Lead notification prepared for: ${targetEmail}`);
   console.log(`[SMTP Mailer Engine] Subject: ${subject}`);
-  console.log(`[SMTP Mailer Engine] Lead: ${lead.name} | Phone: ${lead.phone} | Plot: ${lead.plotSize || "N/A"}`);
+  console.log(`[SMTP Mailer Engine] Lead: ${lead.name} | Phone: ${lead.phone}${lead.plotSize ? ` | Plot: ${lead.plotSize}` : ""}${lead.message ? ` | Message: ${lead.message}` : ""}`);
 
   try {
     const transporter = getMailTransporter(settings);

@@ -18,9 +18,9 @@ export default function EnquiryForm({
   id,
   title = "Book Your Plot Today",
   subtitle = "",
-  defaultPlotSize = "5 Marla",
-  defaultSector = "Sector A (Block B)",
-  defaultPlotType = "Residential",
+  defaultPlotSize = "",
+  defaultSector = "",
+  defaultPlotType = "",
   className = "",
   variant = "light",
 }: EnquiryFormProps) {

@@ -1377,14 +1377,11 @@ export default function AdminDashboardPage() {
                               {lead.sector && <span className="block text-[10px] text-slate-500">{lead.sector}</span>}
                             </div>
                           ) : (
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-200 text-[11px] font-semibold">
-                              <FileDown className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
-                              <span className="leading-snug">{lead.source?.replace(/^Map Download:\s*/i, "") || "Document Download"}</span>
-                            </div>
+                            <span className="text-xs text-slate-400 font-normal">—</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 max-w-xs text-slate-600 truncate" title={lead.message}>
-                          {lead.message || "No specific message"}
+                        <td className="py-3.5 px-4 max-w-xs text-slate-600 truncate" title={lead.message || ""}>
+                          {lead.message || <span className="text-slate-400 italic">—</span>}
                         </td>
                         <td className="py-3.5 px-4">
                           <select

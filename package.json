@@ -8,13 +8,15 @@
     "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync:mysql": "node scripts/sync-mysql.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.1",
     "clsx": "^2.1.1",
     "gsap": "^3.12.7",
     "lucide-react": "^0.475.0",
+    "mysql2": "^3.24.4",
     "next": "^15.1.7",
     "nodemailer": "^10.0.3",
     "react": "^19.0.0",

@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
     const newInquiry = await db.createInquiry({
       name: name.trim(),
       phone: phone.trim(),
-      email: email ? email.trim() : undefined,
-      message: message ? message.trim() : "Website lead inquiry",
-      plotSize: plotSize || undefined,
-      plotType: plotType || undefined,
-      sector: sector || undefined,
+      email: email && email.trim() ? email.trim() : undefined,
+      message: message && message.trim() ? message.trim() : undefined,
+      plotSize: plotSize && plotSize.trim() ? plotSize.trim() : undefined,
+      plotType: plotType && plotType.trim() ? plotType.trim() : undefined,
+      sector: sector && sector.trim() ? sector.trim() : undefined,
       status: "New",
-      source: source || "Website Form",
-      notes: `Lead received via ${source || "Website"}`,
+      source: source && source.trim() ? source.trim() : "Website Form",
+      notes: undefined,
     });
 
     // Send instant lead notification email asynchronously
