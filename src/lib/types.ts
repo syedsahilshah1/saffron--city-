@@ -166,11 +166,16 @@ export interface StoredSettings {
   heroBgImage: string;
   heroButtonText: string;
 
-  // Chairman & Founder Section
+  // Chairman & Legacy Section
+  chairmanHeadingTop?: string;
+  chairmanHeadingSub?: string;
+  chairmanHeadingMain?: string;
   chairmanName: string;
   chairmanTitle: string;
   chairmanBioShort: string;
   chairmanBioFull: string;
+  chairmanCtaText?: string;
+  chairmanCtaLink?: string;
   chairmanPortrait: string;
 
   // Master Plan & Media

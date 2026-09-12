@@ -11,6 +11,7 @@
         "overview",
         "leads",
         "plots",
+        "blogs",
         "content",
         "masterplan",
         "paymentplans",
@@ -22,11 +23,46 @@
       "lockedUntil": null,
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-01-01T00:00:00.000Z"
+      "updatedAt": "2026-09-12T05:59:43.095Z",
+      "lastLoginAt": "2026-09-12T05:59:43.094Z",
+      "sessionToken": "tls_saff_dXNyLXN1cGVyYWRtaW4tMDE6dWJhaWRuYXNpcjQwMUBnbWFpbC5jb206MTc4OTE5Mjc4MzA5NDowMWZmZDk2ZjA3MmYzYjFkMDc0ZjgyY2M3ODJjNWEzYw.8a819eba6932509eb5e83c6ee350769aefdab6a1ec138ae3d118a9fedd1b490c"
+    },
+    {
+      "id": "usr-1789191256685-9ptk",
+      "name": "sahil shah",
+      "email": "sahilkhan536ah@gmail.com",
+      "passwordHash": "ad2185d9e4da154e42fcc0f2c95ccf199ba097a1aec80d79bca2761d00da10dc837511ab2a3649dca4b84a8b072ab5f416a6c1b7551dfce3603d382cdf7f08fd",
+      "salt": "b0d6cea4eb32806b6636e0bf1001dbd20e03df6c9b5b47027d189b629d5282bc",
+      "role": "EDITOR",
+      "permissions": [
+        "blogs",
+        "content"
+      ],
+      "failedAttempts": 0,
+      "lockedUntil": null,
+      "isActive": true,
+      "createdAt": "2026-09-12T05:34:16.685Z",
+      "updatedAt": "2026-09-12T05:58:51.345Z",
+      "lastLoginAt": "2026-09-12T05:58:51.343Z",
+      "sessionToken": "tls_saff_dXNyLTE3ODkxOTEyNTY2ODUtOXB0azpzYWhpbGtoYW41MzZhaEBnbWFpbC5jb206MTc4OTE5MjczMTM0MzpkYjM2MTVmNmFhMjVjZjE5Yjc2ZmRjNjcxYjcwYTcwNA.0c7d58ff0091b1dbc8b68a3d7ea0a863e1a2b2d2bbbd99e9eb57848c9680564e"
     }
   ],
   "resetTokens": [],
   "inquiries": [
+    {
+      "id": "lead-1789192823210-ekh9",
+      "name": "sahil",
+      "phone": "345678",
+      "message": "hj",
+      "plotSize": "5 Marla",
+      "plotType": "Residential",
+      "sector": "Sector A (Block B)",
+      "status": "New",
+      "source": "Website Form",
+      "notes": "Lead received via Website",
+      "createdAt": "2026-09-12T06:00:23.210Z",
+      "updatedAt": "2026-09-12T06:00:23.210Z"
+    },
     {
       "id": "lead-001",
       "name": "Tariq Mehmood",
@@ -161,6 +197,63 @@
       "status": "Booked",
       "features": "Corporate Plaza Hub, Multi-Storey Approved",
       "image": "/images/sectors/commercial-plaza.jpg"
+    },
+    {
+      "id": "plt-1789190993839-t16d",
+      "plotNumber": "A21",
+      "sector": "Sector A",
+      "category": "10 Marla",
+      "type": "Residential",
+      "totalPrice": 45,
+      "downPayment": 4.5,
+      "monthlyInst": 0.45,
+      "status": "Available",
+      "features": "100% Underground Utilities, 50ft Wide Carpeted Road",
+      "image": "/uploads/1789190989041_ChatGPT_Image_Aug_25__2026__05_07_12_AM.png"
+    }
+  ],
+  "blogs": [
+    {
+      "id": "blog-001",
+      "slug": "rawalpindi-ring-road-interchange-saffron-city-impact",
+      "title": "Rawalpindi Ring Road Interchange — Transformative Value for Saffron City",
+      "excerpt": "How the 2-minute direct bypass connection turns Saffron City on GT Road into a primary commercial and residential nexus for Islamabad & Rawalpindi.",
+      "content": "The Rawalpindi Ring Road (RRR) project stands as one of the most critical economic game-changers for the twin cities. Saffron City's strategic positioning just 2 minutes from the Rawat interchange provides signal-free connectivity to the New Islamabad International Airport, M-2 Motorway, and Central Islamabad.\n\nInvestors are seeing rapid capital appreciation as infrastructure earthworks accelerate. With wide 250-foot boulevards and direct arterial links, Saffron City offers unmatched logistical convenience for overseas Pakistanis and local residents alike.",
+      "image": "/images/hero-bg.jpg",
+      "category": "Market Insights",
+      "author": "Saffron City Research Desk",
+      "readTime": "4 min read",
+      "isPublished": true,
+      "createdAt": "2026-09-10T05:28:30.360Z",
+      "updatedAt": "2026-09-10T05:28:30.360Z"
+    },
+    {
+      "id": "blog-002",
+      "slug": "sector-a-block-b-development-milestones-2026",
+      "title": "Sector A (Block B) Fast-Track Infrastructure & Development Update",
+      "excerpt": "On-ground progress report on underground utilities, Grand Jamia Mosque foundation, carpeted roads, and recreational park zones.",
+      "content": "Development works across Sector A (Block B) have entered an advanced phase. Underground cabling for electrical distribution, water filtration plant earthworks, and modern sewerage systems are being installed with precision.\n\nThe project philosophy of 'infrastructure preceding residents' ensures that every allottee steps into a fully operational, secure community from day one. New official rates are now live with 10% down payment options.",
+      "image": "/images/sectors/sector-a-luxury.jpg",
+      "category": "Development Update",
+      "author": "SKB Engineering Team",
+      "readTime": "5 min read",
+      "isPublished": true,
+      "createdAt": "2026-09-08T05:28:30.360Z",
+      "updatedAt": "2026-09-08T05:28:30.360Z"
+    },
+    {
+      "id": "blog-003",
+      "slug": "why-saffron-city-top-rda-approved-investment",
+      "title": "Why Saffron City is Ranked Among Top RDA-Approved Societies in 2026",
+      "excerpt": "A deep-dive into legal security, 15,000 Kanal RDA NOC approval, 70-year construction pedigree of SKB Group, and high ROI potential.",
+      "content": "Real estate investment requires two fundamental pillars: legal transparency and reliable developer pedigree. Saffron City boasts an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across its full 15,000 Kanal master plan.\n\nBacked by Saadullah Khan & Brothers (SKB Group) with over 70 years of nationwide mega-infrastructure achievements, Saffron City ensures zero-risk, high-growth investment for families and commercial developers.",
+      "image": "/images/facilities/gated-security.jpg",
+      "category": "Legal & Investment",
+      "author": "Official Advisory Board",
+      "readTime": "6 min read",
+      "isPublished": true,
+      "createdAt": "2026-09-06T09:28:30.360Z",
+      "updatedAt": "2026-09-06T09:28:30.360Z"
     }
   ],
   "settings": {
@@ -196,10 +289,15 @@
     "heroSubtitle": "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
     "heroBgImage": "/images/hero-bg.jpg",
     "heroButtonText": "Book Your Plot",
+    "chairmanHeadingTop": "A STORY",
+    "chairmanHeadingSub": "of",
+    "chairmanHeadingMain": "LEGACY",
     "chairmanName": "Malik Tariq Mehmood",
     "chairmanTitle": "Chairman & Founder",
     "chairmanBioShort": "Saffron City's journey reflects vision, trust, and a dedication to excellence. Under Malik Tariq Mehmood's leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.",
     "chairmanBioFull": "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
+    "chairmanCtaText": "Discover More",
+    "chairmanCtaLink": "/about-us",
     "chairmanPortrait": "/images/chairman_portrait_hd.png",
     "masterPlanImage": "/images/saffron-city-master-plan.webp",
     "masterPlanFullImage": "/images/saffron-city-master-plan-full.jpg",

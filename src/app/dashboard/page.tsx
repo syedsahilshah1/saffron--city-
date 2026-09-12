@@ -90,6 +90,31 @@ export default function AdminDashboardPage() {
   const [usersList, setUsersList] = useState<Omit<StoredUser, "passwordHash" | "salt">[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
+  // Granular Access Control Helpers
+  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
+
+  const hasAccess = (perm: DashboardPermission): boolean => {
+    if (!currentUser) return true; // during initial client hydration
+    if (isSuperAdmin) return true;
+    return Array.isArray(currentUser.permissions) && currentUser.permissions.includes(perm);
+  };
+
+  // Auto-switch to first permitted tab if activeTab is not allowed for this role
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === "SUPER_ADMIN") return;
+
+    const userPerms = currentUser.permissions || [];
+    if (userPerms.length === 0) return;
+
+    if (!userPerms.includes(activeTab as DashboardPermission)) {
+      const firstAllowed = ALL_PERMISSIONS.find((p) => userPerms.includes(p.id));
+      if (firstAllowed) {
+        setActiveTab(firstAllowed.id as any);
+      }
+    }
+  }, [currentUser]);
+
   // Blog Management States
   const [blogsList, setBlogsList] = useState<StoredBlog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
@@ -841,213 +866,266 @@ export default function AdminDashboardPage() {
         >
           <div className="bg-white border border-amber-200/80 rounded-3xl shadow-lg p-3 space-y-4 sticky top-24">
             {/* Sidebar Navigation Links */}
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                Main Console
-              </span>
+            {(hasAccess("overview") || hasAccess("leads") || hasAccess("plots")) && (
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                  Main Console
+                </span>
 
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "overview"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Overview</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("leads")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "leads"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Users className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Leads CRM</span>
-                </div>
-                {newLeadsCount > 0 && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      activeTab === "leads"
-                        ? "bg-white text-slate-950"
-                        : "bg-emerald-100 text-emerald-800"
+                {hasAccess("overview") && (
+                  <button
+                    onClick={() => setActiveTab("overview")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "overview"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
                     }`}
                   >
-                    {newLeadsCount}
-                  </span>
+                    <div className="flex items-center gap-2.5">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Overview</span>
+                    </div>
+                  </button>
                 )}
-              </button>
 
-              <button
-                onClick={() => setActiveTab("plots")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "plots"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Building2 className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Plots Inventory</span>
-                </div>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    activeTab === "plots"
-                      ? "bg-white text-slate-950"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
+                {hasAccess("leads") && (
+                  <button
+                    onClick={() => setActiveTab("leads")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "leads"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Users className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Leads CRM</span>
+                    </div>
+                    {newLeadsCount > 0 && (
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          activeTab === "leads"
+                            ? "bg-white text-slate-950"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {newLeadsCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {hasAccess("plots") && (
+                  <button
+                    onClick={() => setActiveTab("plots")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "plots"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Building2 className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Plots Inventory</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        activeTab === "plots"
+                          ? "bg-white text-slate-950"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {plots.length}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {(hasAccess("blogs") || hasAccess("content") || hasAccess("masterplan") || hasAccess("paymentplans")) && (
+              <div className="space-y-1 pt-2 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                  CMS &amp; Media Control
+                </span>
+
+                {hasAccess("blogs") && (
+                  <button
+                    onClick={() => setActiveTab("blogs")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "blogs"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <BookOpen className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Blogs &amp; News CMS</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        activeTab === "blogs"
+                          ? "bg-white text-slate-950"
+                          : "bg-amber-100 text-amber-900"
+                      }`}
+                    >
+                      {blogsList.length}
+                    </span>
+                  </button>
+                )}
+
+                {hasAccess("content") && (
+                  <button
+                    onClick={() => setActiveTab("content")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "content"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <ImageIcon className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Content &amp; Images</span>
+                    </div>
+                  </button>
+                )}
+
+                {hasAccess("masterplan") && (
+                  <button
+                    onClick={() => setActiveTab("masterplan")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "masterplan"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Compass className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Master Plan &amp; Media</span>
+                    </div>
+                  </button>
+                )}
+
+                {hasAccess("paymentplans") && (
+                  <button
+                    onClick={() => setActiveTab("paymentplans")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "paymentplans"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <CreditCard className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Payment Plans</span>
+                    </div>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {(hasAccess("seo") || hasAccess("settings")) && (
+              <div className="space-y-1 pt-2 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                  Configuration &amp; SEO
+                </span>
+
+                {hasAccess("seo") && (
+                  <button
+                    onClick={() => setActiveTab("seo")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "seo"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Globe className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>SEO &amp; Meta Tags</span>
+                    </div>
+                  </button>
+                )}
+
+                {hasAccess("settings") && (
+                  <button
+                    onClick={() => setActiveTab("settings")}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === "settings"
+                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Mail className="w-4 h-4" />
+                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Contact &amp; SMTP</span>
+                    </div>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* User & Access Management Section in Sidebar (Only for SuperAdmin or users with 'users' permission) */}
+            {(isSuperAdmin || hasAccess("users")) && (
+              <div className="space-y-1 pt-2 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                  Security &amp; Team
+                </span>
+
+                <button
+                  onClick={() => setActiveTab("users")}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === "users"
+                      ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
+                      : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                  }`} 
                 >
-                  {plots.length}
-                </span>
-              </button>
-            </div>
-
-            <div className="space-y-1 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                CMS &amp; Media Control
-              </span>
-
-              <button
-                onClick={() => setActiveTab("blogs")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "blogs"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <BookOpen className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Blogs &amp; News CMS</span>
-                </div>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    activeTab === "blogs"
-                      ? "bg-white text-slate-950"
-                      : "bg-amber-100 text-amber-900"
-                  }`}
-                >
-                  {blogsList.length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("content")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "content"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <ImageIcon className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Content &amp; Images</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("masterplan")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "masterplan"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Compass className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Master Plan &amp; Media</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("paymentplans")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "paymentplans"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <CreditCard className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Payment Plans</span>
-                </div>
-              </button>
-            </div>
-
-            <div className="space-y-1 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                Configuration &amp; SEO
-              </span>
-
-              <button
-                onClick={() => setActiveTab("seo")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "seo"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Globe className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>SEO &amp; Meta Tags</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "settings"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Mail className="w-4 h-4" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Contact &amp; SMTP</span>
-                </div>
-              </button>
-            </div>
-
-            {/* User & Access Management Section in Sidebar */}
-            <div className="space-y-1 pt-2 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                Security &amp; Team
-              </span>
-
-              <button
-                onClick={() => setActiveTab("users")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "users"
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                    : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-4 h-4 text-amber-500" />
-                  <span className={sidebarOpen ? "inline" : "lg:hidden"}>Users &amp; Access</span>
-                </div>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === "users" ? "bg-white text-slate-950" : "bg-amber-100 text-amber-900"
-                }`}>
-                  {usersList.length}
-                </span>
-              </button>
-            </div>
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-500" />
+                    <span className={sidebarOpen ? "inline" : "lg:hidden"}>Users &amp; Access</span>
+                  </div>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    activeTab === "users" ? "bg-white text-slate-950" : "bg-amber-100 text-amber-900"
+                  }`}>
+                    {usersList.length}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 
         {/* MAIN CONTENT PANEL */}
         <main className="flex-1 min-w-0 space-y-6">
+          {/* If the logged-in user is not Super Admin and has zero permissions assigned */}
+          {currentUser && !isSuperAdmin && (!currentUser.permissions || currentUser.permissions.length === 0) && (
+            <div className="bg-white border border-amber-200/80 rounded-3xl p-8 sm:p-12 text-center shadow-sm space-y-4 max-w-xl mx-auto my-12">
+              <div className="w-16 h-16 rounded-3xl bg-amber-50 text-[#D4A017] border border-amber-200 flex items-center justify-center mx-auto shadow-inner">
+                <Shield className="w-8 h-8" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-xl font-bold font-heading text-slate-900">
+                  Welcome, {currentUser.name}
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+                  Your account ({currentUser.role}) has been activated successfully, but has not yet been assigned specific dashboard modules. Please ask your administrator to grant module permissions (e.g. Blogs, Content, CRM).
+                </p>
+              </div>
+              <div className="pt-2 flex justify-center gap-3">
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+                >
+                  <span>View Live Website</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* ========================================================
               TAB 1: OVERVIEW
           ======================================================== */}
-          {activeTab === "overview" && (
+          {activeTab === "overview" && hasAccess("overview") && (
             <div className="space-y-6">
               {/* Stat Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1166,44 +1244,55 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="lg:col-span-4 space-y-4">
-                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                    <h3 className="font-bold text-slate-900 font-heading text-base">
-                      Quick Content Shortcuts
-                    </h3>
-                    <div className="space-y-2 text-xs">
-                      <button
-                        onClick={() => setActiveTab("content")}
-                        className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <span>Edit Chairman Portrait &amp; Bio</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </button>
+                  {/* Quick Content Actions (Filtered by permissions) */}
+                  {(hasAccess("content") || hasAccess("masterplan") || hasAccess("paymentplans") || hasAccess("seo")) && (
+                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                      <h3 className="font-bold text-slate-900 font-heading text-base">
+                        Quick Content Shortcuts
+                      </h3>
+                      <div className="space-y-2 text-xs">
+                        {hasAccess("content") && (
+                          <button
+                            onClick={() => setActiveTab("content")}
+                            className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
+                          >
+                            <span>Edit Story of Legacy &amp; Chairman Bio</span>
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          </button>
+                        )}
 
-                      <button
-                        onClick={() => setActiveTab("masterplan")}
-                        className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <span>Update Master Plan 4K Map &amp; PDF</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </button>
+                        {hasAccess("masterplan") && (
+                          <button
+                            onClick={() => setActiveTab("masterplan")}
+                            className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
+                          >
+                            <span>Update Master Plan 4K Map &amp; PDF</span>
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          </button>
+                        )}
 
-                      <button
-                        onClick={() => setActiveTab("paymentplans")}
-                        className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <span>Edit Payment Plan Tables</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </button>
+                        {hasAccess("paymentplans") && (
+                          <button
+                            onClick={() => setActiveTab("paymentplans")}
+                            className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
+                          >
+                            <span>Edit Payment Plan Tables</span>
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          </button>
+                        )}
 
-                      <button
-                        onClick={() => setActiveTab("seo")}
-                        className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <span>Update SEO Meta &amp; Keywords</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </button>
+                        {hasAccess("seo") && (
+                          <button
+                            onClick={() => setActiveTab("seo")}
+                            className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 flex items-center justify-between font-bold text-slate-800 transition-colors cursor-pointer"
+                          >
+                            <span>Update SEO Meta &amp; Keywords</span>
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1212,7 +1301,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 2: LEADS CRM
           ======================================================== */}
-          {activeTab === "leads" && (
+          {activeTab === "leads" && hasAccess("leads") && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1348,7 +1437,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 3: PLOTS INVENTORY
           ======================================================== */}
-          {activeTab === "plots" && (
+          {activeTab === "plots" && hasAccess("plots") && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1581,7 +1670,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB: BLOGS & ARTICLES CMS
           ======================================================== */}
-          {activeTab === "blogs" && (
+          {activeTab === "blogs" && hasAccess("blogs") && (
             <div className="space-y-6">
               {/* Header & Main Actions */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
@@ -1815,7 +1904,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 4: WEBSITE CONTENT & IMAGES
           ======================================================== */}
-          {activeTab === "content" && settings && (
+          {activeTab === "content" && hasAccess("content") && settings && (
             <div className="space-y-6">
               {/* Section: Hero Banner */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
@@ -1870,18 +1959,88 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Section: Chairman & Founder */}
-              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Briefcase className="w-4 h-4 text-[#D4A017]" />
-                  <h3 className="font-bold text-slate-900 font-heading text-base">
-                    Chairman &amp; Founder Leadership Section
-                  </h3>
+              {/* Section: Story of Legacy & Chairman Leadership */}
+              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017]">
+                      <Briefcase className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 font-heading text-base">
+                        Story of Legacy &amp; Leadership Section
+                      </h3>
+                      <p className="text-[11px] text-slate-500">
+                        Controls Homepage Section 2 — &quot;A STORY of LEGACY&quot; &amp; Chairman profile
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                    Homepage Section 2
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                {/* Live Section Headline Preview */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/60 via-amber-50/30 to-transparent border border-amber-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Chairman Name</label>
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-amber-800 block mb-1">
+                      Live Headline Typography Preview
+                    </span>
+                    <div className="text-xl sm:text-2xl font-serif text-slate-900 leading-tight">
+                      <span>{settings.chairmanHeadingTop || "A STORY"}</span>
+                      <br />
+                      <span className="italic font-serif font-normal lowercase pr-2 inline-block">
+                        {settings.chairmanHeadingSub || "of"}
+                      </span>
+                      <span className="font-serif font-medium uppercase tracking-wider text-[#5C1D24]">
+                        {settings.chairmanHeadingMain || "LEGACY"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-500 border-l border-amber-200/80 pl-3 sm:max-w-xs">
+                    Renders with bespoke editorial typography and elegant serif styling on the homepage.
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  {/* Headline controls */}
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Top Heading Text</label>
+                    <input
+                      type="text"
+                      placeholder="A STORY"
+                      value={settings.chairmanHeadingTop ?? "A STORY"}
+                      onChange={(e) => updateSettingField("chairmanHeadingTop", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Connector Word (Italic)</label>
+                    <input
+                      type="text"
+                      placeholder="of"
+                      value={settings.chairmanHeadingSub ?? "of"}
+                      onChange={(e) => updateSettingField("chairmanHeadingSub", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 italic font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Main Accent Word (Uppercase)</label>
+                    <input
+                      type="text"
+                      placeholder="LEGACY"
+                      value={settings.chairmanHeadingMain ?? "LEGACY"}
+                      onChange={(e) => updateSettingField("chairmanHeadingMain", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold uppercase tracking-wider text-[#5C1D24]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Chairman / Founder Name</label>
                     <input
                       type="text"
                       value={settings.chairmanName}
@@ -1901,7 +2060,9 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="font-bold text-slate-700 block mb-1">Brief Overview</label>
+                    <label className="font-bold text-slate-700 block mb-1">
+                      Brief Overview (Initial paragraph visible on homepage)
+                    </label>
                     <textarea
                       rows={2}
                       value={settings.chairmanBioShort}
@@ -1912,13 +2073,35 @@ export default function AdminDashboardPage() {
 
                   <div className="sm:col-span-2">
                     <label className="font-bold text-slate-700 block mb-1">
-                      Expanded Bio &amp; SKB Legacy (Shown on &quot;See More&quot;)
+                      Expanded Bio &amp; SKB Legacy (Revealed when clicking &quot;Read more&quot;)
                     </label>
                     <textarea
                       rows={3}
                       value={settings.chairmanBioFull}
                       onChange={(e) => updateSettingField("chairmanBioFull", e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Action Button Text</label>
+                    <input
+                      type="text"
+                      placeholder="Discover More"
+                      value={settings.chairmanCtaText ?? "Discover More"}
+                      onChange={(e) => updateSettingField("chairmanCtaText", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Action Button Target Link</label>
+                    <input
+                      type="text"
+                      placeholder="/about-us"
+                      value={settings.chairmanCtaLink ?? "/about-us"}
+                      onChange={(e) => updateSettingField("chairmanCtaLink", e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-blue-600"
                     />
                   </div>
 
@@ -2019,7 +2202,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 5: MASTER PLAN & MEDIA
           ======================================================== */}
-          {activeTab === "masterplan" && settings && (
+          {activeTab === "masterplan" && hasAccess("masterplan") && settings && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
@@ -2090,7 +2273,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 6: PAYMENT PLANS
           ======================================================== */}
-          {activeTab === "paymentplans" && settings && (
+          {activeTab === "paymentplans" && hasAccess("paymentplans") && settings && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
@@ -2242,7 +2425,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 7: SEO & META TAGS
           ======================================================== */}
-          {activeTab === "seo" && settings && (
+          {activeTab === "seo" && hasAccess("seo") && settings && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
@@ -2377,7 +2560,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 8: CONTACT & SMTP SETTINGS
           ======================================================== */}
-          {activeTab === "settings" && settings && (
+          {activeTab === "settings" && hasAccess("settings") && settings && (
             <div className="space-y-6">
               {/* Contact Information */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
@@ -2608,7 +2791,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================
               TAB 9: USERS & ACCESS CONTROL (RBAC)
           ======================================================== */}
-          {activeTab === "users" && (
+          {activeTab === "users" && (isSuperAdmin || hasAccess("users")) && (
             <div className="space-y-6">
               {/* Header Banner */}
               <div className="bg-gradient-to-r from-slate-900 via-[#1e293b] to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-amber-300/30 shadow-lg relative overflow-hidden">
@@ -2871,22 +3054,6 @@ export default function AdminDashboardPage() {
                                     <span>Permissions</span>
                                   </button>
 
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedUserForAction(user);
-                                      setResetPasswordInput("");
-                                      setUserModalError("");
-                                      setUserModalMessage("");
-                                      setShowResetPasswordModal(true);
-                                    }}
-                                    className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                                    title="Reset password"
-                                  >
-                                    <Key className="w-3 h-3" />
-                                    <span>Reset Key</span>
-                                  </button>
-
                                   {!isSuperAdmin && (
                                     <button
                                       type="button"
@@ -2907,31 +3074,6 @@ export default function AdminDashboardPage() {
                   </table>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Fallback Permission Guard */}
-          {!hasPermission(activeTab) && (
-            <div className="bg-white border-2 border-amber-300 rounded-3xl p-8 sm:p-12 text-center space-y-4 shadow-lg max-w-2xl mx-auto my-12">
-              <div className="w-16 h-16 rounded-full bg-amber-50 text-[#D4A017] flex items-center justify-center mx-auto border border-amber-200 shadow-sm">
-                <ShieldAlert className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold font-serif text-slate-900">
-                Access Permission Restricted
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                Your current administrative role does not have permission to access the <strong>{activeTab.toUpperCase()}</strong> module.
-              </p>
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 font-medium">
-                Please contact SuperAdmin <strong>(ubaidnasir401@gmail.com)</strong> to grant access to this section.
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab("overview")}
-                className="px-6 py-2.5 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:bg-amber-600 transition-all cursor-pointer"
-              >
-                Return to Overview
-              </button>
             </div>
           )}
         </main>
@@ -3007,7 +3149,20 @@ export default function AdminDashboardPage() {
                   <label className="font-bold text-slate-700 block mb-1">Assigned Role</label>
                   <select
                     value={newUserForm.role}
-                    onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value as UserRole })}
+                    onChange={(e) => {
+                      const newRole = e.target.value as UserRole;
+                      let rolePerms: DashboardPermission[] = ["overview", "leads"];
+                      if (newRole === "EDITOR") {
+                        rolePerms = ["blogs", "content"];
+                      } else if (newRole === "MANAGER") {
+                        rolePerms = ["overview", "leads", "plots", "paymentplans"];
+                      } else if (newRole === "ADMIN") {
+                        rolePerms = ALL_PERMISSIONS.map((p) => p.id);
+                      } else if (newRole === "AGENT") {
+                        rolePerms = ["overview", "leads"];
+                      }
+                      setNewUserForm({ ...newUserForm, role: newRole, permissions: rolePerms });
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:border-[#D4A017] outline-none"
                   >
                     <option value="ADMIN">Admin (Full Control)</option>
@@ -3201,80 +3356,6 @@ export default function AdminDashboardPage() {
               >
                 <Save className="w-4 h-4" />
                 <span>Save Permissions</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Reset User Password Modal */}
-      {showResetPasswordModal && selectedUserForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-900 shadow-2xl relative border border-amber-300">
-            <button
-              type="button"
-              onClick={() => setShowResetPasswordModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="mb-4">
-              <h3 className="text-lg font-bold font-serif text-slate-900">Reset User Security Key</h3>
-              <p className="text-xs text-slate-500">
-                Set a new encrypted password for <strong>{selectedUserForAction.name}</strong> ({selectedUserForAction.email}).
-              </p>
-            </div>
-
-            {userModalError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{userModalError}</span>
-              </div>
-            )}
-
-            {userModalMessage && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-                <Check className="w-4 h-4 shrink-0" />
-                <span>{userModalMessage}</span>
-              </div>
-            )}
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  New Password (min 6 characters)
-                </label>
-                <input
-                  type="password"
-                  value={resetPasswordInput}
-                  onChange={(e) => setResetPasswordInput(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] outline-none"
-                />
-              </div>
-
-              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                Setting this will immediately hash with a new cryptographic salt and reset any active failed attempts or lockouts.
-              </div>
-            </div>
-
-            <div className="mt-5 flex justify-end gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setShowResetPasswordModal(false)}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleResetPassword}
-                disabled={resetPasswordInput.length < 6}
-                className="px-5 py-2.5 rounded-xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
-              >
-                <Key className="w-4 h-4" />
-                <span>Update Password</span>
               </button>
             </div>
           </div>

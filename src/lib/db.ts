@@ -209,12 +209,17 @@ const defaultSettings: StoredSettings = {
   heroBgImage: "/images/hero-bg.jpg",
   heroButtonText: "Book Your Plot",
 
+  chairmanHeadingTop: "A STORY",
+  chairmanHeadingSub: "of",
+  chairmanHeadingMain: "LEGACY",
   chairmanName: "Malik Tariq Mehmood",
   chairmanTitle: "Chairman & Founder",
   chairmanBioShort:
     "Saffron City's journey reflects vision, trust, and a dedication to excellence. Under Malik Tariq Mehmood's leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.",
   chairmanBioFull:
     "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
+  chairmanCtaText: "Discover More",
+  chairmanCtaLink: "/about-us",
   chairmanPortrait: "/images/chairman_portrait_hd.png",
 
   masterPlanImage: "/images/saffron-city-master-plan.webp",
@@ -486,25 +491,25 @@ function loadStore(): CMSStoreData {
       const raw = fs.readFileSync(storeFilePath, "utf-8");
       const parsed = JSON.parse(raw);
 
-      // Strictly keep only SuperAdmin ubaidnasir401@gmail.com
-      let users: StoredUser[] = Array.isArray(parsed.users)
-        ? (parsed.users as StoredUser[]).filter(
-            (u: StoredUser) =>
-              u && u.email && u.email.toLowerCase() === "ubaidnasir401@gmail.com"
-          )
-        : [];
+      let users: StoredUser[] = Array.isArray(parsed.users) ? (parsed.users as StoredUser[]) : [];
 
       if (users.length === 0) {
         users = [initialUsers[0]];
       } else {
-        users = [
-          {
-            ...users[0],
+        // Ensure primary super admin always has Super Admin role and full permissions
+        const superAdminIndex = users.findIndex(
+          (u) => u && u.email && u.email.toLowerCase() === "ubaidnasir401@gmail.com"
+        );
+        if (superAdminIndex === -1) {
+          users.unshift(initialUsers[0]);
+        } else {
+          users[superAdminIndex] = {
+            ...users[superAdminIndex],
             role: "SUPER_ADMIN",
             permissions: ALL_PERMISSIONS.map((p) => p.id),
             isActive: true,
-          },
-        ];
+          };
+        }
       }
 
       globalForStore.cmsStore = {
@@ -1050,6 +1055,7 @@ export const db = {
       ...updates,
     };
     saveStore(store);
+    backendCache.delete("site_settings");
     return store.settings;
   },
 

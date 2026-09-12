@@ -24,13 +24,19 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
     }
   }, [initialSettings]);
 
+  const headingTop = settings?.chairmanHeadingTop || "A STORY";
+  const headingSub = settings?.chairmanHeadingSub || "of";
+  const headingMain = settings?.chairmanHeadingMain || "LEGACY";
   const name = settings?.chairmanName || "Malik Tariq Mehmood";
+  const title = settings?.chairmanTitle || "Chairman & Founder";
   const bioShort =
     settings?.chairmanBioShort ||
     `Saffron City's journey reflects vision, trust, and a dedication to excellence. Under ${name}'s leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.`;
   const bioFull =
     settings?.chairmanBioFull ||
     "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.";
+  const ctaText = settings?.chairmanCtaText || "Discover More";
+  const ctaLink = settings?.chairmanCtaLink || "/about-us";
   const portrait = settings?.chairmanPortrait || "/images/chairman_portrait_hd.png";
 
   return (
@@ -44,10 +50,10 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
         >
           {/* Styled Title: A STORY of LEGACY */}
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-medium text-slate-900 tracking-normal leading-[1.12]">
-            A STORY
+            {headingTop}
             <br />
-            <span className="italic font-serif font-normal lowercase pr-3 inline-block">of</span>
-            <span className="font-serif font-medium uppercase tracking-wider">LEGACY</span>
+            <span className="italic font-serif font-normal lowercase pr-3 inline-block">{headingSub}</span>
+            <span className="font-serif font-medium uppercase tracking-wider">{headingMain}</span>
           </h2>
 
           {/* Description Text */}
@@ -87,10 +93,10 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           {/* Discover More Link */}
           <div className="pt-2">
             <Link
-              href="/about-us"
+              href={ctaLink}
               className="group inline-flex items-center gap-2.5 text-[#5C1D24] hover:text-[#7E2430] font-medium text-sm sm:text-base transition-colors border-b-2 border-[#5C1D24] pb-0.5"
             >
-              <span>Discover More</span>
+              <span>{ctaText}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </Link>
           </div>
@@ -106,7 +112,7 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg flex justify-center lg:justify-end">
             <img
               src={portrait}
-              alt="Chairman & Founder Malik Tariq Mehmood - Saffron City"
+              alt={`${title} ${name} - Saffron City`}
               className="w-full h-auto object-contain select-none pointer-events-none transition-all duration-500"
             />
           </div>
