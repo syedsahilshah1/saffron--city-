@@ -15,8 +15,7 @@ export async function GET(
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
     }
 
-    const { passwordHash, salt, ...safeUser } = user;
-    return NextResponse.json({ success: true, data: safeUser });
+    return NextResponse.json({ success: true, data: user });
   } catch (error: any) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }

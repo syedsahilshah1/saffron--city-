@@ -26,10 +26,14 @@ import {
   TIMELINE_MILESTONES
 } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "About Us | Saffron City Islamabad",
-  description: "Learn about Saffron City Islamabad, developed by SKB Builders with 70+ years of construction legacy. RDA approved residential and commercial community on GT Road.",
-};
+import { getPageMetadata } from "@/lib/seo";
+import { BreadcrumbSchema } from "@/components/seo/JsonLd";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/about-us");
+}
 
 const DIFFERENTIATORS_WITH_IMAGES = [
   {
@@ -152,7 +156,7 @@ export default function AboutUsPage() {
 
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
-      
+
       {/* Hero Banner Section with Background Image */}
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         {/* Background Hero Image */}
@@ -163,17 +167,13 @@ export default function AboutUsPage() {
             className="w-full h-full object-cover object-center opacity-100 scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-            <Award className="w-3.5 h-3.5 text-[#D4A017]" />
-            <span>Legacy of SKB Builders Since 1954</span>
-          </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white">
-            About <span className="text-[#D4A017]">Us</span>
+            About <span className="text-[#D49E17]">Us</span>
           </h1>
 
           <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
@@ -183,13 +183,13 @@ export default function AboutUsPage() {
           {/* Quick Stats Banner */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-6">
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-              <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">
+              <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">
                 <AnimatedCounter end={70} suffix="+" />
               </span>
               <p className="text-xs text-slate-300 font-medium">Years Legacy</p>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-              <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">
+              <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">
                 <AnimatedCounter end={15000} suffix=" Kanal" />
               </span>
               <p className="text-xs text-slate-300 font-medium">Total Land Expanse</p>
@@ -199,7 +199,7 @@ export default function AboutUsPage() {
               <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-              <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">250 Ft</span>
+              <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">250 Ft</span>
               <p className="text-xs text-slate-300 font-medium">Main Boulevard</p>
             </div>
           </div>
@@ -212,13 +212,8 @@ export default function AboutUsPage() {
         {/* Introduction & Developer Overview */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-6">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Saadullah Khan &amp; Brothers (SKB)</span>
-              </div>
-            </ScrollReveal>
-            
+          
+
             <WordReveal
               text="A Legacy Built on Quality & Trust"
               highlightWords={["Quality", "Trust", "&"]}
@@ -249,7 +244,7 @@ export default function AboutUsPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
-                  <span className="px-3 py-1 rounded-full bg-[#D4A017] text-slate-950 text-xs font-bold shadow">
+                  <span className="px-3 py-1 rounded-full bg-[#D49E17] text-slate-950 text-xs font-bold shadow">
                     Saffron City Project
                   </span>
                   <span className="text-xs font-medium">Main GT Road, Rawat</span>
@@ -262,13 +257,6 @@ export default function AboutUsPage() {
         {/* Leadership Section */}
         <section className="space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Users className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Executive Leadership</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Our Leadership"
               highlightWords={["Leadership"]}
@@ -291,11 +279,11 @@ export default function AboutUsPage() {
             {LEADERSHIP.map((leader) => (
               <div
                 key={leader.name}
-                className="p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all space-y-4 group flex flex-col justify-between"
+                className="p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all space-y-4 group flex flex-col justify-between"
               >
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-amber-200 group-hover:border-[#D4A017] transition-colors shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-amber-200 group-hover:border-[#D49E17] transition-colors shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center">
                       <img
                         src={leader.image}
                         alt={leader.name}
@@ -303,10 +291,10 @@ export default function AboutUsPage() {
                       />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors">
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors">
                         {leader.name}
                       </h4>
-                      <span className="text-xs text-[#D4A017] font-bold">{leader.role}</span>
+                      <span className="text-xs text-[#D49E17] font-bold">{leader.role}</span>
                     </div>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
@@ -321,13 +309,6 @@ export default function AboutUsPage() {
         {/* Development Timeline (Redesigned Style) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Project Milestones</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Development Timeline & Journey"
               highlightWords={["Timeline", "Journey", "&"]}
@@ -351,10 +332,10 @@ export default function AboutUsPage() {
             {TIMELINE_MILESTONES.map((item, index) => (
               <div
                 key={item.year}
-                className="relative p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all duration-300 space-y-3 group"
+                className="relative p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 space-y-3 group"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-[#D4A017] text-white font-mono font-bold text-sm shadow">
+                  <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] text-white font-mono font-bold text-sm shadow">
                     {item.year}
                   </span>
                   <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">
@@ -372,13 +353,6 @@ export default function AboutUsPage() {
         {/* What Makes Saffron City Different (With Images) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Distinct Features</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="What Makes Saffron City Different"
               highlightWords={["Different", "Saffron", "City"]}
@@ -401,7 +375,7 @@ export default function AboutUsPage() {
             {DIFFERENTIATORS_WITH_IMAGES.map((diff) => (
               <div
                 key={diff.number}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
+                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
               >
                 <div>
                   {/* Card Image */}
@@ -416,7 +390,7 @@ export default function AboutUsPage() {
                       <span>{diff.number}</span>
                     </div>
                     <div className="absolute bottom-3 left-3 right-3">
-                      <span className="px-2.5 py-1 rounded-full bg-[#D4A017] text-slate-950 text-[11px] font-bold shadow">
+                      <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[11px] font-bold shadow">
                         {diff.badge}
                       </span>
                     </div>
@@ -424,7 +398,7 @@ export default function AboutUsPage() {
 
                   {/* Card Content */}
                   <div className="p-6 space-y-2">
-                    <h4 className="text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors">
+                    <h4 className="text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors">
                       {diff.title}
                     </h4>
                     <p className="text-xs text-slate-600 leading-relaxed">
@@ -440,13 +414,6 @@ export default function AboutUsPage() {
         {/* Our Core Values (With Images) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <HeartHandshake className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Principles</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Our Core Values"
               highlightWords={["Core", "Values"]}
@@ -469,7 +436,7 @@ export default function AboutUsPage() {
             {CORE_VALUES_WITH_IMAGES.map((val) => (
               <div
                 key={val.title}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
+                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between"
               >
                 <div>
                   <div className="relative h-44 w-full overflow-hidden bg-slate-100">
@@ -486,7 +453,7 @@ export default function AboutUsPage() {
                     </div>
                   </div>
                   <div className="p-5 space-y-2">
-                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2 group-hover:text-[#D4A017] transition-colors">
+                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2 group-hover:text-[#D49E17] transition-colors">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                       <span>{val.title}</span>
                     </h4>
@@ -566,7 +533,7 @@ export default function AboutUsPage() {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer"
               >
                 <span>Connect with Saffron City Official Representative</span>
                 <ArrowRight className="w-4 h-4" />

@@ -238,7 +238,7 @@ export default function LocationMapViewer({
                 className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer"
                 title="Download Map"
               >
-                <Download className="w-4 h-4 text-[#D4A017]" />
+                <Download className="w-4 h-4 text-[#D49E17]" />
               </button>
               <button
                 type="button"
@@ -248,7 +248,7 @@ export default function LocationMapViewer({
                   setModalPosition({ x: 0, y: 0 });
                   setIsModalOpen(true);
                 }}
-                className="p-2 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 transition-colors cursor-pointer ml-0.5"
+                className="p-2 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 transition-colors cursor-pointer ml-0.5"
                 title="Fullscreen HD View"
               >
                 <Maximize2 className="w-4 h-4" />
@@ -278,7 +278,7 @@ export default function LocationMapViewer({
             <div className="flex items-center justify-between p-4 px-6 bg-white border-b border-slate-200 z-30">
               <div>
                 <h3 className="font-bold text-slate-900 text-base sm:text-lg font-heading flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#D4A017]" />
+                  <MapPin className="w-4 h-4 text-[#D49E17]" />
                   <span>Saffron City Official Location &amp; Access Map</span>
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -374,7 +374,7 @@ export default function LocationMapViewer({
             {/* Modal Footer Note */}
             <div className="px-6 py-2.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
               <span>Scroll mouse wheel or pinch to zoom • Drag to explore landmarks &amp; routes</span>
-              <span className="text-[#D4A017] font-bold">Official Saffron City Blueprint</span>
+              <span className="text-[#D49E17] font-bold">Official Saffron City Blueprint</span>
             </div>
           </div>
         </div>

@@ -168,7 +168,7 @@ export default function PlotsForSaleGrid() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/plot-for-sale"
-            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all shadow-md hover:shadow-lg active:scale-95"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all shadow-md hover:shadow-lg active:scale-95"
           >
             <span>VIEW COMPLETE DIRECTORY</span>
             <ArrowRight className="w-4 h-4" />
@@ -186,8 +186,8 @@ export default function PlotsForSaleGrid() {
           }}
           className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             filter === "all"
-              ? "bg-[#D4A017] text-white shadow-md"
-              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+              ? "bg-[#D49E17] text-white shadow-md"
+              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
           }`}
         >
           All Inventory ({PLOTS_INVENTORY.length})
@@ -200,8 +200,8 @@ export default function PlotsForSaleGrid() {
           }}
           className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             filter === "residential"
-              ? "bg-[#D4A017] text-white shadow-md"
-              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+              ? "bg-[#D49E17] text-white shadow-md"
+              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
           }`}
         >
           Residential
@@ -214,8 +214,8 @@ export default function PlotsForSaleGrid() {
           }}
           className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             filter === "commercial"
-              ? "bg-[#D4A017] text-white shadow-md"
-              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+              ? "bg-[#D49E17] text-white shadow-md"
+              : "bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
           }`}
         >
           Commercial
@@ -265,7 +265,7 @@ export default function PlotsForSaleGrid() {
                       {plot.title}
                     </h3>
                     <div className="flex items-center gap-1 text-[10px] text-slate-600 truncate">
-                      <MapPin className="w-2.5 h-2.5 text-[#D4A017] shrink-0" />
+                      <MapPin className="w-2.5 h-2.5 text-[#D49E17] shrink-0" />
                       <span className="truncate">{plot.sector}</span>
                     </div>
                     <div className="inline-block px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-[9px] font-semibold text-slate-600 font-mono">
@@ -302,7 +302,7 @@ export default function PlotsForSaleGrid() {
             <button
               type="button"
               onClick={() => setShowAllMobile(!showAllMobile)}
-              className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#D4A017] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#D49E17] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer"
             >
               {showAllMobile ? (
                 <>
@@ -336,7 +336,7 @@ export default function PlotsForSaleGrid() {
             return (
               <div
                 key={plot.id}
-                className="group rounded-3xl bg-white text-slate-900 overflow-hidden shadow-md hover:shadow-2xl border border-amber-200/70 hover:border-[#D4A017] transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"
+                className="group rounded-3xl bg-white text-slate-900 overflow-hidden shadow-md hover:shadow-2xl border border-amber-200/70 hover:border-[#D49E17] transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"
               >
                 {/* Card Image Area */}
                 <div>
@@ -359,7 +359,7 @@ export default function PlotsForSaleGrid() {
 
                     {/* Top-Right Category Pill */}
                     <div className="absolute top-3 right-3 z-10">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017] text-white text-[10px] font-bold uppercase tracking-wider shadow">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#D49E17] text-white text-[10px] font-bold uppercase tracking-wider shadow">
                         {plot.category}
                       </span>
                     </div>
@@ -386,14 +386,14 @@ export default function PlotsForSaleGrid() {
                   <div className="p-4 sm:p-5 space-y-3">
                     {/* Location & Tag */}
                     <div className="flex items-center gap-1.5 text-xs text-amber-700 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                       <span className="font-bold text-slate-800">{plot.sector}</span>
                       <span className="text-slate-300">•</span>
                       <span className="text-slate-500 text-[11px]">{plot.tag}</span>
                     </div>
 
                     {/* Plot Title */}
-                    <h3 className="text-xl font-serif font-bold text-slate-900 tracking-tight group-hover:text-[#D4A017] transition-colors">
+                    <h3 className="text-xl font-serif font-bold text-slate-900 tracking-tight group-hover:text-[#D49E17] transition-colors">
                       {plot.title}
                     </h3>
 
@@ -419,7 +419,7 @@ export default function PlotsForSaleGrid() {
                     href={plotWhatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shimmer-gold-btn flex-1 py-2 px-3 rounded-full bg-gradient-to-r from-amber-500 to-[#D4A017] hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold text-center transition-all inline-flex items-center justify-center gap-1 shadow-sm hover:shadow"
+                    className="shimmer-gold-btn flex-1 py-2 px-3 rounded-full bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold text-center transition-all inline-flex items-center justify-center gap-1 shadow-sm hover:shadow"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>Inquire / Book</span>

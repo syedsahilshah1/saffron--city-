@@ -34,7 +34,7 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
     `Saffron City's journey reflects vision, trust, and a dedication to excellence. Under ${name}'s leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.`;
   const bioFull =
     settings?.chairmanBioFull ||
-    "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.";
+    "Saffron City represents a benchmark in planned urban living on Main GT Road Rawat. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.";
   const ctaText = settings?.chairmanCtaText || "Discover More";
   const ctaLink = settings?.chairmanCtaLink || "/about-us";
   const portrait = settings?.chairmanPortrait || "/images/chairman_portrait_hd.png";

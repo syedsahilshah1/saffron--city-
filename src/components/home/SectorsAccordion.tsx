@@ -117,7 +117,7 @@ export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionP
                 <div className="absolute inset-0 flex flex-col justify-end p-6 lg:p-8 z-20 space-y-4 animate-in fade-in duration-300">
                   {/* Badge & Plot sizes */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider px-3 py-1 rounded-full bg-[#D4A017]/30 border border-[#D4A017] backdrop-blur-md">
+                    <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider px-3 py-1 rounded-full bg-[#D49E17]/30 border border-[#D49E17] backdrop-blur-md">
                       {block.badge}
                     </span>
                     <span className="text-[11px] font-medium text-white px-2.5 py-1 rounded-full bg-black/60 border border-white/20 backdrop-blur-sm">
@@ -139,7 +139,7 @@ export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionP
                   <div className="pt-1">
                     <Link
                       href={block.href}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs lg:text-sm font-bold tracking-wider uppercase transition-all shadow-lg hover:scale-[1.03] active:scale-95 border border-amber-300"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs lg:text-sm font-bold tracking-wider uppercase transition-all shadow-lg hover:scale-[1.03] active:scale-95 border border-amber-300"
                     >
                       <span>EXPLORE SECTOR</span>
                       <ArrowRight className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function SectorsAccordion({ sectorA, sectorB }: SectorsAccordionP
                   </p>
                   <Link
                     href={block.href}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#D4A017] text-white text-xs font-bold uppercase tracking-wider"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] text-white text-xs font-bold uppercase tracking-wider"
                   >
                     <span>EXPLORE SECTOR</span>
                     <ArrowRight className="w-3.5 h-3.5" />

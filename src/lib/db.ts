@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import crypto from "crypto";
 import {
   StoredUser,
@@ -14,35 +12,18 @@ import {
   ALL_PERMISSIONS,
   SafeUser,
   StoredBlog,
+  StoredPageSeo,
+  StoredRedirect,
 } from "./types";
+import { getMySQLPool, query } from "./mysql";
 
 export * from "./types";
 
 // -------------------------------------------------------------
-// Security & Cryptography Utilities (PBKDF2 Hashing + HMAC Session)
+// Session Token Cryptography (Direct HMAC Session Tokens)
 // -------------------------------------------------------------
 
 const APP_SECRET = process.env.APP_SECRET || "saffron-city-executive-secret-key-2026-secure";
-
-export function generateSalt(): string {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-export function hashPassword(password: string, existingSalt?: string): { hash: string; salt: string } {
-  const salt = existingSalt || generateSalt();
-  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
-  return { hash, salt };
-}
-
-export function verifyPassword(password: string, hash: string, salt: string): boolean {
-  if (!password || !hash || !salt) return false;
-  // Try 10,000 iterations (standard fast) first
-  let computedHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
-  if (computedHash === hash) return true;
-  // Fallback for legacy 100,000 iteration hashes
-  const legacyHash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
-  return legacyHash === hash;
-}
 
 export function generateUserSessionToken(userId: string, email: string): string {
   const timestamp = Date.now();
@@ -79,7 +60,7 @@ export function verifyUserSessionToken(token: string): { valid: boolean; userId?
 }
 
 // -------------------------------------------------------------
-// In-Memory Cache Manager with Invalidation
+// In-Memory Cache Manager
 // -------------------------------------------------------------
 
 interface CacheEntry<T> {
@@ -100,7 +81,7 @@ class MemoryCacheManager {
     return entry.data as T;
   }
 
-  set<T>(key: string, data: T, ttlSeconds: number = 60): void {
+  set<T>(key: string, data: T, ttlSeconds: number = 30): void {
     this.cache.set(key, {
       data,
       expiresAt: Date.now() + ttlSeconds * 1000,
@@ -111,14 +92,6 @@ class MemoryCacheManager {
     this.cache.delete(key);
   }
 
-  invalidatePrefix(prefix: string): void {
-    for (const key of this.cache.keys()) {
-      if (key.startsWith(prefix)) {
-        this.cache.delete(key);
-      }
-    }
-  }
-
   clear(): void {
     this.cache.clear();
   }
@@ -127,567 +100,33 @@ class MemoryCacheManager {
 export const backendCache = new MemoryCacheManager();
 
 // -------------------------------------------------------------
-// Default Seed Users (Exclusively SuperAdmin ubaidnasir401@gmail.com)
+// Helper to verify database user password (supports direct string & hashed)
 // -------------------------------------------------------------
+function verifyUserPasswordInDb(inputPassword: string, storedHash: string, storedSalt?: string): boolean {
+  if (!inputPassword || !storedHash) return false;
+  // 1. Direct match (plain text in DB)
+  if (inputPassword === storedHash) return true;
 
-const superAdminHash = hashPassword("ubaidnasir401@gmail.com");
-
-const initialUsers: StoredUser[] = [
-  {
-    id: "usr-superadmin-01",
-    email: "ubaidnasir401@gmail.com",
-    name: "Ubaid Nasir (Super Admin)",
-    passwordHash: superAdminHash.hash,
-    salt: superAdminHash.salt,
-    role: "SUPER_ADMIN",
-    permissions: [
-      "overview",
-      "leads",
-      "plots",
-      "content",
-      "masterplan",
-      "paymentplans",
-      "seo",
-      "settings",
-      "users",
-    ],
-    failedAttempts: 0,
-    lockedUntil: null,
-    isActive: true,
-    createdAt: "2026-01-01T00:00:00.000Z",
-    updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-];
-
-export interface PasswordResetRecord {
-  id: string;
-  email: string;
-  token: string;
-  expiresAt: string;
-  used: boolean;
-  createdAt: string;
-}
-
-const defaultSettings: StoredSettings = {
-  siteName: "Saffron City Islamabad",
-  contactPhone: "0333 1113551",
-  secondaryPhone: "",
-  whatsappPhone: "923331113551",
-  officialEmail: "info@saffroncity.org",
-  officeAddress: "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
-  googleMapsUrl: "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
-  rdaNocStatus: "RDA Approved (Full 15,000 Kanal)",
-  rdaVerificationUrl: "https://punjab.gov.pk",
-  announcement: "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
-  activePreLaunchDiscount: true,
-
-  smtpEnabled: true,
-  smtpHost: "smtp.hostinger.com",
-  smtpPort: 465,
-  smtpSecure: true,
-  smtpUser: "info@saffroncity.org",
-  smtpPass: "2igu-plh8-etms-ioqc",
-  smtpFromEmail: "info@saffroncity.org",
-  leadNotificationEmail: "info@saffroncity.org",
-
-  metaTitle: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
-  metaDescription:
-    "Invest in Saffron City Islamabad — a premier 15,000 Kanal RDA NOC-approved housing society on Main GT Road near Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments.",
-  metaKeywords:
-    "Saffron City, Saffron City Islamabad, RDA approved plots, GT Road Rawat, SKB Builders, 5 Marla plot, 10 Marla plot, 1 Kanal plot, Rawalpindi Ring Road",
-  ogTitle: "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat",
-  ogDescription:
-    "15,000 Kanal RDA NOC Approved housing society on Main GT Road, Rawat. Flexible 3-year installment plans with 10% down payment.",
-  ogImage: "/images/hero-bg.jpg",
-  canonicalUrl: "https://saffroncity.pk",
-  googleSiteVerification: "",
-
-  heroTitle: "Invest in Premium Living",
-  heroHighlightedWord: "Saffron City",
-  heroSubtitle:
-    "RDA Approved master-planned community on Main GT Road Rawat by SKB Group. Secure your future with flexible 30-month installment plans.",
-  heroBgImage: "/images/hero-bg.jpg",
-  heroButtonText: "Book Your Plot",
-
-  chairmanHeadingTop: "A STORY",
-  chairmanHeadingSub: "of",
-  chairmanHeadingMain: "LEGACY",
-  chairmanName: "Malik Tariq Mehmood",
-  chairmanTitle: "Chairman & Founder",
-  chairmanBioShort:
-    "Saffron City's journey reflects vision, trust, and a dedication to excellence. Under Malik Tariq Mehmood's leadership, it grew by delivering modern, affordable communities with transparency and timely development, continually enriching lives and shaping Pakistan's future through purposeful, people-focused progress.",
-  chairmanBioFull:
-    "Saadullah Khan & Brothers (SKB) was founded in 1954 and has built some of the most critical infrastructure networks, highways, flyovers, and mega developments across Pakistan, Dubai, Abu Dhabi, and Saudi Arabia. Under the visionary leadership of Chairman Malik Tariq Mehmood, Saffron City offers 100% legal security with an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across the full 15,000 Kanal master plan.",
-  chairmanCtaText: "Discover More",
-  chairmanCtaLink: "/about-us",
-  chairmanPortrait: "/images/chairman_portrait_hd.png",
-
-  masterPlanImage: "/images/saffron-city-master-plan.webp",
-  masterPlanFullImage: "/images/saffron-city-master-plan-full.jpg",
-  masterPlanPdf: "/images/saffron-city-master-plan.webp",
-  masterPlanDescription:
-    "The master plan divides Saffron City into residential blocks alongside dedicated space for commercial area, mosque, schools, and parks.",
-
-  sectorATitle: "Sector A (Block B - New Rates)",
-  sectorATagline:
-    "Prestigious residential sector featuring Grand Jamia Mosque, underground utilities, and wider carpeted roads.",
-  sectorAPlots: "5M, 10M & 1 Kanal",
-  sectorAPrice: "From PKR 45 Lakh",
-  sectorAImage: "/images/sectors/sector-a-luxury.jpg",
-
-  sectorBTitle: "Sector B (Affordable Block)",
-  sectorBTagline:
-    "Family-friendly sector with easy 3-year installment plans, dedicated sports courts, and community parks.",
-  sectorBPlots: "5M, 10M & 1 Kanal",
-  sectorBPrice: "From PKR 45 Lakh",
-  sectorBImage: "/images/sectors/sector-b-residential.jpg",
-
-  residentialPaymentPlanImage: "/images/payment-plans/official-residential-payment-plan.jpg",
-  commercialPaymentPlanImage: "/images/payment-plans/official-commercial-payment-plan.jpg",
-  officialPaymentPlanPdf: "/images/saffron-city-master-plan.webp",
-
-  amenities: [
-    { id: "am-1", title: "Grand Jamia Mosque", desc: "A central, magnificent mosque sized for the entire community.", image: "/images/amenities/amenity_mosque.jpg" },
-    { id: "am-2", title: "Modern Hospital & Trauma", desc: "On-site 24/7 healthcare access for everyday medical needs.", image: "/images/amenities/amenity_hospital.jpg" },
-    { id: "am-3", title: "International Standard Schools", desc: "Top-tier schools planned within safe walking distance.", image: "/images/amenities/amenity_school.jpg" },
-    { id: "am-4", title: "24/7 Gated Security & CCTV", desc: "3-tier gated perimeter with biometric checkpoints.", image: "/images/amenities/amenity_security.jpg" },
-    { id: "am-5", title: "Commercial Shopping Plazas", desc: "Retail centers and supermarkets within each sector.", image: "/images/amenities/amenity_shopping.jpg" },
-    { id: "am-6", title: "250ft Main Boulevard", desc: "Wide arterial road network designed for signal-free flow.", image: "/images/amenities/amenity_boulevard.jpg" },
-    { id: "am-7", title: "Underground Utilities & Water", desc: "Underground electrification, gas, and dedicated water filtration.", image: "/images/amenities/amenity_water.jpg" },
-    { id: "am-8", title: "Family Parks & Sports Courts", desc: "Lush green belts, walking tracks, and children play grounds.", image: "/images/amenities/amenity_park.jpg" },
-  ],
-
-  landmarks: [
-    { id: "lm-1", title: "T-Chowk, Rawat", subtitle: "Main GT Road Junction", driveTime: "5 Mins Drive", image: "/images/landmark_t_chowk.jpg" },
-    { id: "lm-2", title: "Giga Mall & DHA", subtitle: "Premier Shopping & Dining", driveTime: "12 Mins Drive", image: "/images/landmark_giga_mall.jpg" },
-    { id: "lm-3", title: "DHA Islamabad", subtitle: "Executive Housing Society", driveTime: "10 Mins Drive", image: "/images/landmark_dha_islamabad.jpg" },
-    { id: "lm-4", title: "Zero Point & Blue Area", subtitle: "Capital Business District", driveTime: "20 Mins Drive", image: "/images/hero-bg.jpg" },
-    { id: "lm-5", title: "Bahria Town", subtitle: "Gated Residential Community", driveTime: "10 Mins Drive", image: "/images/imgi_25_saffron-city-islamabad.jpg" },
-    { id: "lm-6", title: "Islamabad Airport", subtitle: "International Air Terminal", driveTime: "30 Mins Drive", image: "/images/landmark_t_chowk.jpg" },
-    { id: "lm-7", title: "Rawalpindi Ring Road", subtitle: "Direct Bypass Interchange", driveTime: "2 Mins Drive", image: "/images/imgi_25_saffron-city-islamabad.jpg" },
-    { id: "lm-8", title: "Islamabad Expressway", subtitle: "Signal-Free Arterial Route", driveTime: "15 Mins Drive", image: "/images/hero-bg.jpg" },
-  ],
-
-  paymentTiers: [
-    { size: "5 Marla", type: "Residential", totalPrice: "PKR 4,500,000", downPayment: "PKR 450,000 (10%)", confirmation: "PKR 450,000 (10%)", monthlyInstallment: "PKR 45,000 × 30", balloonPayment: "PKR 350,000 × 4", possession: "PKR 850,000", duration: "30 Months" },
-    { size: "10 Marla", type: "Residential", totalPrice: "PKR 8,200,000", downPayment: "PKR 820,000 (10%)", confirmation: "PKR 820,000 (10%)", monthlyInstallment: "PKR 82,000 × 30", balloonPayment: "PKR 650,000 × 4", possession: "PKR 1,500,000", duration: "30 Months" },
-    { size: "1 Kanal", type: "Residential", totalPrice: "PKR 15,500,000", downPayment: "PKR 1,550,000 (10%)", confirmation: "PKR 1,550,000 (10%)", monthlyInstallment: "PKR 155,000 × 30", balloonPayment: "PKR 1,200,000 × 4", possession: "PKR 3,000,000", duration: "30 Months" },
-    { size: "4 Marla", type: "Commercial", totalPrice: "PKR 18,000,000", downPayment: "PKR 1,800,000 (10%)", confirmation: "PKR 1,800,000 (10%)", monthlyInstallment: "PKR 180,000 × 30", balloonPayment: "PKR 1,500,000 × 4", possession: "PKR 3,000,000", duration: "30 Months" },
-    { size: "8 Marla", type: "Commercial", totalPrice: "PKR 34,000,000", downPayment: "PKR 3,400,000 (10%)", confirmation: "PKR 3,400,000 (10%)", monthlyInstallment: "PKR 340,000 × 30", balloonPayment: "PKR 2,800,000 × 4", possession: "PKR 6,000,000", duration: "30 Months" },
-  ],
-};
-
-const initialInquiries: StoredInquiry[] = [
-  {
-    id: "lead-001",
-    name: "Tariq Mehmood",
-    phone: "+92 321 5554321",
-    message: "Interested in 1 Kanal residential plot in Sector A with park facing option.",
-    plotSize: "1 Kanal",
-    plotType: "Residential",
-    sector: "Sector A",
-    status: "New",
-    source: "Website Hero Form",
-    notes: "Requires remote overseas booking guidance.",
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-  },
-  {
-    id: "lead-002",
-    name: "Dr. Usman Farooq",
-    phone: "+92 300 9876543",
-    message: "Looking for 4 Marla commercial plot on GT Road frontage for clinic setup.",
-    plotSize: "4 Marla",
-    plotType: "Commercial",
-    sector: "Commercial Block",
-    status: "Contacted",
-    source: "WhatsApp Lead",
-    notes: "Sent payment plan brochure. Follow-up scheduled for Friday.",
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 18).toISOString(),
-  },
-  {
-    id: "lead-003",
-    name: "Bilal Ahmad",
-    phone: "+92 333 1234567",
-    message: "I need a 5 Marla plot in Saffron City Sector B on 3-year installment.",
-    plotSize: "5 Marla",
-    plotType: "Residential",
-    sector: "Sector B",
-    status: "FollowUp",
-    source: "Plot For Sale Page",
-    notes: "Checking down payment readiness.",
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-  },
-];
-
-const initialPlots: StoredPlot[] = [
-  {
-    id: "plt-a-01",
-    plotNumber: "A-101",
-    sector: "Sector A",
-    category: "5 Marla",
-    type: "Residential",
-    totalPrice: 4500000,
-    downPayment: 450000,
-    monthlyInst: 45000,
-    status: "Available",
-    features: "Underground Utilities, Near Central Park",
-    image: "/images/sectors/sector-a-luxury.jpg",
-  },
-  {
-    id: "plt-a-02",
-    plotNumber: "A-102",
-    sector: "Sector A",
-    category: "10 Marla",
-    type: "Residential",
-    totalPrice: 8200000,
-    downPayment: 820000,
-    monthlyInst: 82000,
-    status: "Reserved",
-    features: "Main Boulevard, Underground Electrification",
-    image: "/images/sectors/sector-a-luxury.jpg",
-  },
-  {
-    id: "plt-a-03",
-    plotNumber: "A-105",
-    sector: "Sector A",
-    category: "1 Kanal",
-    type: "Residential",
-    totalPrice: 15500000,
-    downPayment: 1550000,
-    monthlyInst: 155000,
-    status: "Available",
-    features: "Corner Plot, Park Facing, 60-ft Road",
-    image: "/images/sectors/sector-a-luxury.jpg",
-  },
-  {
-    id: "plt-b-01",
-    plotNumber: "B-201",
-    sector: "Sector B",
-    category: "5 Marla",
-    type: "Residential",
-    totalPrice: 4500000,
-    downPayment: 450000,
-    monthlyInst: 45000,
-    status: "Available",
-    features: "Near Community Mosque, 40-ft Wide Road",
-    image: "/images/sectors/sector-b-residential.jpg",
-  },
-  {
-    id: "plt-b-02",
-    plotNumber: "B-205",
-    sector: "Sector B",
-    category: "10 Marla",
-    type: "Residential",
-    totalPrice: 8200000,
-    downPayment: 820000,
-    monthlyInst: 82000,
-    status: "Available",
-    features: "Family Zone, Green Belt Adjacent",
-    image: "/images/sectors/sector-b-residential.jpg",
-  },
-  {
-    id: "plt-com-01",
-    plotNumber: "COM-01",
-    sector: "Commercial Block",
-    category: "4 Marla",
-    type: "Commercial",
-    totalPrice: 18000000,
-    downPayment: 1800000,
-    monthlyInst: 180000,
-    status: "Available",
-    features: "Main GT Road Frontage, High Footfall Plaza Plot",
-    image: "/images/sectors/commercial-plaza.jpg",
-  },
-  {
-    id: "plt-com-02",
-    plotNumber: "COM-04",
-    sector: "Commercial Block",
-    category: "8 Marla",
-    type: "Commercial",
-    totalPrice: 34000000,
-    downPayment: 3400000,
-    monthlyInst: 340000,
-    status: "Booked",
-    features: "Corporate Plaza Hub, Multi-Storey Approved",
-    image: "/images/sectors/commercial-plaza.jpg",
-  },
-];
-
-// -------------------------------------------------------------
-// Initial Blogs Seed Data
-// -------------------------------------------------------------
-
-export const initialBlogs: StoredBlog[] = [
-  {
-    id: "blog-001",
-    slug: "rawalpindi-ring-road-interchange-saffron-city-impact",
-    title: "Rawalpindi Ring Road Interchange — Transformative Value for Saffron City",
-    excerpt: "How the 2-minute direct bypass connection turns Saffron City on GT Road into a primary commercial and residential nexus for Islamabad & Rawalpindi.",
-    content: "The Rawalpindi Ring Road (RRR) project stands as one of the most critical economic game-changers for the twin cities. Saffron City's strategic positioning just 2 minutes from the Rawat interchange provides signal-free connectivity to the New Islamabad International Airport, M-2 Motorway, and Central Islamabad.\n\nInvestors are seeing rapid capital appreciation as infrastructure earthworks accelerate. With wide 250-foot boulevards and direct arterial links, Saffron City offers unmatched logistical convenience for overseas Pakistanis and local residents alike.",
-    image: "/images/hero-bg.jpg",
-    category: "Market Insights",
-    author: "Saffron City Research Desk",
-    readTime: "4 min read",
-    isPublished: true,
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-  },
-  {
-    id: "blog-002",
-    slug: "sector-a-block-b-development-milestones-2026",
-    title: "Sector A (Block B) Fast-Track Infrastructure & Development Update",
-    excerpt: "On-ground progress report on underground utilities, Grand Jamia Mosque foundation, carpeted roads, and recreational park zones.",
-    content: "Development works across Sector A (Block B) have entered an advanced phase. Underground cabling for electrical distribution, water filtration plant earthworks, and modern sewerage systems are being installed with precision.\n\nThe project philosophy of 'infrastructure preceding residents' ensures that every allottee steps into a fully operational, secure community from day one. New official rates are now live with 10% down payment options.",
-    image: "/images/sectors/sector-a-luxury.jpg",
-    category: "Development Update",
-    author: "SKB Engineering Team",
-    readTime: "5 min read",
-    isPublished: true,
-    createdAt: new Date(Date.now() - 3600000 * 96).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 96).toISOString(),
-  },
-  {
-    id: "blog-003",
-    slug: "why-saffron-city-top-rda-approved-investment",
-    title: "Why Saffron City is Ranked Among Top RDA-Approved Societies in 2026",
-    excerpt: "A deep-dive into legal security, 15,000 Kanal RDA NOC approval, 70-year construction pedigree of SKB Group, and high ROI potential.",
-    content: "Real estate investment requires two fundamental pillars: legal transparency and reliable developer pedigree. Saffron City boasts an official No Objection Certificate (NOC) granted by the Rawalpindi Development Authority (RDA) across its full 15,000 Kanal master plan.\n\nBacked by Saadullah Khan & Brothers (SKB Group) with over 70 years of nationwide mega-infrastructure achievements, Saffron City ensures zero-risk, high-growth investment for families and commercial developers.",
-    image: "/images/facilities/gated-security.jpg",
-    category: "Legal & Investment",
-    author: "Official Advisory Board",
-    readTime: "6 min read",
-    isPublished: true,
-    createdAt: new Date(Date.now() - 3600000 * 140).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 140).toISOString(),
-  },
-];
-
-// -------------------------------------------------------------
-// Persistent Store Implementation (JSON File + Memory Cache)
-// -------------------------------------------------------------
-
-const dataDir = path.join(process.cwd(), "data");
-const storeFilePath = path.join(dataDir, "cms_store.json");
-
-interface CMSStoreData {
-  users: StoredUser[];
-  resetTokens: PasswordResetRecord[];
-  inquiries: StoredInquiry[];
-  plots: StoredPlot[];
-  blogs: StoredBlog[];
-  settings: StoredSettings;
-}
-
-const globalForStore = globalThis as unknown as {
-  cmsStore?: CMSStoreData;
-};
-
-function loadStore(): CMSStoreData {
-  try {
-    if (fs.existsSync(storeFilePath)) {
-      const raw = fs.readFileSync(storeFilePath, "utf-8");
-      const parsed = JSON.parse(raw);
-
-      let users: StoredUser[] = Array.isArray(parsed.users) ? (parsed.users as StoredUser[]) : [];
-
-      if (users.length === 0) {
-        users = [initialUsers[0]];
-      } else {
-        // Ensure primary super admin always has Super Admin role and full permissions
-        const superAdminIndex = users.findIndex(
-          (u) => u && u.email && u.email.toLowerCase() === "ubaidnasir401@gmail.com"
-        );
-        if (superAdminIndex === -1) {
-          users.unshift(initialUsers[0]);
-        } else {
-          users[superAdminIndex] = {
-            ...users[superAdminIndex],
-            role: "SUPER_ADMIN",
-            permissions: ALL_PERMISSIONS.map((p) => p.id),
-            isActive: true,
-          };
-        }
-      }
-
-      globalForStore.cmsStore = {
-        users,
-        resetTokens: Array.isArray(parsed.resetTokens) ? parsed.resetTokens : [],
-        inquiries: Array.isArray(parsed.inquiries) ? parsed.inquiries : initialInquiries,
-        plots: Array.isArray(parsed.plots) ? parsed.plots : initialPlots,
-        blogs: Array.isArray(parsed.blogs) ? parsed.blogs : initialBlogs,
-        settings: { ...defaultSettings, ...(parsed.settings || {}) },
-      };
-      return globalForStore.cmsStore;
-    }
-  } catch (err) {
-    console.warn("Could not read cms_store.json, using defaults:", err);
+  // 2. Hash verification if salt exists
+  if (storedSalt) {
+    try {
+      const h10k = crypto.pbkdf2Sync(inputPassword, storedSalt, 10000, 64, "sha512").toString("hex");
+      if (h10k === storedHash) return true;
+      const h100k = crypto.pbkdf2Sync(inputPassword, storedSalt, 100000, 64, "sha512").toString("hex");
+      if (h100k === storedHash) return true;
+    } catch {}
   }
 
-  const initialData: CMSStoreData = {
-    users: initialUsers,
-    resetTokens: [],
-    inquiries: initialInquiries,
-    plots: initialPlots,
-    blogs: initialBlogs,
-    settings: defaultSettings,
-  };
-
-  saveStore(initialData);
-  globalForStore.cmsStore = initialData;
-  return initialData;
-}
-
-function saveStore(data: CMSStoreData) {
-  try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(storeFilePath, JSON.stringify(data, null, 2), "utf-8");
-    globalForStore.cmsStore = data;
-    backendCache.clear();
-  } catch (err) {
-    console.error("Failed to save cms_store.json:", err);
-  }
+  return false;
 }
 
 // -------------------------------------------------------------
-// Exported Repository Helpers
+// Direct MySQL Database API (Mapped to exact live saffron_city tables)
 // -------------------------------------------------------------
 
 export const db = {
   // -------------------------
-  // Auth & User Management
-  // -------------------------
-  getUsers: async (): Promise<SafeUser[]> => {
-    const cached = backendCache.get<SafeUser[]>("all_users");
-    if (cached) return cached;
-
-    const store = loadStore();
-    const safeUsers = store.users.map(({ passwordHash, salt, ...rest }) => rest);
-    backendCache.set("all_users", safeUsers, 30);
-    return safeUsers;
-  },
-
-  getUserByEmail: async (email: string): Promise<StoredUser | null> => {
-    const store = loadStore();
-    const cleanEmail = email.trim().toLowerCase();
-    const user = store.users.find(
-      (u) =>
-        u.email.toLowerCase() === cleanEmail ||
-        (cleanEmail === "ubaid" && u.email.toLowerCase() === "ubaidnasir401@gmail.com") ||
-        (cleanEmail === "admin" && u.email.toLowerCase() === "admin@saffroncity.pk")
-    );
-    return user ? { ...user } : null;
-  },
-
-  getUserById: async (id: string): Promise<StoredUser | null> => {
-    const store = loadStore();
-    const user = store.users.find((u) => u.id === id);
-    return user ? { ...user } : null;
-  },
-
-  createUser: async (data: {
-    name: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    permissions: DashboardPermission[];
-  }): Promise<SafeUser> => {
-    const store = loadStore();
-    const existing = store.users.find((u) => u.email.toLowerCase() === data.email.trim().toLowerCase());
-    if (existing) {
-      throw new Error(`User with email ${data.email} already exists`);
-    }
-
-    const { hash, salt } = hashPassword(data.password);
-    const newUser: StoredUser = {
-      id: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      name: data.name.trim(),
-      email: data.email.trim().toLowerCase(),
-      passwordHash: hash,
-      salt,
-      role: data.role,
-      permissions: data.permissions || ["overview", "leads"],
-      failedAttempts: 0,
-      lockedUntil: null,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    store.users.push(newUser);
-    saveStore(store);
-
-    const { passwordHash, salt: _, ...safeUser } = newUser;
-    return safeUser;
-  },
-
-  updateUser: async (
-    id: string,
-    updates: Partial<Omit<StoredUser, "id" | "passwordHash" | "salt">> & { password?: string }
-  ): Promise<SafeUser | null> => {
-    const store = loadStore();
-    const index = store.users.findIndex((u) => u.id === id);
-    if (index === -1) return null;
-
-    const user = store.users[index];
-
-    if (updates.password) {
-      const { hash, salt } = hashPassword(updates.password);
-      user.passwordHash = hash;
-      user.salt = salt;
-    }
-
-    if (updates.name !== undefined) user.name = updates.name.trim();
-    if (updates.email !== undefined) user.email = updates.email.trim().toLowerCase();
-    if (updates.role !== undefined) user.role = updates.role;
-    if (updates.permissions !== undefined) user.permissions = updates.permissions;
-    if (updates.isActive !== undefined) user.isActive = updates.isActive;
-    if (updates.lockedUntil !== undefined) user.lockedUntil = updates.lockedUntil;
-    if (updates.failedAttempts !== undefined) user.failedAttempts = updates.failedAttempts;
-
-    user.updatedAt = new Date().toISOString();
-    store.users[index] = user;
-    saveStore(store);
-
-    const { passwordHash, salt: _, ...safeUser } = user;
-    return safeUser;
-  },
-
-  unlockUser: async (id: string): Promise<boolean> => {
-    const store = loadStore();
-    const index = store.users.findIndex((u) => u.id === id);
-    if (index === -1) return false;
-
-    store.users[index].failedAttempts = 0;
-    store.users[index].lockedUntil = null;
-    store.users[index].updatedAt = new Date().toISOString();
-    saveStore(store);
-    return true;
-  },
-
-  deleteUser: async (id: string): Promise<boolean> => {
-    const store = loadStore();
-    const user = store.users.find((u) => u.id === id);
-    if (!user) return false;
-    if (user.role === "SUPER_ADMIN" || user.email.toLowerCase() === "ubaidnasir401@gmail.com") {
-      throw new Error("SuperAdmin account cannot be deleted");
-    }
-
-    const prevLen = store.users.length;
-    store.users = store.users.filter((u) => u.id !== id);
-    if (store.users.length !== prevLen) {
-      saveStore(store);
-      return true;
-    }
-    return false;
-  },
-
-  // -------------------------
-  // Secure Login with Multi-Credential & 30-min Lockout
+  // 1. User Authentication (Direct from MySQL `user` table)
   // -------------------------
   authenticateUser: async (
     identifierInput: string,
@@ -702,389 +141,893 @@ export const db = {
     attemptsLeft?: number;
     message?: string;
   }> => {
-    const store = loadStore();
-    const identifier = identifierInput.trim().toLowerCase();
+    try {
+      const pool = getMySQLPool();
+      const identifier = identifierInput.trim().toLowerCase();
 
-    // Map common aliases (e.g. "ubaid" -> "ubaidnasir401@gmail.com")
-    let userIndex = store.users.findIndex((u) => u.email.toLowerCase() === identifier);
+      // Query database directly for matching user
+      const [rows]: any = await pool.query(
+        "SELECT * FROM `user` WHERE LOWER(`email`) = ? OR `id` = ? LIMIT 1",
+        [identifier, identifier]
+      );
 
-    if (userIndex === -1 && (identifier === "ubaid" || identifier === "admin")) {
-      userIndex = store.users.findIndex((u) => u.email.toLowerCase() === "ubaidnasir401@gmail.com");
-    }
-
-    if (userIndex === -1) {
-      return {
-        success: false,
-        message: "Invalid administrator credentials. Please verify your email and password.",
-      };
-    }
-
-    const user = store.users[userIndex];
-
-    if (!user.isActive) {
-      return {
-        success: false,
-        message: "This account has been deactivated by SuperAdmin. Please contact support.",
-      };
-    }
-
-    // 1. Check if account is currently locked
-    if (user.lockedUntil) {
-      const lockExpiry = new Date(user.lockedUntil).getTime();
-      const now = Date.now();
-
-      if (now < lockExpiry) {
-        const remainingMs = lockExpiry - now;
-        const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+      if (!rows || rows.length === 0) {
         return {
           success: false,
-          locked: true,
-          lockExpiresAt: user.lockedUntil,
-          remainingMinutes,
-          message: `Account is temporarily locked due to 3 incorrect attempts. Please try again in ${remainingMinutes} minute(s) or contact SuperAdmin.`,
-        };
-      } else {
-        // Lock expired -> reset lockout
-        user.failedAttempts = 0;
-        user.lockedUntil = null;
-      }
-    }
-
-    // 2. Verify password strictly with PBKDF2
-    const isMatch = verifyPassword(passwordInput, user.passwordHash, user.salt);
-
-    if (!isMatch) {
-      user.failedAttempts = (user.failedAttempts || 0) + 1;
-      const attemptsLeft = Math.max(0, 3 - user.failedAttempts);
-
-      if (user.failedAttempts >= 3) {
-        // Lock account for 30 minutes
-        const lockDurationMs = 30 * 60 * 1000;
-        const lockUntilDate = new Date(Date.now() + lockDurationMs).toISOString();
-        user.lockedUntil = lockUntilDate;
-        user.updatedAt = new Date().toISOString();
-        saveStore(store);
-
-        return {
-          success: false,
-          locked: true,
-          lockExpiresAt: lockUntilDate,
-          remainingMinutes: 30,
-          attemptsLeft: 0,
-          message: "Account locked! You entered 3 incorrect passwords. The account is locked for 30 minutes.",
+          message: "Invalid administrator credentials. User not found in database.",
         };
       }
 
-      user.updatedAt = new Date().toISOString();
-      saveStore(store);
+      const userRow = rows[0];
+
+      if (!userRow.isActive) {
+        return {
+          success: false,
+          message: "This account has been deactivated by SuperAdmin. Please contact support.",
+        };
+      }
+
+      // Verify password from DB
+      const isPasswordValid = verifyUserPasswordInDb(
+        passwordInput,
+        userRow.passwordHash || userRow.password,
+        userRow.salt
+      );
+
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: "Invalid administrator credentials. Incorrect password.",
+        };
+      }
+
+      // Update last login timestamp in database
+      await pool.query("UPDATE `user` SET `lastLoginAt` = NOW(), `failedAttempts` = 0 WHERE `id` = ?", [userRow.id]);
+
+      const token = generateUserSessionToken(userRow.id, userRow.email);
+
+      const permissions = typeof userRow.permissions === "string" ? JSON.parse(userRow.permissions) : (userRow.permissions || []);
+
+      const safeUser: SafeUser = {
+        id: userRow.id,
+        email: userRow.email,
+        name: userRow.name,
+        role: userRow.role,
+        permissions,
+        isActive: Boolean(userRow.isActive),
+        lastLoginAt: new Date().toISOString(),
+        createdAt: userRow.createdAt,
+      };
 
       return {
-        success: false,
-        attemptsLeft,
-        message: `Incorrect password. ${attemptsLeft} attempt(s) remaining before a 30-minute security lock.`,
+        success: true,
+        user: safeUser,
+        token,
       };
-    }
-
-    // 3. Password is valid! Reset failure counters & generate unique TLS token
-    user.failedAttempts = 0;
-    user.lockedUntil = null;
-    user.lastLoginAt = new Date().toISOString();
-
-    const sessionToken = generateUserSessionToken(user.id, user.email);
-    user.sessionToken = sessionToken;
-    user.updatedAt = new Date().toISOString();
-    saveStore(store);
-
-    const { passwordHash, salt, ...safeUser } = user;
-    return {
-      success: true,
-      user: safeUser,
-      token: sessionToken,
-      message: "Authentication successful.",
-    };
-  },
-
-  // -------------------------
-  // Forgot Password Flow
-  // -------------------------
-  createPasswordResetRequest: async (emailInput: string): Promise<{ success: boolean; token?: string; message: string }> => {
-    const store = loadStore();
-    const email = emailInput.trim().toLowerCase();
-    const user = store.users.find((u) => u.email.toLowerCase() === email);
-
-    if (!user) {
+    } catch (err: any) {
+      console.error("[MySQL Auth Error]:", err.message);
       return {
         success: false,
-        message: "No account found with this email address.",
+        message: `Database connection error: ${err.message}. Please verify MySQL service is running in XAMPP.`,
       };
     }
-
-    // Generate a secure 6-digit numeric OTP code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
-
-    // Invalidate previous unused OTPs for this email
-    store.resetTokens = store.resetTokens.filter((r) => r.email !== email || !r.used);
-    store.resetTokens.push({
-      id: `otp-${Date.now()}`,
-      email,
-      token: otpCode,
-      expiresAt,
-      used: false,
-      createdAt: new Date().toISOString(),
-    });
-    saveStore(store);
-
-    return {
-      success: true,
-      token: otpCode,
-      message: `A 6-digit verification code has been dispatched to ${email}.`,
-    };
   },
 
-  resetPasswordWithToken: async (otpOrToken: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
-    const store = loadStore();
-    const cleanOtp = otpOrToken.trim();
-    const record = store.resetTokens.find((r) => r.token === cleanOtp && !r.used);
-
-    if (!record) {
-      return { success: false, message: "Invalid or expired 6-digit verification code." };
+  getUserById: async (id: string): Promise<SafeUser | null> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE `id` = ? LIMIT 1", [id]);
+      if (!rows || rows.length === 0) return null;
+      const u = rows[0];
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
+        isActive: Boolean(u.isActive),
+        lastLoginAt: u.lastLoginAt,
+        createdAt: u.createdAt,
+      };
+    } catch (err: any) {
+      console.error("[MySQL getUserById Error]:", err.message);
+      return null;
     }
+  },
 
-    if (Date.now() > new Date(record.expiresAt).getTime()) {
-      return { success: false, message: "Verification code has expired (15 minutes). Please request a new OTP." };
+  getUsers: async (): Promise<SafeUser[]> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT `id`, `email`, `name`, `role`, `permissions`, `isActive`, `lastLoginAt`, `createdAt` FROM `user` ORDER BY `createdAt` ASC");
+      return (rows || []).map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : (u.permissions || []),
+        isActive: Boolean(u.isActive),
+        lastLoginAt: u.lastLoginAt,
+        createdAt: u.createdAt,
+      }));
+    } catch (err: any) {
+      console.error("[MySQL getUsers Error]:", err.message);
+      return [];
     }
+  },
 
-    const userIndex = store.users.findIndex((u) => u.email.toLowerCase() === record.email.toLowerCase());
-    if (userIndex === -1) {
-      return { success: false, message: "User account not found." };
+  createUser: async (
+    data: Omit<StoredUser, "id" | "failedAttempts" | "lockedUntil" | "createdAt" | "updatedAt"> & { password?: string }
+  ): Promise<SafeUser | null> => {
+    try {
+      const pool = getMySQLPool();
+      const id = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const password = data.password || data.email;
+      const salt = crypto.randomBytes(32).toString("hex");
+      const passwordHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+      const permissionsJson = JSON.stringify(data.permissions || []);
+
+      await pool.query(
+        `INSERT INTO \`user\` (\`id\`, \`email\`, \`name\`, \`passwordHash\`, \`salt\`, \`role\`, \`permissions\`, \`isActive\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [id, data.email.toLowerCase().trim(), data.name, passwordHash, salt, data.role, permissionsJson, data.isActive ? 1 : 0]
+      );
+
+      return {
+        id,
+        email: data.email,
+        name: data.name,
+        role: data.role,
+        permissions: data.permissions,
+        isActive: data.isActive,
+        createdAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      console.error("[MySQL createUser Error]:", err.message);
+      return null;
     }
+  },
 
-    const { hash, salt } = hashPassword(newPassword);
-    store.users[userIndex].passwordHash = hash;
-    store.users[userIndex].salt = salt;
-    store.users[userIndex].failedAttempts = 0;
-    store.users[userIndex].lockedUntil = null;
-    store.users[userIndex].updatedAt = new Date().toISOString();
+  updateUser: async (id: string, updates: Partial<StoredUser> & { password?: string }): Promise<SafeUser | null> => {
+    try {
+      const pool = getMySQLPool();
+      const fields: string[] = [];
+      const values: any[] = [];
 
-    record.used = true;
-    saveStore(store);
+      if (updates.name !== undefined) {
+        fields.push("`name` = ?");
+        values.push(updates.name);
+      }
+      if (updates.email !== undefined) {
+        fields.push("`email` = ?");
+        values.push(updates.email.toLowerCase().trim());
+      }
+      if (updates.password !== undefined) {
+        const salt = crypto.randomBytes(32).toString("hex");
+        const passwordHash = crypto.pbkdf2Sync(updates.password, salt, 10000, 64, "sha512").toString("hex");
+        fields.push("`passwordHash` = ?, `salt` = ?");
+        values.push(passwordHash, salt);
+      }
+      if (updates.role !== undefined) {
+        fields.push("`role` = ?");
+        values.push(updates.role);
+      }
+      if (updates.permissions !== undefined) {
+        fields.push("`permissions` = ?");
+        values.push(JSON.stringify(updates.permissions));
+      }
+      if (updates.isActive !== undefined) {
+        fields.push("`isActive` = ?");
+        values.push(updates.isActive ? 1 : 0);
+      }
 
-    return { success: true, message: "Password updated successfully. You may now sign in with your new password." };
+      if (fields.length === 0) return null;
+
+      values.push(id);
+      await pool.query(`UPDATE \`user\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+
+      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE `id` = ? LIMIT 1", [id]);
+      if (!rows || rows.length === 0) return null;
+      const u = rows[0];
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        permissions: typeof u.permissions === "string" ? JSON.parse(u.permissions) : u.permissions,
+        isActive: Boolean(u.isActive),
+        createdAt: u.createdAt,
+      };
+    } catch (err: any) {
+      console.error("[MySQL updateUser Error]:", err.message);
+      return null;
+    }
+  },
+
+  unlockUser: async (id: string): Promise<boolean> => {
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("UPDATE `user` SET `failedAttempts` = 0, `lockedUntil` = NULL WHERE `id` = ?", [id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL unlockUser Error]:", err.message);
+      return false;
+    }
+  },
+
+  deleteUser: async (id: string): Promise<boolean> => {
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `user` WHERE `id` = ?", [id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deleteUser Error]:", err.message);
+      return false;
+    }
+  },
+
+  createPasswordResetRequest: async (email: string): Promise<{ success: boolean; token?: string; message?: string }> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `user` WHERE LOWER(`email`) = ? LIMIT 1", [email.toLowerCase().trim()]);
+      if (!rows || rows.length === 0) {
+        return { success: false, message: "No account found with this email." };
+      }
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await pool.query("INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())", [
+        `rst-${Date.now()}`,
+        otp,
+        rows[0].id,
+      ]);
+      return { success: true, token: otp, message: "Reset code generated." };
+    } catch (err: any) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  resetPasswordWithToken: async (token: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `passwordresettoken` WHERE `token` = ? AND `expiresAt` > NOW() ORDER BY `createdAt` DESC LIMIT 1", [token]);
+      if (!rows || rows.length === 0) {
+        return { success: false, message: "Invalid or expired reset token." };
+      }
+      const userId = rows[0].userId;
+      const salt = crypto.randomBytes(32).toString("hex");
+      const passwordHash = crypto.pbkdf2Sync(newPassword, salt, 10000, 64, "sha512").toString("hex");
+      await pool.query("UPDATE `user` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?", [passwordHash, salt, userId]);
+      await pool.query("DELETE FROM `passwordresettoken` WHERE `token` = ?", [token]);
+      return { success: true, message: "Password updated successfully." };
+    } catch (err: any) {
+      return { success: false, message: err.message };
+    }
   },
 
   // -------------------------
-  // Inquiries (Leads)
+  // 2. Dashboard Stats (Direct MySQL)
+  // -------------------------
+  getStats: async (): Promise<any> => {
+    try {
+      const pool = getMySQLPool();
+      const [inqRows]: any = await pool.query("SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'New' THEN 1 ELSE 0 END) AS unread FROM `leadinquiry`");
+      const [plotRows]: any = await pool.query("SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) AS available, SUM(CASE WHEN status IN ('Booked', 'Reserved') THEN 1 ELSE 0 END) AS booked, SUM(totalPrice) AS totalValuation FROM `plotinventory`");
+      const [blogRows]: any = await pool.query("SELECT COUNT(*) AS total FROM `blogs`");
+
+      return {
+        totalLeads: inqRows[0]?.total || 0,
+        unreadLeads: inqRows[0]?.unread || 0,
+        totalPlots: plotRows[0]?.total || 0,
+        availablePlots: plotRows[0]?.available || 0,
+        bookedPlots: plotRows[0]?.booked || 0,
+        totalInventoryValue: plotRows[0]?.totalValuation || 0,
+        totalBlogs: blogRows[0]?.total || 0,
+      };
+    } catch (err: any) {
+      console.error("[MySQL getStats Error]:", err.message);
+      return {
+        totalLeads: 0,
+        unreadLeads: 0,
+        totalPlots: 0,
+        availablePlots: 0,
+        bookedPlots: 0,
+        totalInventoryValue: 0,
+        totalBlogs: 0,
+      };
+    }
+  },
+
+  // -------------------------
+  // 3. Inquiries / Leads (Direct MySQL `leadinquiry` table)
   // -------------------------
   getInquiries: async (): Promise<StoredInquiry[]> => {
-    const cached = backendCache.get<StoredInquiry[]>("all_inquiries");
-    if (cached) return cached;
-
-    const store = loadStore();
-    backendCache.set("all_inquiries", store.inquiries, 30);
-    return store.inquiries;
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `leadinquiry` ORDER BY `createdAt` DESC");
+      return rows || [];
+    } catch (err: any) {
+      console.error("[MySQL getInquiries Error]:", err.message);
+      return [];
+    }
   },
 
-  createInquiry: async (data: Omit<StoredInquiry, "id" | "createdAt" | "updatedAt">): Promise<StoredInquiry> => {
-    const store = loadStore();
-    const newInquiry: StoredInquiry = {
-      id: `lead-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      ...data,
+  createInquiry: async (inquiry: Omit<StoredInquiry, "id" | "createdAt" | "updatedAt">): Promise<StoredInquiry> => {
+    const id = `lead-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      const pool = getMySQLPool();
+      await pool.query(
+        `INSERT INTO \`leadinquiry\` (\`id\`, \`name\`, \`phone\`, \`message\`, \`plotSize\`, \`plotType\`, \`sector\`, \`status\`, \`source\`, \`notes\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [
+          id,
+          inquiry.name,
+          inquiry.phone,
+          inquiry.message || null,
+          inquiry.plotSize || null,
+          inquiry.plotType || null,
+          inquiry.sector || null,
+          inquiry.status || "New",
+          inquiry.source || "Website Form",
+          inquiry.notes || null,
+        ]
+      );
+    } catch (err: any) {
+      console.error("[MySQL createInquiry Error]:", err.message);
+    }
+
+    return {
+      ...inquiry,
+      id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    store.inquiries.unshift(newInquiry);
-    saveStore(store);
-    return newInquiry;
   },
 
   updateInquiry: async (id: string, updates: Partial<StoredInquiry>): Promise<StoredInquiry | null> => {
-    const store = loadStore();
-    const index = store.inquiries.findIndex((i) => i.id === id);
-    if (index === -1) return null;
+    try {
+      const pool = getMySQLPool();
+      const fields: string[] = [];
+      const values: any[] = [];
 
-    store.inquiries[index] = {
-      ...store.inquiries[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    saveStore(store);
-    return store.inquiries[index];
+      for (const [key, val] of Object.entries(updates)) {
+        if (key !== "id") {
+          fields.push(`\`${key}\` = ?`);
+          values.push(val);
+        }
+      }
+
+      if (fields.length > 0) {
+        values.push(id);
+        await pool.query(`UPDATE \`leadinquiry\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+      }
+
+      const [rows]: any = await pool.query("SELECT * FROM `leadinquiry` WHERE `id` = ? LIMIT 1", [id]);
+      return rows && rows.length > 0 ? rows[0] : null;
+    } catch (err: any) {
+      console.error("[MySQL updateInquiry Error]:", err.message);
+      return null;
+    }
   },
 
   deleteInquiry: async (id: string): Promise<boolean> => {
-    const store = loadStore();
-    const prevLen = store.inquiries.length;
-    store.inquiries = store.inquiries.filter((i) => i.id !== id);
-    if (store.inquiries.length !== prevLen) {
-      saveStore(store);
-      return true;
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `leadinquiry` WHERE `id` = ?", [id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deleteInquiry Error]:", err.message);
+      return false;
     }
-    return false;
   },
 
   // -------------------------
-  // Plots
+  // 4. Plots Inventory (Direct MySQL `plotinventory` table)
   // -------------------------
   getPlots: async (): Promise<StoredPlot[]> => {
-    const cached = backendCache.get<StoredPlot[]>("all_plots");
-    if (cached) return cached;
-
-    const store = loadStore();
-    backendCache.set("all_plots", store.plots, 30);
-    return store.plots;
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `plotinventory` ORDER BY `createdAt` ASC");
+      return (rows || []).map((p: any) => ({
+        ...p,
+        totalPrice: Number(p.totalPrice) || 0,
+        downPayment: Number(p.downPayment) || 0,
+        monthlyInst: Number(p.monthlyInst) || 0,
+      }));
+    } catch (err: any) {
+      console.error("[MySQL getPlots Error]:", err.message);
+      return [];
+    }
   },
 
-  getPlotById: async (id: string): Promise<StoredPlot | null> => {
-    const store = loadStore();
-    return store.plots.find((p) => p.id === id) || null;
-  },
+  createPlot: async (plot: Omit<StoredPlot, "id">): Promise<StoredPlot> => {
+    const id = `plt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      const pool = getMySQLPool();
+      await pool.query(
+        `INSERT INTO \`plotinventory\` (\`id\`, \`plotNumber\`, \`sector\`, \`category\`, \`type\`, \`totalPrice\`, \`downPayment\`, \`monthlyInst\`, \`status\`, \`features\`, \`image\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [
+          id,
+          plot.plotNumber,
+          plot.sector,
+          plot.category,
+          plot.type,
+          plot.totalPrice,
+          plot.downPayment,
+          plot.monthlyInst,
+          plot.status || "Available",
+          plot.features || "",
+          plot.image || "/images/sectors/sector-a-luxury.jpg",
+        ]
+      );
+    } catch (err: any) {
+      console.error("[MySQL createPlot Error]:", err.message);
+    }
 
-  createPlot: async (data: Omit<StoredPlot, "id">): Promise<StoredPlot> => {
-    const store = loadStore();
-    const newPlot: StoredPlot = {
-      id: `plt-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      ...data,
-    };
-    store.plots.push(newPlot);
-    saveStore(store);
-    return newPlot;
+    return { ...plot, id };
   },
 
   updatePlot: async (id: string, updates: Partial<StoredPlot>): Promise<StoredPlot | null> => {
-    const store = loadStore();
-    const index = store.plots.findIndex((p) => p.id === id);
-    if (index === -1) return null;
+    try {
+      const pool = getMySQLPool();
+      const fields: string[] = [];
+      const values: any[] = [];
 
-    store.plots[index] = {
-      ...store.plots[index],
-      ...updates,
-    };
-    saveStore(store);
-    return store.plots[index];
+      for (const [key, val] of Object.entries(updates)) {
+        if (key !== "id") {
+          fields.push(`\`${key}\` = ?`);
+          values.push(val);
+        }
+      }
+
+      if (fields.length > 0) {
+        values.push(id);
+        await pool.query(`UPDATE \`plotinventory\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+      }
+
+      const [rows]: any = await pool.query("SELECT * FROM `plotinventory` WHERE `id` = ? LIMIT 1", [id]);
+      return rows && rows.length > 0 ? rows[0] : null;
+    } catch (err: any) {
+      console.error("[MySQL updatePlot Error]:", err.message);
+      return null;
+    }
   },
 
   deletePlot: async (id: string): Promise<boolean> => {
-    const store = loadStore();
-    const prevLen = store.plots.length;
-    store.plots = store.plots.filter((p) => p.id !== id);
-    if (store.plots.length !== prevLen) {
-      saveStore(store);
-      return true;
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `plotinventory` WHERE `id` = ?", [id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deletePlot Error]:", err.message);
+      return false;
     }
-    return false;
   },
 
   // -------------------------
-  // Blogs & Articles CMS
+  // 5. Blogs CMS (Direct MySQL `blogs` table)
   // -------------------------
   getBlogs: async (publishedOnly: boolean = false): Promise<StoredBlog[]> => {
-    const cached = backendCache.get<StoredBlog[]>(`all_blogs_${publishedOnly}`);
-    if (cached) return cached;
-
-    const store = loadStore();
-    const list = publishedOnly
-      ? (store.blogs || []).filter((b) => b.isPublished)
-      : store.blogs || [];
-    backendCache.set(`all_blogs_${publishedOnly}`, list, 30);
-    return list;
+    try {
+      const pool = getMySQLPool();
+      const sql = publishedOnly
+        ? "SELECT * FROM `blogs` WHERE `isPublished` = 1 ORDER BY `createdAt` DESC"
+        : "SELECT * FROM `blogs` ORDER BY `createdAt` DESC";
+      const [rows]: any = await pool.query(sql);
+      return (rows || []).map((b: any) => ({
+        ...b,
+        isPublished: Boolean(b.isPublished),
+        robotsIndex: Boolean(b.robotsIndex),
+        robotsFollow: Boolean(b.robotsFollow),
+      }));
+    } catch (err: any) {
+      console.error("[MySQL getBlogs Error]:", err.message);
+      return [];
+    }
   },
 
   getBlogBySlug: async (slug: string): Promise<StoredBlog | null> => {
-    const store = loadStore();
-    return (store.blogs || []).find((b) => b.slug === slug) || null;
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `blogs` WHERE `slug` = ? LIMIT 1", [slug]);
+      if (!rows || rows.length === 0) return null;
+      const b = rows[0];
+      return {
+        ...b,
+        isPublished: Boolean(b.isPublished),
+        robotsIndex: Boolean(b.robotsIndex),
+        robotsFollow: Boolean(b.robotsFollow),
+      };
+    } catch (err: any) {
+      console.error("[MySQL getBlogBySlug Error]:", err.message);
+      return null;
+    }
   },
 
-  createBlog: async (data: Omit<StoredBlog, "id" | "createdAt" | "updatedAt">): Promise<StoredBlog> => {
-    const store = loadStore();
-    if (!store.blogs) store.blogs = [];
-    const newBlog: StoredBlog = {
-      id: `blog-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      ...data,
+  createBlog: async (blog: Omit<StoredBlog, "id" | "createdAt" | "updatedAt">): Promise<StoredBlog> => {
+    const id = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      const pool = getMySQLPool();
+      await pool.query(
+        `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`createdAt\`) ` +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        [
+          id,
+          blog.slug,
+          blog.title,
+          blog.excerpt || "",
+          blog.content || "",
+          blog.image || "/images/blogs/rda-noc-guide.jpg",
+          blog.category || "General",
+          blog.author || "Editorial Team",
+          blog.readTime || "5 min read",
+          blog.isPublished ? 1 : 0,
+          blog.seoTitle || null,
+          blog.metaDescription || null,
+          blog.canonicalUrl || null,
+          blog.robotsIndex ? 1 : 0,
+          blog.robotsFollow ? 1 : 0,
+          blog.focusKeyword || null,
+          blog.secondaryKeywords || null,
+          blog.h1Heading || null,
+        ]
+      );
+    } catch (err: any) {
+      console.error("[MySQL createBlog Error]:", err.message);
+    }
+
+    return {
+      ...blog,
+      id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    store.blogs.unshift(newBlog);
-    saveStore(store);
-    return newBlog;
   },
 
   updateBlog: async (id: string, updates: Partial<StoredBlog>): Promise<StoredBlog | null> => {
-    const store = loadStore();
-    if (!store.blogs) store.blogs = [];
-    const index = store.blogs.findIndex((b) => b.id === id);
-    if (index === -1) return null;
+    try {
+      const pool = getMySQLPool();
+      const fields: string[] = [];
+      const values: any[] = [];
 
-    store.blogs[index] = {
-      ...store.blogs[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    saveStore(store);
-    return store.blogs[index];
+      for (const [key, val] of Object.entries(updates)) {
+        if (key !== "id") {
+          fields.push(`\`${key}\` = ?`);
+          values.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+        }
+      }
+
+      if (fields.length > 0) {
+        values.push(id);
+        await pool.query(`UPDATE \`blogs\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+      }
+
+      return (await db.getBlogBySlug(updates.slug || id)) || null;
+    } catch (err: any) {
+      console.error("[MySQL updateBlog Error]:", err.message);
+      return null;
+    }
   },
 
   deleteBlog: async (id: string): Promise<boolean> => {
-    const store = loadStore();
-    if (!store.blogs) return false;
-    const prevLen = store.blogs.length;
-    store.blogs = store.blogs.filter((b) => b.id !== id);
-    if (store.blogs.length !== prevLen) {
-      saveStore(store);
-      return true;
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `blogs` WHERE `id` = ? OR `slug` = ?", [id, id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deleteBlog Error]:", err.message);
+      return false;
     }
-    return false;
   },
 
   // -------------------------
-  // Settings & CMS Content
+  // 6. Settings & CMS Content (Direct MySQL `sitesetting` table)
   // -------------------------
   getSettings: async (): Promise<StoredSettings> => {
     const cached = backendCache.get<StoredSettings>("site_settings");
     if (cached) return cached;
 
-    const store = loadStore();
-    backendCache.set("site_settings", store.settings, 60);
-    return store.settings;
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `sitesetting` WHERE `id` = 'default' LIMIT 1");
+      if (rows && rows.length > 0) {
+        const row = rows[0];
+        const meta = row.metaSettingsJson ? (typeof row.metaSettingsJson === "string" ? JSON.parse(row.metaSettingsJson) : row.metaSettingsJson) : {};
+        const hero = row.heroSettingsJson ? (typeof row.heroSettingsJson === "string" ? JSON.parse(row.heroSettingsJson) : row.heroSettingsJson) : {};
+        const chairman = row.chairmanSettingsJson ? (typeof row.chairmanSettingsJson === "string" ? JSON.parse(row.chairmanSettingsJson) : row.chairmanSettingsJson) : {};
+        const amenities = row.amenitiesJson ? (typeof row.amenitiesJson === "string" ? JSON.parse(row.amenitiesJson) : row.amenitiesJson) : [];
+        const landmarks = row.landmarksJson ? (typeof row.landmarksJson === "string" ? JSON.parse(row.landmarksJson) : row.landmarksJson) : [];
+        const paymentTiers = row.paymentTiersJson ? (typeof row.paymentTiersJson === "string" ? JSON.parse(row.paymentTiersJson) : row.paymentTiersJson) : [];
+
+        const settings: StoredSettings = {
+          siteName: row.siteName || "Saffron City Islamabad",
+          contactPhone: row.contactPhone || "0333 1113551",
+          secondaryPhone: row.secondaryPhone || "",
+          whatsappPhone: row.whatsappPhone || "923331113551",
+          officialEmail: row.officialEmail || "info@saffroncity.org",
+          officeAddress: row.officeAddress || "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
+          googleMapsUrl: "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
+          rdaNocStatus: row.rdaNocStatus || "RDA Approved (Full 15,000 Kanal)",
+          rdaVerificationUrl: "https://punjab.gov.pk",
+          announcement: row.announcement || "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
+          activePreLaunchDiscount: Boolean(row.activePreLaunchDiscount),
+          smtpEnabled: Boolean(row.smtpEnabled),
+          smtpHost: row.smtpHost || "smtp.hostinger.com",
+          smtpPort: row.smtpPort || 465,
+          smtpSecure: Boolean(row.smtpSecure),
+          smtpUser: row.smtpUser || "info@saffroncity.org",
+          smtpPass: row.smtpPass || "",
+          smtpFromEmail: row.smtpFromEmail || "info@saffroncity.org",
+          leadNotificationEmail: row.leadNotificationEmail || "info@saffroncity.org",
+          ...meta,
+          ...hero,
+          ...chairman,
+          amenities,
+          landmarks,
+          paymentTiers,
+        };
+
+        backendCache.set("site_settings", settings, 60);
+        return settings;
+      }
+    } catch (err: any) {
+      console.error("[MySQL getSettings Error]:", err.message);
+    }
+
+    return {
+      siteName: "Saffron City Islamabad",
+      contactPhone: "0333 1113551",
+      secondaryPhone: "",
+      whatsappPhone: "923331113551",
+      officialEmail: "info@saffroncity.org",
+      officeAddress: "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
+      googleMapsUrl: "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
+      rdaNocStatus: "RDA Approved (Full 15,000 Kanal)",
+      rdaVerificationUrl: "https://punjab.gov.pk",
+      announcement: "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
+      activePreLaunchDiscount: true,
+      smtpEnabled: true,
+      smtpHost: "smtp.hostinger.com",
+      smtpPort: 465,
+      smtpSecure: true,
+      smtpUser: "info@saffroncity.org",
+      smtpPass: "",
+      smtpFromEmail: "info@saffroncity.org",
+      leadNotificationEmail: "info@saffroncity.org",
+    } as StoredSettings;
   },
 
   updateSettings: async (updates: Partial<StoredSettings>): Promise<StoredSettings> => {
-    const store = loadStore();
-    store.settings = {
-      ...store.settings,
-      ...updates,
-    };
-    saveStore(store);
-    backendCache.delete("site_settings");
-    return store.settings;
+    try {
+      const pool = getMySQLPool();
+      const current = await db.getSettings();
+      const merged: StoredSettings = { ...current, ...updates };
+
+      await pool.query(
+        `INSERT INTO \`sitesetting\` (
+          \`id\`, \`siteName\`, \`contactPhone\`, \`secondaryPhone\`, \`whatsappPhone\`, \`officialEmail\`, \`officeAddress\`, \`rdaNocStatus\`, \`announcement\`, \`activePreLaunchDiscount\`, \`smtpEnabled\`, \`smtpHost\`, \`smtpPort\`, \`smtpSecure\`, \`smtpUser\`, \`smtpPass\`, \`smtpFromEmail\`, \`leadNotificationEmail\`
+        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          \`siteName\` = VALUES(\`siteName\`),
+          \`contactPhone\` = VALUES(\`contactPhone\`),
+          \`secondaryPhone\` = VALUES(\`secondaryPhone\`),
+          \`whatsappPhone\` = VALUES(\`whatsappPhone\`),
+          \`officialEmail\` = VALUES(\`officialEmail\`),
+          \`officeAddress\` = VALUES(\`officeAddress\`),
+          \`rdaNocStatus\` = VALUES(\`rdaNocStatus\`),
+          \`announcement\` = VALUES(\`announcement\`),
+          \`activePreLaunchDiscount\` = VALUES(\`activePreLaunchDiscount\`),
+          \`smtpEnabled\` = VALUES(\`smtpEnabled\`),
+          \`smtpHost\` = VALUES(\`smtpHost\`),
+          \`smtpPort\` = VALUES(\`smtpPort\`),
+          \`smtpSecure\` = VALUES(\`smtpSecure\`),
+          \`smtpUser\` = VALUES(\`smtpUser\`),
+          \`smtpPass\` = VALUES(\`smtpPass\`),
+          \`smtpFromEmail\` = VALUES(\`smtpFromEmail\`),
+          \`leadNotificationEmail\` = VALUES(\`leadNotificationEmail\`);`,
+        [
+          merged.siteName,
+          merged.contactPhone,
+          merged.secondaryPhone || null,
+          merged.whatsappPhone,
+          merged.officialEmail,
+          merged.officeAddress,
+          merged.rdaNocStatus,
+          merged.announcement || null,
+          merged.activePreLaunchDiscount ? 1 : 0,
+          merged.smtpEnabled ? 1 : 0,
+          merged.smtpHost || null,
+          merged.smtpPort || 465,
+          merged.smtpSecure ? 1 : 0,
+          merged.smtpUser || null,
+          merged.smtpPass || null,
+          merged.smtpFromEmail || null,
+          merged.leadNotificationEmail || null,
+        ]
+      );
+
+      backendCache.delete("site_settings");
+      return merged;
+    } catch (err: any) {
+      console.error("[MySQL updateSettings Error]:", err.message);
+      return updates as StoredSettings;
+    }
   },
 
   // -------------------------
-  // Overview Stats
+  // 7. Page SEO (Direct MySQL `pageseo` table)
   // -------------------------
-  getStats: async () => {
-    const store = loadStore();
-    const totalLeads = store.inquiries.length;
-    const newLeads = store.inquiries.filter((l) => l.status === "New").length;
-    const contactedLeads = store.inquiries.filter((l) => l.status === "Contacted").length;
-    const totalPlots = store.plots.length;
-    const availablePlots = store.plots.filter((p) => p.status === "Available").length;
-    const reservedPlots = store.plots.filter((p) => p.status === "Reserved").length;
-    const bookedPlots = store.plots.filter((p) => p.status === "Booked").length;
-    const inventoryValue = store.plots.reduce((acc, p) => acc + (p.totalPrice || 0), 0);
-    const totalUsers = store.users.length;
+  getPageSeoList: async (): Promise<StoredPageSeo[]> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `pageseo` ORDER BY `path` ASC");
+      return (rows || []).map((r: any) => ({
+        ...r,
+        robotsIndex: Boolean(r.robotsIndex),
+        robotsFollow: Boolean(r.robotsFollow),
+      }));
+    } catch (err: any) {
+      console.error("[MySQL getPageSeoList Error]:", err.message);
+      return [];
+    }
+  },
+
+  getPageSeoByPath: async (path: string): Promise<StoredPageSeo | null> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `pageseo` WHERE `path` = ? LIMIT 1", [path]);
+      if (!rows || rows.length === 0) return null;
+      const r = rows[0];
+      return {
+        ...r,
+        robotsIndex: Boolean(r.robotsIndex),
+        robotsFollow: Boolean(r.robotsFollow),
+      };
+    } catch (err: any) {
+      console.error("[MySQL getPageSeoByPath Error]:", err.message);
+      return null;
+    }
+  },
+
+  upsertPageSeo: async (data: Partial<StoredPageSeo> & { path: string }): Promise<StoredPageSeo | null> => {
+    const id = data.id || `seo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      const pool = getMySQLPool();
+      await pool.query(
+        `INSERT INTO \`pageseo\` (
+          \`id\`, \`path\`, \`pageName\`, \`metaTitle\`, \`metaDescription\`, \`h1Heading\`, \`focusKeyword\`, \`secondaryKeywords\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`ogTitle\`, \`ogDescription\`, \`ogImage\`, \`twitterTitle\`, \`twitterDescription\`, \`twitterImage\`, \`schemaType\`, \`customJsonLd\`, \`updatedAt\`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ON DUPLICATE KEY UPDATE
+          \`pageName\` = VALUES(\`pageName\`),
+          \`metaTitle\` = VALUES(\`metaTitle\`),
+          \`metaDescription\` = VALUES(\`metaDescription\`),
+          \`h1Heading\` = VALUES(\`h1Heading\`),
+          \`focusKeyword\` = VALUES(\`focusKeyword\`),
+          \`secondaryKeywords\` = VALUES(\`secondaryKeywords\`),
+          \`canonicalUrl\` = VALUES(\`canonicalUrl\`),
+          \`robotsIndex\` = VALUES(\`robotsIndex\`),
+          \`robotsFollow\` = VALUES(\`robotsFollow\`),
+          \`ogTitle\` = VALUES(\`ogTitle\`),
+          \`ogDescription\` = VALUES(\`ogDescription\`),
+          \`ogImage\` = VALUES(\`ogImage\`),
+          \`twitterTitle\` = VALUES(\`twitterTitle\`),
+          \`twitterDescription\` = VALUES(\`twitterDescription\`),
+          \`twitterImage\` = VALUES(\`twitterImage\`),
+          \`schemaType\` = VALUES(\`schemaType\`),
+          \`customJsonLd\` = VALUES(\`customJsonLd\`),
+          \`updatedAt\` = NOW();`,
+        [
+          id,
+          data.path,
+          data.pageName || data.path,
+          data.metaTitle || "Saffron City Islamabad",
+          data.metaDescription || "",
+          data.h1Heading || null,
+          data.focusKeyword || null,
+          data.secondaryKeywords || null,
+          data.canonicalUrl || null,
+          data.robotsIndex !== false ? 1 : 0,
+          data.robotsFollow !== false ? 1 : 0,
+          data.ogTitle || null,
+          data.ogDescription || null,
+          data.ogImage || null,
+          data.twitterTitle || null,
+          data.twitterDescription || null,
+          data.twitterImage || null,
+          data.schemaType || "WebSite",
+          data.customJsonLd || null,
+        ]
+      );
+
+      return await db.getPageSeoByPath(data.path);
+    } catch (err: any) {
+      console.error("[MySQL upsertPageSeo Error]:", err.message);
+      return null;
+    }
+  },
+
+  deletePageSeo: async (id: string): Promise<boolean> => {
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `pageseo` WHERE `id` = ? OR `path` = ?", [id, id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deletePageSeo Error]:", err.message);
+      return false;
+    }
+  },
+
+  // -------------------------
+  // 8. Redirects (Direct MySQL `redirects` table)
+  // -------------------------
+  getRedirects: async (): Promise<StoredRedirect[]> => {
+    try {
+      const pool = getMySQLPool();
+      const [rows]: any = await pool.query("SELECT * FROM `redirects` ORDER BY `createdAt` DESC");
+      return (rows || []).map((r: any) => ({
+        ...r,
+        isActive: Boolean(r.isActive),
+      }));
+    } catch (err: any) {
+      console.error("[MySQL getRedirects Error]:", err.message);
+      return [];
+    }
+  },
+
+  createRedirect: async (redirect: Omit<StoredRedirect, "id" | "hitCount" | "createdAt" | "updatedAt">): Promise<StoredRedirect> => {
+    const id = `red-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      const pool = getMySQLPool();
+      await pool.query(
+        `INSERT INTO \`redirects\` (\`id\`, \`sourcePath\`, \`destinationUrl\`, \`statusCode\`, \`isActive\`, \`hitCount\`, \`createdAt\`)
+         VALUES (?, ?, ?, ?, ?, 0, NOW())`,
+        [id, redirect.sourcePath, redirect.destinationUrl, redirect.statusCode || 301, redirect.isActive ? 1 : 0]
+      );
+    } catch (err: any) {
+      console.error("[MySQL createRedirect Error]:", err.message);
+    }
 
     return {
-      totalLeads,
-      newLeads,
-      contactedLeads,
-      totalPlots,
-      availablePlots,
-      reservedPlots,
-      bookedPlots,
-      inventoryValue,
-      totalUsers,
-      settings: store.settings,
+      ...redirect,
+      id,
+      hitCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
+  },
+
+  updateRedirect: async (id: string, updates: Partial<StoredRedirect>): Promise<StoredRedirect | null> => {
+    try {
+      const pool = getMySQLPool();
+      const fields: string[] = [];
+      const values: any[] = [];
+
+      for (const [key, val] of Object.entries(updates)) {
+        if (key !== "id") {
+          fields.push(`\`${key}\` = ?`);
+          values.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+        }
+      }
+
+      if (fields.length > 0) {
+        values.push(id);
+        await pool.query(`UPDATE \`redirects\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+      }
+
+      const [rows]: any = await pool.query("SELECT * FROM `redirects` WHERE `id` = ? LIMIT 1", [id]);
+      return rows && rows.length > 0 ? rows[0] : null;
+    } catch (err: any) {
+      console.error("[MySQL updateRedirect Error]:", err.message);
+      return null;
+    }
+  },
+
+  deleteRedirect: async (id: string): Promise<boolean> => {
+    try {
+      const pool = getMySQLPool();
+      const [res]: any = await pool.query("DELETE FROM `redirects` WHERE `id` = ?", [id]);
+      return res.affectedRows > 0;
+    } catch (err: any) {
+      console.error("[MySQL deleteRedirect Error]:", err.message);
+      return false;
+    }
   },
 };

@@ -31,10 +31,13 @@ import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Sector A (Block B) | Flagship Executive Plots for Sale",
-  description: "Explore Sector A (Block B) plots for sale in Saffron City Islamabad — featuring 100% underground utilities, 250ft carpeted boulevards, prime RDA approved plots, and 3-year easy installments.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/sectors/sector-a");
+}
 
 const SECTOR_A_PLOTS_FOR_SALE = [
   {
@@ -115,7 +118,7 @@ const SECTOR_A_NEARBY_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
     time: "0 Minutes Direct",
-    timeHighlight: "text-[#D4A017]",
+    timeHighlight: "text-[#D49E17]",
     distance: "Direct Frontage Access",
     bgClass: "bg-amber-50/70 border-amber-300 shadow-amber-100/50",
     image: "/images/amenities/amenity_boulevard.jpg",
@@ -196,17 +199,10 @@ export default function SectorAPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <Award className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Flagship Executive Residential Sector</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Sector A (Block B): Executive Plots For Sale"
             highlightWords={["Sector", "A", "Executive", "Plots", "Sale"]}
@@ -224,11 +220,11 @@ export default function SectorAPage() {
           <ScrollReveal animation="fade-up" delay={150}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">100%</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">100%</span>
                 <p className="text-xs text-slate-300 font-medium">Underground Wiring</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">250 Ft</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">250 Ft</span>
                 <p className="text-xs text-slate-300 font-medium">Boulevard Connectivity</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -236,7 +232,7 @@ export default function SectorAPage() {
                 <p className="text-xs text-slate-300 font-medium">Booking Amount</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">3 Years</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
                 <p className="text-xs text-slate-300 font-medium">Installment Schedule</p>
               </div>
             </div>
@@ -245,7 +241,7 @@ export default function SectorAPage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#plots-for-sale"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               View Sector A Plots For Sale
             </a>
@@ -253,7 +249,7 @@ export default function SectorAPage() {
               href="#nearby-landmarks"
               className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
             >
-              <MapPin className="w-4 h-4 text-[#D4A017]" />
+              <MapPin className="w-4 h-4 text-[#D49E17]" />
               <span>Nearby Landmarks</span>
             </a>
             <a
@@ -275,13 +271,6 @@ export default function SectorAPage() {
         {/* 1. Dedicated Sector A Overview Section */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Sector Overview</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Sector A Overview: Flagship Executive Living"
               highlightWords={["Sector", "A", "Overview", "Flagship", "Executive"]}
@@ -298,8 +287,8 @@ export default function SectorAPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ScrollReveal animation="fade-right" delay={80}>
-              <div className="p-7 rounded-3xl bg-amber-50/40 border border-amber-200 hover:border-[#D4A017] transition-all space-y-3 h-full">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-[#D4A017] shadow-sm">
+              <div className="p-7 rounded-3xl bg-amber-50/40 border border-amber-200 hover:border-[#D49E17] transition-all space-y-3 h-full">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-[#D49E17] shadow-sm">
                   <Zap className="w-6 h-6" />
                 </div>
                 <h4 className="font-bold text-slate-900 text-base">100% Underground Utilities</h4>
@@ -338,13 +327,6 @@ export default function SectorAPage() {
         {/* 2. Sector A Plots for Sale with High Quality Images */}
         <section id="plots-for-sale" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Executive Inventory</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Sector A Plots for Sale"
               highlightWords={["Sector", "A", "Plots", "Sale"]}
@@ -369,7 +351,7 @@ export default function SectorAPage() {
                   animation={isLeft ? "fade-right" : isRight ? "fade-left" : "fade-up"}
                   delay={idx * 100}
                 >
-                  <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                  <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
                     <div>
                       {/* Plot Image Header */}
                       <div className="relative h-56 w-full overflow-hidden bg-slate-100">
@@ -380,7 +362,7 @@ export default function SectorAPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                         <div className="absolute top-3 right-3">
-                          <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D4A017] border border-[#D4A017]/40 text-[11px] font-bold shadow">
+                          <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D49E17] border border-[#D49E17]/40 text-[11px] font-bold shadow">
                             {plot.tag}
                           </span>
                         </div>
@@ -398,7 +380,7 @@ export default function SectorAPage() {
                       <div className="p-6 space-y-4">
                         <div className="space-y-1">
                           <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                          <p className="text-2xl font-black text-[#D4A017]">{plot.totalPrice}</p>
+                          <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
                         </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed">
@@ -458,9 +440,6 @@ export default function SectorAPage() {
         {/* 2. Detailed Sector A Pricing Schedule Table */}
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-[#D4A017] uppercase tracking-wider block">
-              Official Rate Card
-            </span>
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
               Sector A (Block B) 3-Year Installment Breakdown
             </h3>
@@ -489,7 +468,7 @@ export default function SectorAPage() {
                     <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
                       <td className="py-4 px-5 text-slate-500 font-mono">{p.dimensions}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017] text-sm">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17] text-sm">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
@@ -506,12 +485,6 @@ export default function SectorAPage() {
         {/* 3. Why Investors Choose Sector A (with Rich Images!) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Award className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Prime Value Proposition</span>
-              </div>
-            </ScrollReveal>
 
             <WordReveal
               text="Why Investors Choose Sector A"
@@ -536,7 +509,7 @@ export default function SectorAPage() {
                   animation={isLeft ? "fade-right" : "fade-left"}
                   delay={index * 80}
                 >
-                  <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                  <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
                     <div>
                       <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
@@ -546,14 +519,14 @@ export default function SectorAPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-3">
-                          <span className="px-2.5 py-1 rounded-full bg-[#D4A017] text-slate-950 text-[10px] font-bold shadow">
+                          <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[10px] font-bold shadow">
                             {item.tag}
                           </span>
                         </div>
                       </div>
 
                       <div className="p-5 space-y-2">
-                        <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D4A017] transition-colors">
+                        <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D49E17] transition-colors">
                           {item.title}
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed">
@@ -571,13 +544,6 @@ export default function SectorAPage() {
         {/* 4. DEDICATED SEPARATE SECTION: Nearby Landmarks & Travel Distances with IMAGES */}
         <section id="nearby-landmarks" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <MapPin className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Prime Highway Access</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Nearby Landmarks & Travel Distances"
               highlightWords={["Nearby", "Landmarks", "Travel", "Distances"]}
@@ -610,7 +576,7 @@ export default function SectorAPage() {
                       />
                     </div>
                     <div className="space-y-0.5">
-                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors">
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors">
                         {item.name}
                       </h4>
                       <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
@@ -634,12 +600,6 @@ export default function SectorAPage() {
         {/* 5. Sector A Location & Embedded Google Map */}
         <section id="sector-location" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Compass className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Front Gate Location</span>
-              </div>
-            </ScrollReveal>
 
             <WordReveal
               text="Sector A Location & Google Map"
@@ -659,7 +619,7 @@ export default function SectorAPage() {
             {/* Location Highlights Left (fade-right) */}
             <ScrollReveal animation="fade-right" className="lg:col-span-6 space-y-6">
               <div className="p-8 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-[#D4A017] text-xs font-bold">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-[#D49E17] text-xs font-bold">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>Main GT Road (N-5) Direct Gateway</span>
                 </div>
@@ -679,7 +639,7 @@ export default function SectorAPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-800">Highway Access:</span>
-                    <span className="font-bold text-[#D4A017]">Main GT Road (N-5)</span>
+                    <span className="font-bold text-[#D49E17]">Main GT Road (N-5)</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-800">Authority Jurisdiction:</span>
@@ -692,7 +652,7 @@ export default function SectorAPage() {
                     href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 font-bold text-xs shadow transition-all flex items-center gap-2"
+                    className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs shadow transition-all flex items-center gap-2"
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Open in Google Maps</span>
@@ -723,7 +683,7 @@ export default function SectorAPage() {
                   loading="lazy"
                 />
                 <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded-full bg-white/95 border border-amber-300 text-amber-900 text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-md">
-                  <MapPin className="w-4 h-4 text-[#D4A017]" />
+                  <MapPin className="w-4 h-4 text-[#D49E17]" />
                   <span>Sector A (Block B) • GT Road Gate</span>
                 </div>
               </div>
@@ -735,7 +695,7 @@ export default function SectorAPage() {
         <section className="p-8 sm:p-12 rounded-3xl bg-amber-50/50 border border-amber-200 shadow-xl space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
-              <span className="text-xs font-bold text-[#D4A017] uppercase tracking-wider block">
+              <span className="text-xs font-bold text-[#D49E17] uppercase tracking-wider block">
                 Official Layout &amp; Demarcation
               </span>
               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
@@ -748,7 +708,7 @@ export default function SectorAPage() {
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 href="/master-plan"
-                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
+                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <Layers className="w-4 h-4" />
                 <span>Open Master Plan Viewer</span>
@@ -766,13 +726,6 @@ export default function SectorAPage() {
         {/* Sector A FAQs */}
         <section className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <HelpCircle className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Sector A FAQs</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Frequently Asked Questions"
               highlightWords={["Frequently", "Questions"]}

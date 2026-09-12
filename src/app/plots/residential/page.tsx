@@ -20,10 +20,13 @@ import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Residential Plots | 5 Marla, 10 Marla, 1 Kanal",
-  description: "Browse RDA approved residential plots in Saffron City Islamabad on Main GT Road Rawat. Flexible 3-year installment plans with 10% booking.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/plots/residential");
+}
 
 const RESIDENTIAL_PLOT_CARDS = [
   {
@@ -78,13 +81,13 @@ export default function ResidentialPlotsPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <Home className="w-3.5 h-3.5 text-[#D4A017]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D49E17]/20 border border-[#D49E17]/40 text-[#D49E17] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
+              <Home className="w-3.5 h-3.5 text-[#D49E17]" />
               <span>RDA Approved Residential Community</span>
             </div>
           </ScrollReveal>
@@ -110,11 +113,11 @@ export default function ResidentialPlotsPage() {
                 <p className="text-xs text-slate-300 font-medium">Down Payment</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">3 Years</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
                 <p className="text-xs text-slate-300 font-medium">Payment Plan</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">15,000 K</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">15,000 K</span>
                 <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -127,7 +130,7 @@ export default function ResidentialPlotsPage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#plots"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               Explore Available Plots
             </a>
@@ -152,7 +155,7 @@ export default function ResidentialPlotsPage() {
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <ScrollReveal animation="fade-up">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#D49E17]" />
                 <span>Modern Living</span>
               </div>
             </ScrollReveal>
@@ -174,7 +177,7 @@ export default function ResidentialPlotsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ScrollReveal animation="fade-right" delay={100}>
               <div className="p-6 rounded-3xl bg-amber-50/40 border border-amber-200 space-y-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-[#D4A017]">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-[#D49E17]">
                   <Zap className="w-5 h-5" />
                 </div>
                 <h4 className="font-bold text-slate-900 text-base">Underground Electrification</h4>
@@ -225,7 +228,7 @@ export default function ResidentialPlotsPage() {
                 animation={idx === 0 ? "fade-right" : idx === 1 ? "fade-up" : "fade-left"}
                 delay={idx * 100}
               >
-                <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
                   <div>
                     <div className="relative h-52 w-full overflow-hidden bg-slate-100">
                       <img
@@ -235,7 +238,7 @@ export default function ResidentialPlotsPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                       <div className="absolute top-3 right-3">
-                        <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D4A017] border border-[#D4A017]/40 text-[10px] font-bold">
+                        <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D49E17] border border-[#D49E17]/40 text-[10px] font-bold">
                           {plot.tag}
                         </span>
                       </div>
@@ -247,7 +250,7 @@ export default function ResidentialPlotsPage() {
                     <div className="p-6 space-y-4">
                       <div className="space-y-1">
                         <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                        <p className="text-2xl font-black text-[#D4A017]">{plot.totalPrice}</p>
+                        <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
                       </div>
 
                       <p className="text-xs text-slate-600 leading-relaxed">
@@ -325,7 +328,7 @@ export default function ResidentialPlotsPage() {
                   {RESIDENTIAL_PRICES.map((p) => (
                     <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017]">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17]">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>

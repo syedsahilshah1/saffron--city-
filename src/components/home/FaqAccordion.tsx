@@ -21,7 +21,7 @@ export default function FaqAccordion() {
             key={idx}
             className={`rounded-2xl lg:rounded-3xl border transition-all duration-300 overflow-hidden ${
               isOpen
-                ? "bg-white border-[#D4A017] shadow-lg shadow-amber-500/10"
+                ? "bg-white border-[#D49E17] shadow-lg shadow-amber-500/10"
                 : "bg-slate-50/80 border-slate-200 hover:border-amber-300 hover:bg-white"
             }`}
           >
@@ -37,7 +37,7 @@ export default function FaqAccordion() {
                 <span
                   className={`w-2.5 h-2.5 rounded-full shrink-0 transition-colors duration-300 ${
                     isOpen
-                      ? "bg-[#D4A017] shadow-[0_0_10px_rgba(212,160,23,0.6)]"
+                      ? "bg-[#D49E17] shadow-[0_0_10px_rgba(212, 158, 23,0.6)]"
                       : "bg-amber-400"
                   }`}
                 />
@@ -50,7 +50,7 @@ export default function FaqAccordion() {
               <div
                 className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
                   isOpen
-                    ? "bg-amber-50 text-[#D4A017] rotate-180 border border-amber-300"
+                    ? "bg-amber-50 text-[#D49E17] rotate-180 border border-amber-300"
                     : "bg-white text-slate-400 border border-slate-200"
                 }`}
               >

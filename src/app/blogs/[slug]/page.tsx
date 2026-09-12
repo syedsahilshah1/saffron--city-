@@ -26,6 +26,8 @@ import { db } from "@/lib/db";
 import { SITE_CONFIG } from "@/data/saffron-data";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 
+import { ArticleSchema, BreadcrumbSchema, CustomJsonLd } from "@/components/seo/JsonLd";
+
 export const dynamic = "force-dynamic";
 
 interface BlogPostPageProps {
@@ -34,7 +36,10 @@ interface BlogPostPageProps {
 
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const blog = await db.getBlogBySlug(slug);
+  const [blog, settings] = await Promise.all([
+    db.getBlogBySlug(slug),
+    db.getSettings(),
+  ]);
 
   if (!blog) {
     return {
@@ -42,20 +47,70 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
 
+  const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
+  const canonicalUrl = blog.canonicalUrl || `${baseUrl}/blogs/${slug}`;
+  const title = blog.seoTitle || `${blog.title} | Saffron City Real Estate Portal`;
+  const description = blog.metaDescription || blog.excerpt;
+  const image = blog.ogImage || blog.image || "/images/hero-bg.jpg";
+  const fullImage = image.startsWith("http") ? image : `${baseUrl}${image}`;
+
+  const isIndexable = blog.isPublished && blog.robotsIndex !== false;
+
+  const keywords = [blog.focusKeyword, blog.secondaryKeywords]
+    .filter(Boolean)
+    .join(", ")
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+
   return {
-    title: `${blog.title} | Saffron City Real Estate Portal`,
-    description: blog.excerpt,
+    title,
+    description,
+    keywords: keywords.length > 0 ? keywords : undefined,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: isIndexable,
+      follow: blog.robotsFollow !== false,
+      googleBot: {
+        index: isIndexable,
+        follow: blog.robotsFollow !== false,
+        "max-image-preview": "large",
+      },
+    },
     openGraph: {
-      title: `${blog.title} | Saffron City Official`,
-      description: blog.excerpt,
-      images: [blog.image || "/images/hero-bg.jpg"],
+      title: blog.ogTitle || blog.seoTitle || blog.title,
+      description: blog.ogDescription || blog.metaDescription || blog.excerpt,
+      url: canonicalUrl,
+      type: "article",
+      images: [
+        {
+          url: fullImage,
+          width: 1200,
+          height: 630,
+          alt: blog.imageAlt || blog.title,
+        },
+      ],
+      publishedTime: blog.createdAt,
+      modifiedTime: blog.updatedAt,
+      authors: [blog.author],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.twitterTitle || blog.seoTitle || blog.title,
+      description: blog.twitterDescription || blog.metaDescription || blog.excerpt,
+      images: [fullImage],
     },
   };
 }
 
 export default async function SingleBlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const blog = await db.getBlogBySlug(slug);
+  const [blog, settings] = await Promise.all([
+    db.getBlogBySlug(slug),
+    db.getSettings(),
+  ]);
 
   if (!blog) {
     notFound();
@@ -64,11 +119,37 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
   const allBlogs = await db.getBlogs(true);
   const relatedBlogs = allBlogs.filter((b) => b.id !== blog.id).slice(0, 4);
 
+  const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
+  const pageUrl = `${baseUrl}/blogs/${blog.slug}`;
+  const fullImage = (blog.image || "/images/hero-bg.jpg").startsWith("http")
+    ? blog.image
+    : `${baseUrl}${blog.image || "/images/hero-bg.jpg"}`;
+
   // Format paragraphs or parse sections
   const paragraphs = blog.content.split("\n\n").filter(Boolean);
 
   return (
     <main className="flex-grow bg-[#fcfaf7] min-h-screen text-slate-900 pb-20 font-sans">
+      {/* Structured Data: Article & Breadcrumbs */}
+      <ArticleSchema
+        headline={blog.title}
+        description={blog.metaDescription || blog.excerpt}
+        url={pageUrl}
+        image={fullImage}
+        datePublished={blog.createdAt}
+        dateModified={blog.updatedAt}
+        authorName={blog.author}
+        publisherName={settings?.siteName || "Saffron City Islamabad"}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Blogs & Insights", url: "/blogs" },
+          { name: blog.title, url: `/blogs/${blog.slug}` },
+        ]}
+      />
+      <CustomJsonLd jsonString={blog.customSchema} />
+
       {/* 1. Header Banner / Hero inspired by Faisal Hills style */}
       <section className="bg-gradient-to-r from-[#1a1109] via-[#2c1c0e] to-[#120803] text-white pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-16 relative border-b border-amber-900/30">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
@@ -99,7 +180,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
           </div>
 
           <h1 className="font-serif font-black text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight max-w-5xl">
-            {blog.title}
+            {blog.h1Heading || blog.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-xs text-slate-300 font-medium">
@@ -143,9 +224,11 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             <div className="h-64 sm:h-[420px] rounded-2xl overflow-hidden shadow-sm bg-slate-900 shrink-0 relative group">
               <img
                 src={blog.image || "/images/hero-bg.jpg"}
-                alt={blog.title}
+                alt={blog.imageAlt || blog.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
 
@@ -179,7 +262,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
                       key={idx}
                       className="font-serif font-bold text-xl sm:text-2xl text-slate-950 pt-4 pb-1 border-b border-amber-100 flex items-center gap-2.5"
                     >
-                      <span className="w-2 h-6 bg-[#D4A017] rounded-full inline-block shrink-0" />
+                      <span className="w-2 h-6 bg-[#D49E17] rounded-full inline-block shrink-0" />
                       <span>{p}</span>
                     </h2>
                   );
@@ -233,7 +316,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
 
             {/* Author Profile Footer */}
             <div className="p-6 rounded-2xl bg-[#fbf8f3] border border-amber-200/80 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-              <div className="w-14 h-14 rounded-2xl bg-[#D4A017] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-[#D49E17] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
                 {blog.author.charAt(0)}
               </div>
               <div className="space-y-1">
@@ -278,7 +361,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
               </div>
             </div>
           </div>
-        </div>
+
 
         {/* Right Column: Sticky Sidebar with Consultation Form & Recent Articles */}
         <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
@@ -327,7 +410,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
           <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
             <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                <ShieldCheck className="w-4 h-4 text-[#D4A017]" />
+                <ShieldCheck className="w-4 h-4 text-[#D49E17]" />
               </div>
               <div>
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -375,7 +458,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
                       />
                     </div>
                     <div className="min-w-0 flex-1 space-y-1">
-                      <span className="text-[9px] font-bold text-[#D4A017] uppercase tracking-wider block">
+                      <span className="text-[9px] font-bold text-[#D49E17] uppercase tracking-wider block">
                         {rel.category}
                       </span>
                       <h5 className="font-bold text-slate-900 text-xs group-hover:text-amber-800 transition line-clamp-2 leading-snug">

@@ -1,4 +1,4 @@
-import PlotForSalePage, { metadata } from "../plot-for-sale/page";
+import PlotForSalePage, { generateMetadata } from "../plot-for-sale/page";
 
-export { metadata };
+export { generateMetadata };
 export default PlotForSalePage;

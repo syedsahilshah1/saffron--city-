@@ -22,10 +22,13 @@ import MasterPlanDownloadButton from "@/components/master-plan/MasterPlanDownloa
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Master Plan | Official 15,000 Kanal Layout",
-  description: "Explore the official Saffron City 15,000 Kanal master plan — Sector A & B residential plots, GT Road commercial block, 250ft boulevard, and civic facilities.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/master-plan");
+}
 
 const SECTOR_CARDS = [
   {
@@ -157,13 +160,6 @@ export default function MasterPlanPage() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         {/* Left Side: Information & Highlights */}
         <div className="lg:col-span-6 space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Layers className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>RDA Approved 15,000 Kanal Expanse</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Saffron City Master Plan: Sectors & Layout"
             highlightWords={["Master", "Plan", "Layout"]}
@@ -205,13 +201,6 @@ export default function MasterPlanPage() {
       {/* 4 Sectors Visual Cards */}
       <section className="space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Sectors Overview</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Saffron City Sector Layout"
             highlightWords={["Sector", "Layout"]}
@@ -234,7 +223,7 @@ export default function MasterPlanPage() {
           {SECTOR_CARDS.map((sector) => (
             <div
               key={sector.id}
-              className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group flex flex-col justify-between"
+              className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group flex flex-col justify-between"
             >
               <div>
                 {/* Sector Card Header Image */}
@@ -268,7 +257,7 @@ export default function MasterPlanPage() {
                   <div className="space-y-2">
                     {sector.features.map((f, i) => (
                       <div key={i} className="flex items-center gap-2.5 text-xs text-slate-700">
-                        <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                         <span>{f}</span>
                       </div>
                     ))}
@@ -284,7 +273,7 @@ export default function MasterPlanPage() {
                 </div>
                 <Link
                   href={sector.href}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 group-hover:bg-[#D4A017] group-hover:text-slate-950 text-white text-xs font-bold transition-all shadow cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 group-hover:bg-[#D49E17] group-hover:text-slate-950 text-white text-xs font-bold transition-all shadow cursor-pointer"
                 >
                   <span>Explore Sector</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -314,22 +303,22 @@ export default function MasterPlanPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-700">
               <div className="p-6 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-base font-bold text-[#D4A017]">Sector A (Premium Residential)</h4>
+                  <h4 className="text-base font-bold text-[#D49E17]">Sector A (Premium Residential)</h4>
                   <span className="text-[11px] font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
                     Flagship
                   </span>
                 </div>
                 <ul className="space-y-2.5 pt-1">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                     <span>Underground electrical lines, fiber optics &amp; utilities</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                     <span>Extra-wide carpeted boulevards &amp; direct boulevard access</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                     <span>Nearest access to Grand Mosque and Central Commercial Hub</span>
                   </li>
                 </ul>
@@ -365,13 +354,6 @@ export default function MasterPlanPage() {
       {/* Infrastructure & Civic Facilities (With Images) */}
       <section className="space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Modern Civic Backbone</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Infrastructure & Civic Facilities"
             highlightWords={["Infrastructure", "Facilities"]}
@@ -396,7 +378,7 @@ export default function MasterPlanPage() {
             return (
               <div
                 key={facility.title}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col justify-between"
+                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col justify-between"
               >
                 <div>
                   <div className="relative h-44 w-full overflow-hidden bg-slate-100">
@@ -407,19 +389,19 @@ export default function MasterPlanPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <div className="p-2 rounded-xl bg-white/95 text-[#D4A017] shadow">
-                        <IconComponent className="w-4 h-4 text-[#D4A017]" />
+                      <div className="p-2 rounded-xl bg-white/95 text-[#D49E17] shadow">
+                        <IconComponent className="w-4 h-4 text-[#D49E17]" />
                       </div>
                     </div>
                     <div className="absolute bottom-3 left-3 right-3">
-                      <span className="px-2.5 py-1 rounded-full bg-[#D4A017] text-slate-950 text-[11px] font-bold shadow">
+                      <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[11px] font-bold shadow">
                         {facility.tag}
                       </span>
                     </div>
                   </div>
 
                   <div className="p-5 space-y-2">
-                    <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D4A017] transition-colors">
+                    <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D49E17] transition-colors">
                       {facility.title}
                     </h4>
                     <p className="text-xs text-slate-600 leading-relaxed">
@@ -436,13 +418,6 @@ export default function MasterPlanPage() {
       {/* Redesigned Master Plan FAQs (Interactive Accordion) */}
       <section className="space-y-8 max-w-4xl mx-auto">
         <div className="text-center space-y-3">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-              <HelpCircle className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Questions &amp; Answers</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Frequently Asked Questions"
             highlightWords={["Frequently", "Questions"]}

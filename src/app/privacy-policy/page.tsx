@@ -16,10 +16,13 @@ import ScrollReveal from "@/components/animations/ScrollReveal";
 import WordReveal from "@/components/animations/WordReveal";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Privacy Policy | Saffron City Islamabad",
-  description: "Privacy policy and terms of data usage for Saffron City Islamabad — protecting your personal information with full transparency.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/privacy-policy");
+}
 
 const PRIVACY_SECTIONS = [
   {
@@ -104,13 +107,13 @@ export default function PrivacyPolicyPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <ShieldCheck className="w-4 h-4 text-[#D4A017]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D49E17]/20 border border-[#D49E17]/40 text-[#D49E17] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
+              <ShieldCheck className="w-4 h-4 text-[#D49E17]" />
               <span>Legal &amp; Data Transparency</span>
             </div>
           </ScrollReveal>
@@ -157,9 +160,9 @@ export default function PrivacyPolicyPage() {
                 animation={idx % 2 === 0 ? "fade-right" : "fade-left"}
                 delay={idx * 60}
               >
-                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all duration-300 space-y-4">
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] shrink-0">
                       <Icon className="w-5 h-5" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-slate-900 font-heading">
@@ -176,7 +179,7 @@ export default function PrivacyPolicyPage() {
         {/* Contact Us Box */}
         <div className="p-8 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
           <h3 className="text-lg font-bold font-heading text-white flex items-center gap-2">
-            <Mail className="w-5 h-5 text-[#D4A017]" />
+            <Mail className="w-5 h-5 text-[#D49E17]" />
             <span>Contact Our Privacy Officer</span>
           </h3>
           <p className="text-xs text-slate-300 leading-relaxed">

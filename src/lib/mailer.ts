@@ -65,17 +65,17 @@ export async function sendLeadNotificationEmail(
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px; text-align: center; border-bottom: 3px solid #D4A017; }
+        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px; text-align: center; border-bottom: 3px solid #D49E17; }
         .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
-        .header p { color: #D4A017; margin: 6px 0 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+        .header p { color: #D49E17; margin: 6px 0 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
         .content { padding: 30px; }
         .lead-badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; margin-bottom: 20px; }
         .field-group { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
         .field-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
         .field-value { font-size: 15px; color: #0f172a; font-weight: 600; }
-        .message-box { background: #f8fafc; border-left: 4px solid #D4A017; padding: 16px; border-radius: 4px 8px 8px 4px; margin-top: 20px; font-style: italic; color: #334155; }
+        .message-box { background: #f8fafc; border-left: 4px solid #D49E17; padding: 16px; border-radius: 4px 8px 8px 4px; margin-top: 20px; font-style: italic; color: #334155; }
         .footer { background: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
-        .button { display: inline-block; background: #D4A017; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 20px; }
+        .button { display: inline-block; background: #D49E17; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 20px; }
       </style>
     </head>
     <body>
@@ -198,13 +198,13 @@ export async function sendPasswordResetOtpEmail(
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
-        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 20px; text-align: center; border-bottom: 3px solid #D4A017; }
+        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 20px; text-align: center; border-bottom: 3px solid #D49E17; }
         .header h1 { color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-        .header p { color: #D4A017; margin: 6px 0 0 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+        .header p { color: #D49E17; margin: 6px 0 0 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
         .content { padding: 32px 28px; text-align: center; }
         .title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
         .subtitle { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 24px; }
-        .otp-box { background: #fef3c7; border: 2px dashed #D4A017; border-radius: 16px; padding: 20px; margin: 0 auto 24px auto; max-width: 320px; }
+        .otp-box { background: #fef3c7; border: 2px dashed #D49E17; border-radius: 16px; padding: 20px; margin: 0 auto 24px auto; max-width: 320px; }
         .otp-code { font-size: 36px; font-weight: 900; letter-spacing: 10px; color: #92400e; font-family: monospace; }
         .expiry-note { font-size: 11px; color: #b45309; font-weight: 600; margin-top: 6px; }
         .warning { font-size: 12px; color: #ef4444; background: #fef2f2; padding: 12px; border-radius: 10px; border: 1px solid #fecaca; margin-top: 16px; text-align: left; }
@@ -293,7 +293,7 @@ export async function sendTestSmtpEmail(
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 550px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .header { background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 25px; text-align: center; border-bottom: 3px solid #D4A017; }
+        .header { background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 25px; text-align: center; border-bottom: 3px solid #D49E17; }
         .header h1 { color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; }
         .header p { color: #d1fae5; margin: 6px 0 0 0; font-size: 13px; font-weight: 600; }
         .content { padding: 28px; }

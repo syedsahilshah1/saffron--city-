@@ -26,10 +26,13 @@ import FaqAccordion from "@/components/ui/FaqAccordion";
 import DownloadButtonWithLeadModal from "@/components/ui/DownloadButtonWithLeadModal";
 import { RESIDENTIAL_PRICES, COMMERCIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Payment Plan | Official 3-Year Installment Rates",
-  description: "Official Saffron City payment schedule — Sector A & B residential plots (5M, 10M, 1 Kanal) and Signature Commercial rates with 10% booking.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/payment-plan");
+}
 
 const PAYMENT_PLAN_FAQS = [
   {
@@ -49,7 +52,7 @@ const PAYMENT_PLAN_FAQS = [
   },
   {
     question: "What official payment methods are accepted?",
-    answer: "Payments can be made via direct bank transfer, pay order / demand draft in favor of Saffron City developers (SKB), or through Roshan Digital Accounts / Swift transfers for overseas buyers.",
+    answer: "Payments can be made via direct bank transfer, pay order / demand draft in favor of Saffron City, or through Roshan Digital Accounts / Swift transfers for overseas buyers.",
     category: "Payment Methods"
   },
   {
@@ -77,17 +80,10 @@ export default function PaymentPlanPage() {
             className="w-full h-full object-cover object-center opacity-100 scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/45" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <CreditCard className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Official 3-Year Installment Plan</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Saffron City Payment Plan"
             highlightWords={["Payment", "Plan"]}
@@ -105,11 +101,11 @@ export default function PaymentPlanPage() {
           <ScrollReveal animation="fade-up" delay={150}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">10%</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">10%</span>
                 <p className="text-xs text-slate-300 font-medium">Easy Booking</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">3 Years</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
                 <p className="text-xs text-slate-300 font-medium">Installment Period</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -117,7 +113,7 @@ export default function PaymentPlanPage() {
                 <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">30 Months</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">30 Months</span>
                 <p className="text-xs text-slate-300 font-medium">Monthly Schedule</p>
               </div>
             </div>
@@ -139,7 +135,7 @@ export default function PaymentPlanPage() {
               documentTitle="Saffron City Payment Plan"
               documentType="Payment Plan"
               buttonText="Download Rates Flyer"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
             />
           </ScrollReveal>
         </div>
@@ -151,13 +147,6 @@ export default function PaymentPlanPage() {
         {/* Official Payment Plan Rate Cards (Left & Right Entrance Animations) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Official Rate Cards</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Official Payment Plan Documents"
               highlightWords={["Payment", "Documents"]}
@@ -175,7 +164,7 @@ export default function PaymentPlanPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Residential Flyer Card: Animates in from LEFT */}
             <ScrollReveal animation="fade-right" duration={900}>
-              <div className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-500 space-y-5 h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-500 space-y-5 h-full flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs uppercase">
@@ -187,7 +176,7 @@ export default function PaymentPlanPage() {
                       documentTitle="Residential Payment Plan (Sector A)"
                       documentType="Payment Plan"
                       iconOnly={true}
-                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] border border-amber-200 transition-colors cursor-pointer"
                     />
                   </div>
 
@@ -215,7 +204,7 @@ export default function PaymentPlanPage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span>1 Kanal:</span>
-                    <span className="font-bold text-[#D4A017]">Total PKR 1.55 Crore (Monthly: 1.55 Lac)</span>
+                    <span className="font-bold text-[#D49E17]">Total PKR 1.55 Crore (Monthly: 1.55 Lac)</span>
                   </div>
                 </div>
               </div>
@@ -223,10 +212,10 @@ export default function PaymentPlanPage() {
 
             {/* Commercial Flyer Card: Animates in from RIGHT */}
             <ScrollReveal animation="fade-left" delay={150} duration={900}>
-              <div className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-500 space-y-5 h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-500 space-y-5 h-full flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full bg-[#D4A017] text-slate-950 font-bold text-xs uppercase">
+                    <span className="px-3 py-1 rounded-full bg-[#D49E17] text-slate-950 font-bold text-xs uppercase">
                       Signature Commercial
                     </span>
                     <DownloadButtonWithLeadModal
@@ -235,7 +224,7 @@ export default function PaymentPlanPage() {
                       documentTitle="Signature Commercial Payment Plan"
                       documentType="Payment Plan"
                       iconOnly={true}
-                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] border border-amber-200 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] border border-amber-200 transition-colors cursor-pointer"
                     />
                   </div>
 
@@ -255,7 +244,7 @@ export default function PaymentPlanPage() {
                 <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 text-xs text-slate-700 space-y-2">
                   <div className="flex justify-between items-center">
                     <span>Total / Net Price:</span>
-                    <span className="font-bold text-[#D4A017]">PKR 1.55 Crore (Discounted)</span>
+                    <span className="font-bold text-[#D49E17]">PKR 1.55 Crore (Discounted)</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Down Payment:</span>
@@ -303,7 +292,7 @@ export default function PaymentPlanPage() {
                   {RESIDENTIAL_PRICES.map((p) => (
                     <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017]">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17]">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
@@ -349,7 +338,7 @@ export default function PaymentPlanPage() {
                   {COMMERCIAL_PRICES.map((p) => (
                     <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017]">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17]">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
@@ -398,24 +387,24 @@ export default function PaymentPlanPage() {
             <ScrollReveal animation="fade-right" duration={900}>
               <div className="p-6 sm:p-8 rounded-3xl bg-amber-50/50 border border-amber-200 space-y-4 shadow-xl h-full">
                 <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-[#D4A017]" />
+                  <AlertCircle className="w-5 h-5 text-[#D49E17]" />
                   <span>Official Booking Terms</span>
                 </h4>
                 <div className="space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                     <span><strong>Processing Fee:</strong> Rs. 5,000/- non-refundable form fee.</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                     <span><strong>Category Premium:</strong> 10% extra for corner, boulevard, or park facing.</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                     <span><strong>Due Date:</strong> Monthly installments payable by 5th of each month.</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#D4A017] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                     <span><strong>Plot Rates:</strong> Above prices are for general plots, exclusive of utility charges.</span>
                   </div>
                 </div>
@@ -432,7 +421,7 @@ export default function PaymentPlanPage() {
                 <div className="space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span><strong>Bank Transfer:</strong> Official bank accounts under Saadullah Khan &amp; Brothers (SKB).</span>
+                    <span><strong>Bank Transfer:</strong> Official designated bank accounts of Saffron City.</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -455,13 +444,6 @@ export default function PaymentPlanPage() {
         {/* Payment Plan FAQs Accordion */}
         <section className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <HelpCircle className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Questions &amp; Answers</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Frequently Asked Questions"
               highlightWords={["Frequently", "Questions"]}

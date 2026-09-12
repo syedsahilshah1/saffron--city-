@@ -49,7 +49,7 @@ export default function FaqAccordion({
               }}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                 activeCategory === cat
-                  ? "bg-[#D4A017] text-slate-950 shadow-md scale-105"
+                  ? "bg-[#D49E17] text-slate-950 shadow-md scale-105"
                   : "bg-amber-50/80 hover:bg-amber-100 text-slate-700 border border-amber-200/60"
               }`}
             >
@@ -84,7 +84,7 @@ export default function FaqAccordion({
                   <span
                     className={`inline-flex items-center justify-center w-7 h-7 rounded-xl font-mono text-xs font-bold shrink-0 transition-colors ${
                       isOpen
-                        ? "bg-[#D4A017] text-slate-950 shadow"
+                        ? "bg-[#D49E17] text-slate-950 shadow"
                         : "bg-amber-50 text-amber-800 border border-amber-200"
                     }`}
                   >
@@ -93,7 +93,7 @@ export default function FaqAccordion({
                   <div>
                     <h4
                       className={`text-sm sm:text-base font-bold transition-colors ${
-                        isOpen ? "text-[#D4A017]" : "text-slate-900 hover:text-amber-800"
+                        isOpen ? "text-[#D49E17]" : "text-slate-900 hover:text-amber-800"
                       }`}
                     >
                       {item.question}
@@ -109,7 +109,7 @@ export default function FaqAccordion({
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
                     isOpen
-                      ? "bg-amber-100 text-[#D4A017] rotate-180"
+                      ? "bg-amber-100 text-[#D49E17] rotate-180"
                       : "bg-slate-100 text-slate-500 hover:bg-amber-50 hover:text-amber-700"
                   }`}
                 >

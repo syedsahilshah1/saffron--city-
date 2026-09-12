@@ -223,11 +223,11 @@ export default function UbaidAdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-slate-100 relative overflow-hidden selection:bg-[#D4A017] selection:text-slate-950">
+    <div className="min-h-screen w-full flex flex-col justify-between bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-slate-100 relative overflow-hidden selection:bg-[#D49E17] selection:text-slate-950">
       {/* Background Decorative Gold Glows */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#D4A017]/15 blur-3xl pointer-events-none" />
+      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#D49E17]/15 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[#D4A017]/5 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[#D49E17]/5 blur-3xl pointer-events-none" />
 
       {/* Top Header */}
       <header className="relative z-10 max-w-7xl w-full mx-auto px-6 py-6 flex items-center justify-between">
@@ -240,7 +240,7 @@ export default function UbaidAdminLoginPage() {
         </Link>
         <Link
           href="/"
-          className="text-xs text-slate-400 hover:text-[#D4A017] transition-colors flex items-center gap-1.5"
+          className="text-xs text-slate-400 hover:text-[#D49E17] transition-colors flex items-center gap-1.5"
         >
           <span>&larr; Return to Public Website</span>
         </Link>
@@ -252,12 +252,12 @@ export default function UbaidAdminLoginPage() {
           {/* Card Container */}
           <div className="relative rounded-3xl bg-white/95 backdrop-blur-xl border border-amber-300/40 p-7 sm:p-9 shadow-[0_20px_60px_rgba(0,0,0,0.5)] text-slate-900 overflow-hidden">
             {/* Top Gold Border Accent */}
-            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-600 via-[#D4A017] to-amber-400" />
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-600 via-[#D49E17] to-amber-400" />
 
             {/* Header / Title */}
             <div className="text-center space-y-2 mb-7">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold uppercase tracking-wider">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#D4A017]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#D49E17]" />
                 <span>Executive Admin Access</span>
               </div>
 
@@ -322,7 +322,7 @@ export default function UbaidAdminLoginPage() {
                     placeholder="Enter administrator email"
                     required
                     disabled={isLocked}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A017]/20 transition-all font-medium disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D49E17]/20 transition-all font-medium disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -341,7 +341,7 @@ export default function UbaidAdminLoginPage() {
                       setForgotSuccess("");
                       setForgotError("");
                     }}
-                    className="text-[11px] text-[#D4A017] hover:underline font-semibold"
+                    className="text-[11px] text-[#D49E17] hover:underline font-semibold"
                   >
                     Forgot Password?
                   </button>
@@ -357,7 +357,7 @@ export default function UbaidAdminLoginPage() {
                     placeholder="Enter your password"
                     required
                     disabled={isLocked}
-                    className="w-full pl-10 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A017]/20 transition-all font-medium disabled:opacity-50"
+                    className="w-full pl-10 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D49E17]/20 transition-all font-medium disabled:opacity-50"
                   />
                   <button
                     type="button"
@@ -381,7 +381,7 @@ export default function UbaidAdminLoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-[#D4A017] focus:ring-[#D4A017] accent-[#D4A017]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#D49E17] focus:ring-[#D49E17] accent-[#D49E17]"
                   />
                   <span className="text-xs text-slate-600 font-medium">Remember on this device</span>
                 </label>
@@ -391,7 +391,7 @@ export default function UbaidAdminLoginPage() {
               <button
                 type="submit"
                 disabled={isLoading || isLocked}
-                className="w-full mt-2 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm tracking-wide transition-all duration-300 shadow-[0_4px_20px_rgba(212,160,23,0.35)] hover:shadow-[0_6px_25px_rgba(212,160,23,0.5)] active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-2 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm tracking-wide transition-all duration-300 shadow-[0_4px_20px_rgba(212, 158, 23,0.35)] hover:shadow-[0_6px_25px_rgba(212, 158, 23,0.5)] active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -429,7 +429,7 @@ export default function UbaidAdminLoginPage() {
             </button>
 
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 text-[#D4A017] flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 text-[#D49E17] flex items-center justify-center mx-auto mb-3">
                 <HelpCircle className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold font-serif">
@@ -470,7 +470,7 @@ export default function UbaidAdminLoginPage() {
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       placeholder="ubaidnasir401@gmail.com"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] focus:bg-white outline-none"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D49E17] focus:bg-white outline-none"
                     />
                   </div>
                 </div>
@@ -478,7 +478,7 @@ export default function UbaidAdminLoginPage() {
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="w-full py-3 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
                   {forgotLoading ? (
                     <>
@@ -505,7 +505,7 @@ export default function UbaidAdminLoginPage() {
                     placeholder="123456"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-center font-mono text-xl font-bold tracking-[0.3em] text-slate-900 focus:border-[#D4A017] focus:bg-white outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-center font-mono text-xl font-bold tracking-[0.3em] text-slate-900 focus:border-[#D49E17] focus:bg-white outline-none"
                     autoFocus
                   />
                   <p className="text-[11px] text-slate-400 mt-1 text-center">
@@ -524,7 +524,7 @@ export default function UbaidAdminLoginPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] focus:bg-white outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D49E17] focus:bg-white outline-none"
                   />
                 </div>
 
@@ -539,14 +539,14 @@ export default function UbaidAdminLoginPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D4A017] focus:bg-white outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-[#D49E17] focus:bg-white outline-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="w-full py-3 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
                   {forgotLoading ? (
                     <>
@@ -566,7 +566,7 @@ export default function UbaidAdminLoginPage() {
                       setForgotError("");
                       setForgotSuccess("");
                     }}
-                    className="text-[#D4A017] hover:underline cursor-pointer font-medium"
+                    className="text-[#D49E17] hover:underline cursor-pointer font-medium"
                   >
                     &larr; Change Email
                   </button>
@@ -575,7 +575,7 @@ export default function UbaidAdminLoginPage() {
                     type="button"
                     onClick={handleRequestReset}
                     disabled={forgotLoading}
-                    className="text-[#D4A017] hover:underline cursor-pointer font-medium"
+                    className="text-[#D49E17] hover:underline cursor-pointer font-medium"
                   >
                     Resend OTP Code
                   </button>

@@ -35,11 +35,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { passwordHash, salt, ...safeUser } = user;
-
     return NextResponse.json({
       success: true,
-      user: safeUser,
+      user,
     });
   } catch (error: any) {
     console.error("Auth me error:", error);

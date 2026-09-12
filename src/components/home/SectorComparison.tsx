@@ -16,7 +16,7 @@ export default function SectorComparison() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-[#D4A017] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#D49E17] uppercase tracking-wider">
             Interactive Visual Comparison
           </span>
           <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading mt-0.5">
@@ -31,7 +31,7 @@ export default function SectorComparison() {
             onClick={() => setActiveTab("master-vs-ground")}
             className={`px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
               activeTab === "master-vs-ground"
-                ? "bg-[#D4A017] text-white shadow-sm"
+                ? "bg-[#D49E17] text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -42,7 +42,7 @@ export default function SectorComparison() {
             onClick={() => setActiveTab("entrance-day-night")}
             className={`px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
               activeTab === "entrance-day-night"
-                ? "bg-[#D4A017] text-white shadow-sm"
+                ? "bg-[#D49E17] text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -98,7 +98,7 @@ export default function SectorComparison() {
         <span>↔ Drag the center slider left or right to compare</span>
         <Link
           href="/master-plan"
-          className="font-bold text-[#D4A017] hover:text-amber-700 inline-flex items-center gap-1"
+          className="font-bold text-[#D49E17] hover:text-amber-700 inline-flex items-center gap-1"
         >
           <span>Explore Full Master Plan</span>
           <ArrowRight className="w-3.5 h-3.5" />

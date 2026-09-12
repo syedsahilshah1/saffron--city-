@@ -58,7 +58,7 @@ export default function HomeBlogsSection({
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs transition-colors group"
           >
             <span>View All Articles</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#D4A017]" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#D49E17]" />
           </Link>
         </ScrollReveal>
       </div>
@@ -72,7 +72,7 @@ export default function HomeBlogsSection({
         {blogs.map((blog) => (
           <article
             key={blog.id}
-            className="group rounded-3xl overflow-hidden bg-white border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+            className="group rounded-3xl overflow-hidden bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
           >
             <div className="space-y-4">
               {/* Featured Image */}
@@ -85,7 +85,7 @@ export default function HomeBlogsSection({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                 {/* Category Badge */}
-                <div className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-amber-200 text-[#D4A017] text-[11px] font-bold tracking-wide shadow-md">
+                <div className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-amber-200 text-[#D49E17] text-[11px] font-bold tracking-wide shadow-md">
                   {blog.category}
                 </div>
               </div>
@@ -95,7 +95,7 @@ export default function HomeBlogsSection({
                 {/* Meta Info */}
                 <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium">
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-[#D4A017]" />
+                    <Calendar className="w-3.5 h-3.5 text-[#D49E17]" />
                     <span>
                       {new Date(blog.createdAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -105,12 +105,12 @@ export default function HomeBlogsSection({
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
+                    <Clock className="w-3.5 h-3.5 text-[#D49E17]" />
                     <span>{blog.readTime || "4 min read"}</span>
                   </div>
                 </div>
 
-                <h3 className="font-bold text-slate-900 text-lg sm:text-xl font-heading leading-snug group-hover:text-[#D4A017] transition-colors line-clamp-2">
+                <h3 className="font-bold text-slate-900 text-lg sm:text-xl font-heading leading-snug group-hover:text-[#D49E17] transition-colors line-clamp-2">
                   <Link href={`/blogs/${blog.slug}`}>
                     {blog.title}
                   </Link>
@@ -129,7 +129,7 @@ export default function HomeBlogsSection({
               </span>
               <Link
                 href={`/blogs/${blog.slug}`}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A017] group-hover:text-amber-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D49E17] group-hover:text-amber-700 transition-colors"
               >
                 <span>Read Story</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

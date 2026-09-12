@@ -86,7 +86,7 @@ export default function EnquiryForm({
       } ${className}`}
     >
       {/* Decorative top gold accent */}
-      <div className="absolute top-0 inset-x-8 h-1.5 bg-gradient-to-r from-amber-400 via-[#D4A017] to-amber-600 rounded-b shadow-sm" />
+      <div className="absolute top-0 inset-x-8 h-1.5 bg-gradient-to-r from-amber-400 via-[#D49E17] to-amber-600 rounded-b shadow-sm" />
 
       <div className="mb-4 sm:mb-5">
         <h3 className={`text-xl sm:text-2xl font-bold font-heading ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -133,10 +133,10 @@ export default function EnquiryForm({
               placeholder="e.g. Syed Sahil Shah"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={`w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A017] transition-all ${
+              className={`w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#D49E17] transition-all ${
                 isDark
-                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D4A017]"
-                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D4A017]"
+                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D49E17]"
+                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D49E17]"
               }`}
             />
           </div>
@@ -151,10 +151,10 @@ export default function EnquiryForm({
               placeholder="e.g. 0333 111 3551"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className={`w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A017] transition-all ${
+              className={`w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#D49E17] transition-all ${
                 isDark
-                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D4A017]"
-                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D4A017]"
+                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D49E17]"
+                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D49E17]"
               }`}
             />
           </div>
@@ -169,10 +169,10 @@ export default function EnquiryForm({
               placeholder="e.g. Inquiring about 5 Marla booking in Sector A Block B"
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className={`w-full px-4 py-2 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A017] transition-all resize-none ${
+              className={`w-full px-4 py-2 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#D49E17] transition-all resize-none ${
                 isDark
-                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D4A017]"
-                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D4A017]"
+                  ? "bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:bg-white/15 focus:border-[#D49E17]"
+                  : "bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#D49E17]"
               }`}
             />
           </div>
@@ -180,7 +180,7 @@ export default function EnquiryForm({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-amber-500/25 border border-amber-400 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 cursor-pointer"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-amber-500/25 border border-amber-400 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 cursor-pointer"
           >
             {loading ? (
               <>

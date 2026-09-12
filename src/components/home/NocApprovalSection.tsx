@@ -34,7 +34,7 @@ export default function NocApprovalSection({
     {
       title: "15,000 Kanal Sanctioned Master Layout",
       desc: "Legally sanctioned master layout plan (LOP) with wide 250-foot grand boulevards, civic amenities, and open parks.",
-      icon: <Layers className="w-5 h-5 text-[#D4A017]" />,
+      icon: <Layers className="w-5 h-5 text-[#D49E17]" />,
       tag: "Sanctioned Plan",
     },
     {
@@ -44,9 +44,9 @@ export default function NocApprovalSection({
       tag: "Verified Ownership",
     },
     {
-      title: "70+ Years SKB Engineering Pedigree",
-      desc: "Developed by Saadullah Khan & Brothers (SKB Group) — trusted builders of national motorways, bridges, and mega projects.",
-      icon: <Award className="w-5 h-5 text-[#D4A017]" />,
+      title: "Decades of Engineering Pedigree",
+      desc: "Developed by premier builders of national highways, bridges, and planned master developments with proven delivery excellence.",
+      icon: <Award className="w-5 h-5 text-[#D49E17]" />,
       tag: "Trusted Developer",
     },
   ];
@@ -78,7 +78,7 @@ export default function NocApprovalSection({
         {legalPillars.map((item, idx) => (
           <div
             key={idx}
-            className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+            className="p-6 sm:p-7 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -90,7 +90,7 @@ export default function NocApprovalSection({
                 </span>
               </div>
 
-              <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-[#D4A017] transition-colors leading-snug">
+              <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-[#D49E17] transition-colors leading-snug">
                 {item.title}
               </h3>
 
@@ -125,7 +125,7 @@ export default function NocApprovalSection({
           <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
             <Link
               href="/noc-status"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
             >
               <span>Inspect NOC Documents</span>
               <ArrowRight className="w-4 h-4" />
@@ -135,10 +135,10 @@ export default function NocApprovalSection({
               href={rdaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs shadow-sm hover:border-[#D4A017] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs shadow-sm hover:border-[#D49E17] transition-all"
             >
               <span>Verify on Punjab Portal</span>
-              <ExternalLink className="w-3.5 h-3.5 text-[#D4A017]" />
+              <ExternalLink className="w-3.5 h-3.5 text-[#D49E17]" />
             </a>
           </div>
         </div>

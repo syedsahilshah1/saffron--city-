@@ -12,10 +12,13 @@ import WordReveal from "@/components/animations/WordReveal";
 import PlotsInventoryExplorer from "@/components/plots/PlotsInventoryExplorer";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Plots for Sale 2026 | All Residential & Commercial Inventory",
-  description: "Browse all available RDA approved plots for sale in Saffron City Islamabad — 5 Marla, 10 Marla, 1 Kanal & Commercial Plazas on Main GT Road with 3-year installments.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/plot-for-sale");
+}
 
 export default function PlotForSalePage() {
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
@@ -34,13 +37,13 @@ export default function PlotForSalePage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D49E17]/20 border border-[#D49E17]/40 text-[#D49E17] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
+              <Building2 className="w-3.5 h-3.5 text-[#D49E17]" />
               <span>Verified RDA Plot Inventory Open</span>
             </div>
           </ScrollReveal>
@@ -61,7 +64,7 @@ export default function PlotForSalePage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#inventory-explorer"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               Search &amp; Filter Plots
             </a>
@@ -86,7 +89,7 @@ export default function PlotForSalePage() {
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <ScrollReveal animation="fade-up">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Filter className="w-3.5 h-3.5 text-[#D4A017]" />
+                <Filter className="w-3.5 h-3.5 text-[#D49E17]" />
                 <span>Live Inventory Search</span>
               </div>
             </ScrollReveal>

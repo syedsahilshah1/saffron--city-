@@ -71,7 +71,7 @@ export default function FileUploadField({
             href={currentValue}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-[#D4A017] hover:underline inline-flex items-center gap-1 font-semibold"
+            className="text-[11px] text-[#D49E17] hover:underline inline-flex items-center gap-1 font-semibold"
           >
             <Eye className="w-3 h-3" />
             <span>View Current File</span>
@@ -111,7 +111,7 @@ export default function FileUploadField({
               value={currentValue || ""}
               onChange={(e) => onUploadSuccess(e.target.value)}
               placeholder="e.g. /images/hero-bg.jpg or https://..."
-              className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none transition-all"
+              className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none transition-all"
             />
             <input
               type="file"
@@ -124,7 +124,7 @@ export default function FileUploadField({
               type="button"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#D4A017] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
             >
               {isUploading ? (
                 <>

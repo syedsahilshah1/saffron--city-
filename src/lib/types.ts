@@ -48,26 +48,76 @@ export interface StoredBlog {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // Comprehensive SEO & Social Metadata
+  seoTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
+  focusKeyword?: string;
+  secondaryKeywords?: string;
+  h1Heading?: string;
+  imageAlt?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  customSchema?: string;
+}
+
+export interface StoredPageSeo {
+  id: string;
+  path: string; // e.g. "/", "/about-us", "/master-plan", "/payment-plan", "/noc-status", "/location", "/sectors/sector-a", "/sectors/sector-b", "/plots/residential", "/plots/commercial", "/privacy-policy"
+  pageName: string;
+  metaTitle: string;
+  metaDescription: string;
+  h1Heading?: string;
+  focusKeyword?: string;
+  secondaryKeywords?: string;
+  canonicalUrl?: string;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  schemaType: "WebSite" | "RealEstateListing" | "AboutPage" | "ContactPage" | "FAQPage" | "ItemPage" | "Custom";
+  customJsonLd?: string;
+  updatedAt: string;
+}
+
+export interface StoredRedirect {
+  id: string;
+  sourcePath: string; // e.g. "/old-payment-plan"
+  destinationUrl: string; // e.g. "/payment-plan"
+  statusCode: 301 | 302;
+  isActive: boolean;
+  hitCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface StoredUser {
   id: string;
   email: string;
   name: string;
-  passwordHash: string;
-  salt: string;
+  password?: string;
   role: UserRole;
   permissions: DashboardPermission[];
-  failedAttempts: number;
-  lockedUntil: string | null;
+  failedAttempts?: number;
+  lockedUntil?: string | null;
   isActive: boolean;
   lastLoginAt?: string;
-  sessionToken?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export type SafeUser = Omit<StoredUser, "passwordHash" | "salt">;
+export type SafeUser = Omit<StoredUser, "password">;
 
 export interface StoredInquiry {
   id: string;
@@ -149,15 +199,51 @@ export interface StoredSettings {
   smtpFromEmail: string;
   leadNotificationEmail: string;
 
-  // SEO Settings
+  // Global SEO Settings
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
+  canonicalUrl: string;
+  googleSiteVerification: string;
+  defaultRobotsIndex: boolean;
+  defaultRobotsFollow: boolean;
+
+  // Social & OpenGraph / Twitter Cards
   ogTitle: string;
   ogDescription: string;
   ogImage: string;
-  canonicalUrl: string;
-  googleSiteVerification: string;
+  twitterCard: "summary" | "summary_large_image";
+  twitterSite: string;
+  twitterCreator: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
+
+  // Structured Data / Organization Details
+  orgName: string;
+  orgLogo: string;
+  orgLegalName: string;
+  orgPriceRange: string;
+  orgStreetAddress: string;
+  orgAddressLocality: string;
+  orgAddressRegion: string;
+  orgPostalCode: string;
+  orgAddressCountry: string;
+  orgGeoLat: string;
+  orgGeoLng: string;
+  orgOpeningDays: string;
+  orgOpeningHoursOpens: string;
+  orgOpeningHoursCloses: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  youtubeUrl: string;
+  linkedinUrl: string;
+  twitterUrl: string;
+
+  // Analytics & Webmaster Code Snippets
+  googleAnalyticsId: string;
+  googleTagManagerId: string;
+  customHeadScript: string;
 
   // Hero Section
   heroTitle: string;

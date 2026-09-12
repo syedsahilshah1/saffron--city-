@@ -17,16 +17,19 @@ import EnquiryForm from "@/components/forms/EnquiryForm";
 import LocationMapViewer from "@/components/location/LocationMapViewer";
 import { LANDMARKS, ACCESS_ROUTES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Location | Main GT Road Rawat, Near Ring Road",
-  description: "Explore Saffron City's strategic location on Main GT Road Rawat, minutes from DHA Islamabad, Bahria Town, Giga Mall, and the upcoming Rawalpindi Ring Road.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/location");
+}
 
 const LOCATION_NEARBY_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
     time: "0 Minutes Direct",
-    timeHighlight: "text-[#D4A017]",
+    timeHighlight: "text-[#D49E17]",
     distance: "Direct Frontage Access",
     bgClass: "bg-amber-50/70 border-amber-300",
     image: "/images/amenities/amenity_boulevard.jpg",
@@ -78,17 +81,10 @@ export default function LocationPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <MapPin className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Main GT Road (N-5 Highway) Frontage</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Strategic Location: GT Road Rawat, Islamabad"
             highlightWords={["Strategic", "Location", "GT", "Road", "Islamabad"]}
@@ -106,11 +102,11 @@ export default function LocationPage() {
           <ScrollReveal animation="fade-up" delay={150}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">0 Min</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">0 Min</span>
                 <p className="text-xs text-slate-300 font-medium">GT Road Access</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">5 Mins</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">5 Mins</span>
                 <p className="text-xs text-slate-300 font-medium">T-Chowk Rawat</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -118,7 +114,7 @@ export default function LocationPage() {
                 <p className="text-xs text-slate-300 font-medium">DHA &amp; Giga Mall</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">15 Mins</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">15 Mins</span>
                 <p className="text-xs text-slate-300 font-medium">Ring Road Interchange</p>
               </div>
             </div>
@@ -127,7 +123,7 @@ export default function LocationPage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#location-map"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               View Location Map
             </a>
@@ -135,7 +131,7 @@ export default function LocationPage() {
               href="#nearby-landmarks"
               className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
             >
-              <Compass className="w-4 h-4 text-[#D4A017]" />
+              <Compass className="w-4 h-4 text-[#D49E17]" />
               <span>Nearby Landmarks</span>
             </a>
             <a
@@ -157,13 +153,6 @@ export default function LocationPage() {
         {/* 1. Location Overview & Google Map Section */}
         <section id="location-map" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Compass className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Geographical Advantage</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Location Overview: Gateway of Twin Cities"
               highlightWords={["Location", "Overview", "Gateway"]}
@@ -187,13 +176,6 @@ export default function LocationPage() {
         {/* 2. DEDICATED SEPARATE SECTION: Nearby Landmarks & Travel Times with Image Thumbnails */}
         <section id="nearby-landmarks" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Travel Times</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Nearby Landmarks & Travel Distances"
               highlightWords={["Nearby", "Landmarks", "Travel", "Distances"]}
@@ -226,7 +208,7 @@ export default function LocationPage() {
                       />
                     </div>
                     <div className="space-y-0.5">
-                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors">
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors">
                         {item.name}
                       </h4>
                       <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
@@ -262,7 +244,7 @@ export default function LocationPage() {
                   {LANDMARKS.map((lm) => (
                     <tr key={lm.name} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900">{lm.name}</td>
-                      <td className="py-4 px-5 font-mono font-bold text-[#D4A017]">{lm.time}</td>
+                      <td className="py-4 px-5 font-mono font-bold text-[#D49E17]">{lm.time}</td>
                       <td className="py-4 px-5 text-slate-600">{lm.distance}</td>
                       <td className="py-4 px-5">
                         <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px]">

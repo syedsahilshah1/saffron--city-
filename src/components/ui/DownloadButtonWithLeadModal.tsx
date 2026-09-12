@@ -33,7 +33,7 @@ export default function DownloadButtonWithLeadModal({
         className={className}
         title={`Download ${documentTitle}`}
       >
-        <Download className="w-4 h-4 text-[#D4A017]" />
+        <Download className="w-4 h-4 text-[#D49E17]" />
         {!iconOnly && <span>{buttonText}</span>}
       </button>
 

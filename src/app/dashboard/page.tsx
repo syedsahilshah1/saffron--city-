@@ -63,6 +63,8 @@ import {
   StoredBlog,
   StoredSettings,
   StoredUser,
+  StoredPageSeo,
+  StoredRedirect,
   DashboardPermission,
   UserRole,
   ALL_PERMISSIONS
@@ -119,6 +121,7 @@ export default function AdminDashboardPage() {
   const [blogsList, setBlogsList] = useState<StoredBlog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
   const [showBlogModal, setShowBlogModal] = useState(false);
+  const [blogModalTab, setBlogModalTab] = useState<"content" | "seo">("content");
   const [editingBlog, setEditingBlog] = useState<StoredBlog | null>(null);
   const [blogCategoryFilter, setBlogCategoryFilter] = useState<string>("All");
   const [blogForm, setBlogForm] = useState<{
@@ -131,6 +134,22 @@ export default function AdminDashboardPage() {
     author: string;
     readTime: string;
     isPublished: boolean;
+    seoTitle: string;
+    metaDescription: string;
+    canonicalUrl: string;
+    robotsIndex: boolean;
+    robotsFollow: boolean;
+    focusKeyword: string;
+    secondaryKeywords: string;
+    h1Heading: string;
+    imageAlt: string;
+    ogTitle: string;
+    ogDescription: string;
+    ogImage: string;
+    twitterTitle: string;
+    twitterDescription: string;
+    twitterImage: string;
+    customSchema: string;
   }>({
     title: "",
     slug: "",
@@ -141,7 +160,50 @@ export default function AdminDashboardPage() {
     author: "Saffron City Official",
     readTime: "4 min read",
     isPublished: true,
+    seoTitle: "",
+    metaDescription: "",
+    canonicalUrl: "",
+    robotsIndex: true,
+    robotsFollow: true,
+    focusKeyword: "",
+    secondaryKeywords: "",
+    h1Heading: "",
+    imageAlt: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "/images/hero-bg.jpg",
+    twitterTitle: "",
+    twitterDescription: "",
+    twitterImage: "/images/hero-bg.jpg",
+    customSchema: "",
   });
+
+  // SEO Suite & Redirects States
+  const [seoSubTab, setSeoSubTab] = useState<"global" | "pages" | "redirects" | "health">("global");
+  const [pageSeoList, setPageSeoList] = useState<StoredPageSeo[]>([]);
+  const [selectedPagePath, setSelectedPagePath] = useState<string>("/");
+  const [selectedPageSeo, setSelectedPageSeo] = useState<StoredPageSeo | null>(null);
+  const [loadingPageSeo, setLoadingPageSeo] = useState(false);
+  const [savingPageSeo, setSavingPageSeo] = useState(false);
+  const [pageSeoSuccessMsg, setPageSeoSuccessMsg] = useState("");
+
+  const [redirectsList, setRedirectsList] = useState<StoredRedirect[]>([]);
+  const [loadingRedirects, setLoadingRedirects] = useState(false);
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [editingRedirect, setEditingRedirect] = useState<StoredRedirect | null>(null);
+  const [redirectForm, setRedirectForm] = useState<{
+    sourcePath: string;
+    destinationUrl: string;
+    statusCode: 301 | 302;
+    isActive: boolean;
+  }>({
+    sourcePath: "",
+    destinationUrl: "",
+    statusCode: 301,
+    isActive: true,
+  });
+  const [savingRedirect, setSavingRedirect] = useState(false);
+  const [redirectError, setRedirectError] = useState("");
 
   // User Management Modals
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -259,21 +321,36 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [leadsRes, plotsRes, statsRes, blogsRes] = await Promise.all([
+      const [leadsRes, plotsRes, statsRes, blogsRes, pageSeoRes, redirectsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/plots"),
         fetch("/api/dashboard/stats"),
         fetch("/api/blogs"),
+        fetch("/api/seo/pages"),
+        fetch("/api/seo/redirects"),
       ]);
 
       const leadsData = await leadsRes.json();
       const plotsData = await plotsRes.json();
       const statsData = await statsRes.json();
       const blogsData = await blogsRes.json();
+      const pageSeoData = await pageSeoRes.json();
+      const redirectsData = await redirectsRes.json();
 
       if (leadsData.success) setLeads(leadsData.data);
       if (plotsData.success) setPlots(plotsData.data);
       if (blogsData.success && blogsData.data) setBlogsList(blogsData.data);
+      if (pageSeoData.success && pageSeoData.data) {
+        setPageSeoList(pageSeoData.data);
+        const homeSeo = pageSeoData.data.find((p: StoredPageSeo) => p.path === "/") || pageSeoData.data[0];
+        if (homeSeo) {
+          setSelectedPagePath(homeSeo.path);
+          setSelectedPageSeo(homeSeo);
+        }
+      }
+      if (redirectsData.success && redirectsData.data) {
+        setRedirectsList(redirectsData.data);
+      }
       if (statsData.success && statsData.data.settings) {
         setSettings(statsData.data.settings);
       }
@@ -282,6 +359,164 @@ export default function AdminDashboardPage() {
       console.error("Dashboard fetch error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPageSeo = async () => {
+    setLoadingPageSeo(true);
+    try {
+      const res = await fetch("/api/seo/pages");
+      const data = await res.json();
+      if (data.success && data.data) {
+        setPageSeoList(data.data);
+        const current = data.data.find((p: StoredPageSeo) => p.path === selectedPagePath);
+        if (current) setSelectedPageSeo(current);
+      }
+    } catch (err) {
+      console.error("Error fetching page SEO:", err);
+    } finally {
+      setLoadingPageSeo(false);
+    }
+  };
+
+  const fetchRedirects = async () => {
+    setLoadingRedirects(true);
+    try {
+      const res = await fetch("/api/seo/redirects");
+      const data = await res.json();
+      if (data.success && data.data) {
+        setRedirectsList(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching redirects:", err);
+    } finally {
+      setLoadingRedirects(false);
+    }
+  };
+
+  const handleSelectPageSeo = (path: string) => {
+    setSelectedPagePath(path);
+    const found = pageSeoList.find((p) => p.path === path);
+    if (found) {
+      setSelectedPageSeo({ ...found });
+    } else {
+      setSelectedPageSeo({
+        id: "",
+        path,
+        pageName: path,
+        metaTitle: "",
+        metaDescription: "",
+        h1Heading: "",
+        focusKeyword: "",
+        secondaryKeywords: "",
+        canonicalUrl: "",
+        robotsIndex: true,
+        robotsFollow: true,
+        schemaType: "ItemPage",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  };
+
+  const handleSavePageSeo = async () => {
+    if (!selectedPageSeo) return;
+    setSavingPageSeo(true);
+    setPageSeoSuccessMsg("");
+    try {
+      const res = await fetch("/api/seo/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selectedPageSeo),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPageSeoSuccessMsg("Page SEO settings saved & live in page HTML!");
+        fetchPageSeo();
+        setTimeout(() => setPageSeoSuccessMsg(""), 4000);
+      }
+    } catch (err) {
+      console.error("Error saving page SEO:", err);
+    } finally {
+      setSavingPageSeo(false);
+    }
+  };
+
+  const handleOpenAddRedirect = () => {
+    setEditingRedirect(null);
+    setRedirectForm({
+      sourcePath: "",
+      destinationUrl: "",
+      statusCode: 301,
+      isActive: true,
+    });
+    setRedirectError("");
+    setShowRedirectModal(true);
+  };
+
+  const handleOpenEditRedirect = (red: StoredRedirect) => {
+    setEditingRedirect(red);
+    setRedirectForm({
+      sourcePath: red.sourcePath,
+      destinationUrl: red.destinationUrl,
+      statusCode: red.statusCode,
+      isActive: red.isActive,
+    });
+    setRedirectError("");
+    setShowRedirectModal(true);
+  };
+
+  const handleSaveRedirect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingRedirect(true);
+    setRedirectError("");
+    try {
+      const isEdit = !!editingRedirect;
+      const url = "/api/seo/redirects";
+      const method = isEdit ? "PUT" : "POST";
+      const payload = isEdit ? { id: editingRedirect.id, ...redirectForm } : redirectForm;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setShowRedirectModal(false);
+        fetchRedirects();
+      } else {
+        setRedirectError(data.message || "Failed to save redirect");
+      }
+    } catch (err: any) {
+      setRedirectError(err?.message || "Failed to save redirect");
+    } finally {
+      setSavingRedirect(false);
+    }
+  };
+
+  const handleDeleteRedirect = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this 301 redirect rule?")) return;
+    try {
+      const res = await fetch(`/api/seo/redirects?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchRedirects();
+      }
+    } catch (err) {
+      console.error("Failed to delete redirect:", err);
+    }
+  };
+
+  const handleToggleRedirect = async (red: StoredRedirect) => {
+    try {
+      await fetch("/api/seo/redirects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: red.id, isActive: !red.isActive }),
+      });
+      fetchRedirects();
+    } catch (err) {
+      console.error("Failed to toggle redirect:", err);
     }
   };
 
@@ -302,6 +537,7 @@ export default function AdminDashboardPage() {
 
   const handleOpenCreateBlog = () => {
     setEditingBlog(null);
+    setBlogModalTab("content");
     setBlogForm({
       title: "",
       slug: "",
@@ -312,12 +548,29 @@ export default function AdminDashboardPage() {
       author: currentUser?.name || "Saffron City Official",
       readTime: "4 min read",
       isPublished: true,
+      seoTitle: "",
+      metaDescription: "",
+      canonicalUrl: "",
+      robotsIndex: true,
+      robotsFollow: true,
+      focusKeyword: "",
+      secondaryKeywords: "",
+      h1Heading: "",
+      imageAlt: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "/images/hero-bg.jpg",
+      twitterTitle: "",
+      twitterDescription: "",
+      twitterImage: "/images/hero-bg.jpg",
+      customSchema: "",
     });
     setShowBlogModal(true);
   };
 
   const handleOpenEditBlog = (blog: StoredBlog) => {
     setEditingBlog(blog);
+    setBlogModalTab("content");
     setBlogForm({
       title: blog.title,
       slug: blog.slug,
@@ -328,6 +581,22 @@ export default function AdminDashboardPage() {
       author: blog.author,
       readTime: blog.readTime || "4 min read",
       isPublished: blog.isPublished ?? true,
+      seoTitle: blog.seoTitle || blog.title,
+      metaDescription: blog.metaDescription || blog.excerpt,
+      canonicalUrl: blog.canonicalUrl || "",
+      robotsIndex: blog.robotsIndex ?? true,
+      robotsFollow: blog.robotsFollow ?? true,
+      focusKeyword: blog.focusKeyword || "",
+      secondaryKeywords: blog.secondaryKeywords || "",
+      h1Heading: blog.h1Heading || blog.title,
+      imageAlt: blog.imageAlt || blog.title,
+      ogTitle: blog.ogTitle || blog.seoTitle || blog.title,
+      ogDescription: blog.ogDescription || blog.metaDescription || blog.excerpt,
+      ogImage: blog.ogImage || blog.image || "/images/hero-bg.jpg",
+      twitterTitle: blog.twitterTitle || blog.seoTitle || blog.title,
+      twitterDescription: blog.twitterDescription || blog.metaDescription || blog.excerpt,
+      twitterImage: blog.twitterImage || blog.image || "/images/hero-bg.jpg",
+      customSchema: blog.customSchema || "",
     });
     setShowBlogModal(true);
   };
@@ -749,7 +1018,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col selection:bg-[#D4A017] selection:text-slate-950">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col selection:bg-[#D49E17] selection:text-slate-950">
       {/* 1. TOP NAVBAR */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -757,13 +1026,13 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] transition-colors cursor-pointer"
               title="Toggle Sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-[#D4A017] to-amber-600 flex items-center justify-center text-slate-950 font-bold shadow-sm">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-[#D49E17] to-amber-600 flex items-center justify-center text-slate-950 font-bold shadow-sm">
                 <LayoutDashboard className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -786,7 +1055,7 @@ export default function AdminDashboardPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search leads, phone numbers, or plot IDs..."
-              className="w-full pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D4A017] focus:bg-white focus:outline-none transition-all"
+              className="w-full pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none transition-all"
             />
           </div>
 
@@ -794,7 +1063,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-2.5">
             {/* Current Logged In SuperAdmin / User Badge */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-[#D4A017] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-[#D49E17] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
                 {currentUser?.name?.charAt(0) || "U"}
               </div>
               <div className="text-left leading-none">
@@ -812,14 +1081,14 @@ export default function AdminDashboardPage() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
               title="Sync Data"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#D4A017]" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#D49E17]" : ""}`} />
               <span className="hidden sm:inline">Sync Data</span>
             </button>
 
             <button
               onClick={() => handleSaveSettings()}
               disabled={savingSettings}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
               <Save className={`w-3.5 h-3.5 ${savingSettings ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">
@@ -830,7 +1099,7 @@ export default function AdminDashboardPage() {
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[#D4A017] hover:bg-amber-100 text-xs font-bold transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[#D49E17] hover:bg-amber-100 text-xs font-bold transition-colors"
             >
               <span className="hidden sm:inline">View Live Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -877,8 +1146,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("overview")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "overview"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -893,8 +1162,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("leads")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "leads"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -920,8 +1189,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("plots")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "plots"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -953,8 +1222,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("blogs")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "blogs"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -978,8 +1247,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("content")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "content"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -994,8 +1263,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("masterplan")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "masterplan"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -1010,8 +1279,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("paymentplans")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "paymentplans"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -1034,8 +1303,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("seo")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "seo"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -1050,8 +1319,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab("settings")}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "settings"
-                        ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -1074,8 +1343,8 @@ export default function AdminDashboardPage() {
                   onClick={() => setActiveTab("users")}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                     activeTab === "users"
-                      ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20"
-                      : "text-slate-700 hover:bg-amber-50 hover:text-[#D4A017]"
+                      ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                      : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                   }`} 
                 >
                   <div className="flex items-center gap-2.5">
@@ -1098,7 +1367,7 @@ export default function AdminDashboardPage() {
           {/* If the logged-in user is not Super Admin and has zero permissions assigned */}
           {currentUser && !isSuperAdmin && (!currentUser.permissions || currentUser.permissions.length === 0) && (
             <div className="bg-white border border-amber-200/80 rounded-3xl p-8 sm:p-12 text-center shadow-sm space-y-4 max-w-xl mx-auto my-12">
-              <div className="w-16 h-16 rounded-3xl bg-amber-50 text-[#D4A017] border border-amber-200 flex items-center justify-center mx-auto shadow-inner">
+              <div className="w-16 h-16 rounded-3xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center mx-auto shadow-inner">
                 <Shield className="w-8 h-8" />
               </div>
               <div className="space-y-1.5">
@@ -1132,7 +1401,7 @@ export default function AdminDashboardPage() {
                 <div className="bg-white border border-amber-200/80 rounded-3xl p-5 shadow-sm space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 uppercase">Total Leads</span>
-                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#D4A017] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#D49E17] flex items-center justify-center">
                       <Users className="w-4 h-4" />
                     </div>
                   </div>
@@ -1193,7 +1462,7 @@ export default function AdminDashboardPage() {
                     </h3>
                     <button
                       onClick={() => setActiveTab("leads")}
-                      className="text-xs font-bold text-[#D4A017] hover:underline inline-flex items-center gap-1"
+                      className="text-xs font-bold text-[#D49E17] hover:underline inline-flex items-center gap-1"
                     >
                       <span>View All CRM</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1321,7 +1590,7 @@ export default function AdminDashboardPage() {
                       onClick={() => setStatusFilter(st)}
                       className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
                         statusFilter === st
-                          ? "bg-[#D4A017] text-white shadow-sm"
+                          ? "bg-[#D49E17] text-white shadow-sm"
                           : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
@@ -1364,7 +1633,7 @@ export default function AdminDashboardPage() {
                         <td className="py-3.5 px-4 font-medium text-slate-700">
                           <a
                             href={`tel:${lead.phone}`}
-                            className="hover:text-[#D4A017] inline-flex items-center gap-1"
+                            className="hover:text-[#D49E17] inline-flex items-center gap-1"
                           >
                             <Phone className="w-3 h-3 text-slate-400" />
                             <span>{lead.phone}</span>
@@ -1392,7 +1661,7 @@ export default function AdminDashboardPage() {
                                 e.target.value as StoredInquiry["status"]
                               )
                             }
-                            className="px-2.5 py-1 rounded-xl text-xs font-bold border border-slate-200 bg-white focus:outline-none focus:border-[#D4A017] cursor-pointer"
+                            className="px-2.5 py-1 rounded-xl text-xs font-bold border border-slate-200 bg-white focus:outline-none focus:border-[#D49E17] cursor-pointer"
                           >
                             <option value="New">New</option>
                             <option value="Contacted">Contacted</option>
@@ -1448,7 +1717,7 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={() => setShowAddPlot(true)}
-                  className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white text-xs font-bold shadow-md hover:scale-105 transition-all inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                  className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white text-xs font-bold shadow-md hover:scale-105 transition-all inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Plot</span>
@@ -1576,7 +1845,7 @@ export default function AdminDashboardPage() {
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-[#D4A017] text-white font-bold shadow-md"
+                        className="px-5 py-2 rounded-xl bg-[#D49E17] text-white font-bold shadow-md"
                       >
                         Save Plot
                       </button>
@@ -1619,7 +1888,7 @@ export default function AdminDashboardPage() {
                           <span className="block text-[10px] text-slate-400">{plot.type}</span>
                         </td>
                         <td className="py-3 px-4 font-bold text-slate-800">{plot.category}</td>
-                        <td className="py-3 px-4 font-bold text-[#D4A017]">
+                        <td className="py-3 px-4 font-bold text-[#D49E17]">
                           {formatPKR(plot.totalPrice)}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
@@ -1673,7 +1942,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#D4A017] text-[11px] font-bold uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#D49E17] text-[11px] font-bold uppercase tracking-wider">
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>Content Management System</span>
                     </div>
@@ -1692,12 +1961,12 @@ export default function AdminDashboardPage() {
                       className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                       title="Refresh Blogs"
                     >
-                      <RefreshCw className={`w-4 h-4 ${loadingBlogs ? "animate-spin text-[#D4A017]" : ""}`} />
+                      <RefreshCw className={`w-4 h-4 ${loadingBlogs ? "animate-spin text-[#D49E17]" : ""}`} />
                     </button>
                     <button
                       type="button"
                       onClick={handleOpenCreateBlog}
-                      className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white text-xs font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all flex items-center gap-2 cursor-pointer"
+                      className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white text-xs font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all flex items-center gap-2 cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Create New Article</span>
@@ -1745,7 +2014,7 @@ export default function AdminDashboardPage() {
                         onClick={() => setBlogCategoryFilter(cat)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                           blogCategoryFilter === cat
-                            ? "bg-[#D4A017] text-white shadow-sm"
+                            ? "bg-[#D49E17] text-white shadow-sm"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
@@ -1762,7 +2031,7 @@ export default function AdminDashboardPage() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search articles by title or author..."
-                      className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D4A017] focus:outline-none"
+                      className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1816,7 +2085,7 @@ export default function AdminDashboardPage() {
 
                             {/* Category */}
                             <td className="py-4 px-3 whitespace-nowrap">
-                              <span className="inline-block px-2.5 py-1 rounded-full bg-amber-50 text-[#D4A017] border border-amber-200/80 font-bold text-[10px]">
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-amber-50 text-[#D49E17] border border-amber-200/80 font-bold text-[10px]">
                                 {blog.category}
                               </span>
                             </td>
@@ -1906,7 +2175,7 @@ export default function AdminDashboardPage() {
               {/* Section: Hero Banner */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Sparkles className="w-4 h-4 text-[#D4A017]" />
+                  <Sparkles className="w-4 h-4 text-[#D49E17]" />
                   <h3 className="font-bold text-slate-900 font-heading text-base">
                     Hero Banner &amp; Headline Content
                   </h3>
@@ -1931,7 +2200,7 @@ export default function AdminDashboardPage() {
                       type="text"
                       value={settings.heroHighlightedWord}
                       onChange={(e) => updateSettingField("heroHighlightedWord", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-[#D4A017]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-[#D49E17]"
                     />
                   </div>
 
@@ -1960,7 +2229,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017]">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17]">
                       <Briefcase className="w-4 h-4" />
                     </div>
                     <div>
@@ -2052,7 +2321,7 @@ export default function AdminDashboardPage() {
                       type="text"
                       value={settings.chairmanTitle}
                       onChange={(e) => updateSettingField("chairmanTitle", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[#D4A017] font-bold"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[#D49E17] font-bold"
                     />
                   </div>
 
@@ -2116,7 +2385,7 @@ export default function AdminDashboardPage() {
               {/* Section: Sectors Showcase */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Layers className="w-4 h-4 text-[#D4A017]" />
+                  <Layers className="w-4 h-4 text-[#D49E17]" />
                   <h3 className="font-bold text-slate-900 font-heading text-base">
                     Sectors Comparison &amp; Visuals
                   </h3>
@@ -2125,7 +2394,7 @@ export default function AdminDashboardPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
                   {/* Sector A */}
                   <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm text-[#D4A017]">Sector A Settings</h4>
+                    <h4 className="font-bold text-slate-900 text-sm text-[#D49E17]">Sector A Settings</h4>
                     <div>
                       <label className="font-bold text-slate-700 block mb-1">Title</label>
                       <input
@@ -2153,7 +2422,7 @@ export default function AdminDashboardPage() {
 
                   {/* Sector B */}
                   <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm text-[#D4A017]">Sector B Settings</h4>
+                    <h4 className="font-bold text-slate-900 text-sm text-[#D49E17]">Sector B Settings</h4>
                     <div>
                       <label className="font-bold text-slate-700 block mb-1">Title</label>
                       <input
@@ -2187,7 +2456,7 @@ export default function AdminDashboardPage() {
                   type="button"
                   onClick={() => handleSaveSettings()}
                   disabled={savingSettings}
-                  className="px-6 py-3 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Website Content Changes</span>
@@ -2257,7 +2526,7 @@ export default function AdminDashboardPage() {
                     type="button"
                     onClick={() => handleSaveSettings()}
                     disabled={savingSettings}
-                    className="px-6 py-3 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                    className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
                   >
                     <Save className="w-4 h-4" />
                     <span>Sync Master Plan Files Everywhere</span>
@@ -2326,7 +2595,7 @@ export default function AdminDashboardPage() {
                                 newTiers[idx].totalPrice = e.target.value;
                                 updateSettingField("paymentTiers", newTiers);
                               }}
-                              className="w-28 px-2 py-1 rounded-lg border border-slate-200 font-bold text-[#D4A017] text-xs"
+                              className="w-28 px-2 py-1 rounded-lg border border-slate-200 font-bold text-[#D49E17] text-xs"
                             />
                           </td>
                           <td className="py-2 px-3">
@@ -2410,7 +2679,7 @@ export default function AdminDashboardPage() {
                   type="button"
                   onClick={() => handleSaveSettings()}
                   disabled={savingSettings}
-                  className="px-6 py-3 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Payment Plans</span>
@@ -2420,137 +2689,1101 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================
-              TAB 7: SEO & META TAGS
+              TAB 7: TECHNICAL SEO & REDIRECTS SUITE
           ======================================================== */}
           {activeTab === "seo" && hasAccess("seo") && settings && (
-            <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div>
-                  <h3 className="font-bold text-slate-900 font-heading text-base">
-                    Search Engine Optimization (SEO) &amp; OpenGraph Meta
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Configure Google rankings meta tags, social sharing cards, and domain verification.
-                  </p>
-                </div>
+            <div className="space-y-6">
+              {/* Top SEO Sub-Tabs Navigation */}
+              <div className="bg-white border border-amber-200/80 rounded-3xl p-3 shadow-sm flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSeoSubTab("global")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    seoSubTab === "global"
+                      ? "bg-[#D49E17] text-white shadow-md"
+                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>Global SEO &amp; Social</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSeoSubTab("pages");
+                    if (pageSeoList.length === 0) fetchPageSeo();
+                  }}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    seoSubTab === "pages"
+                      ? "bg-[#D49E17] text-white shadow-md"
+                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Page-by-Page SEO ({pageSeoList.length || 13})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSeoSubTab("redirects");
+                    if (redirectsList.length === 0) fetchRedirects();
+                  }}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    seoSubTab === "redirects"
+                      ? "bg-[#D49E17] text-white shadow-md"
+                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
+                  }`}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>301 Redirect Manager ({redirectsList.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSeoSubTab("health")}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    seoSubTab === "health"
+                      ? "bg-[#D49E17] text-white shadow-md"
+                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Sitemap &amp; Health</span>
+                </button>
               </div>
 
-              <div className="space-y-4 text-xs">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">Meta Title Tag</label>
-                    <span className="text-[11px] text-slate-400">
-                      {settings.metaTitle.length}/65 recommended
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    value={settings.metaTitle}
-                    onChange={(e) => updateSettingField("metaTitle", e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">Meta Description Tag</label>
-                    <span className="text-[11px] text-slate-400">
-                      {settings.metaDescription.length}/160 recommended
-                    </span>
-                  </div>
-                  <textarea
-                    rows={3}
-                    value={settings.metaDescription}
-                    onChange={(e) => updateSettingField("metaDescription", e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Focus SEO Keywords (Comma-separated)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={settings.metaKeywords}
-                    onChange={(e) => updateSettingField("metaKeywords", e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                    placeholder="Saffron City, RDA approved plots, GT Road Rawat, 5 Marla plots..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Canonical URL</label>
-                    <input
-                      type="text"
-                      value={settings.canonicalUrl}
-                      onChange={(e) => updateSettingField("canonicalUrl", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                      placeholder="https://saffroncity.pk"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Google Search Console Verification Tag
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.googleSiteVerification}
-                      onChange={(e) => updateSettingField("googleSiteVerification", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                      placeholder="e.g. google-site-verification=abc123xyz"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
-                    Social Sharing / OpenGraph Card
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">OG Title</label>
-                      <input
-                        type="text"
-                        value={settings.ogTitle}
-                        onChange={(e) => updateSettingField("ogTitle", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                      />
+              {/* ----------------------------------------------------
+                  SUB-TAB 1: GLOBAL SEO & SOCIAL SHARING
+              ---------------------------------------------------- */}
+              {seoSubTab === "global" && (
+                <div className="space-y-6">
+                  {/* Google SERP & Social Card Live Mockup Preview */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    {/* Google SERP Preview Card */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <Search className="w-3.5 h-3.5 text-blue-600" />
+                          <span>Google Search Snippet Preview</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          Live Render
+                        </span>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 font-sans space-y-1">
+                        <div className="flex items-center gap-2 text-[11px] text-[#202124]">
+                          <div className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] font-bold">
+                            S
+                          </div>
+                          <span className="text-slate-700 font-medium">saffroncity.org</span>
+                          <span className="text-slate-400">&rsaquo;</span>
+                        </div>
+                        <div className="text-base text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1 leading-snug">
+                          {settings.metaTitle || "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat"}
+                        </div>
+                        <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                          {settings.metaDescription || "Invest in Saffron City Islamabad — premier 15,000 Kanal RDA NOC-approved housing society on Main GT Road near Rawat."}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">OG Description</label>
-                      <input
-                        type="text"
-                        value={settings.ogDescription}
-                        onChange={(e) => updateSettingField("ogDescription", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                      />
+
+                    {/* Social Share / OpenGraph Mockup Card */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-[#D49E17]" />
+                          <span>Social Share / OpenGraph Card Preview</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                          1200 × 630 Card
+                        </span>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 text-white shadow-sm">
+                        <div className="h-32 bg-slate-800 relative overflow-hidden">
+                          <img
+                            src={settings.ogImage || "/images/hero-bg.jpg"}
+                            alt="Social Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <span className="absolute bottom-2 left-2 text-[10px] font-mono bg-black/70 px-2 py-0.5 rounded text-amber-300">
+                            saffroncity.org
+                          </span>
+                        </div>
+                        <div className="p-3 bg-slate-950 space-y-1">
+                          <div className="font-bold text-xs text-white line-clamp-1">
+                            {settings.ogTitle || settings.metaTitle}
+                          </div>
+                          <div className="text-[11px] text-slate-400 line-clamp-1">
+                            {settings.ogDescription || settings.metaDescription}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="sm:col-span-2">
+                  </div>
+
+                  {/* Core Global Metadata Form */}
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Site-Wide Metadata &amp; Search Engine Indexing
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Default title tag, description, canonical domain, and indexing controls.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-bold text-slate-700">Default Meta Title</label>
+                          <span className={`text-[11px] font-mono ${settings.metaTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                            {settings.metaTitle.length}/65 chars (Optimal: 50-60)
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={settings.metaTitle}
+                          onChange={(e) => updateSettingField("metaTitle", e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-xs text-slate-900 focus:border-[#D49E17] outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-bold text-slate-700">Default Meta Description</label>
+                          <span className={`text-[11px] font-mono ${settings.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                            {settings.metaDescription.length}/160 chars (Optimal: 140-160)
+                          </span>
+                        </div>
+                        <textarea
+                          rows={3}
+                          value={settings.metaDescription}
+                          onChange={(e) => updateSettingField("metaDescription", e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed text-xs text-slate-900 focus:border-[#D49E17] outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">
+                          Primary Focus SEO Keywords (Comma-separated)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={settings.metaKeywords}
+                          onChange={(e) => updateSettingField("metaKeywords", e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-[#D49E17] outline-none"
+                          placeholder="Saffron City, RDA approved plots, GT Road Rawat, 5 Marla plots..."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Canonical Base URL</label>
+                          <input
+                            type="text"
+                            value={settings.canonicalUrl}
+                            onChange={(e) => updateSettingField("canonicalUrl", e.target.value)}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono"
+                            placeholder="https://saffroncity.org"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">
+                            Google Search Console Verification Tag / Code
+                          </label>
+                          <input
+                            type="text"
+                            value={settings.googleSiteVerification}
+                            onChange={(e) => updateSettingField("googleSiteVerification", e.target.value)}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono"
+                            placeholder="google-site-verification=abc123xyz"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Default Indexing Rules */}
+                      <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-slate-900 block text-xs">Default Indexing Directive</span>
+                            <span className="text-[10px] text-slate-500">Allow search engine bots to index pages by default</span>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={settings.defaultRobotsIndex ?? true}
+                              onChange={(e) => updateSettingField("defaultRobotsIndex", e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-slate-900 block text-xs">Default Follow Directive</span>
+                            <span className="text-[10px] text-slate-500">Allow search engine bots to follow links on pages</span>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={settings.defaultRobotsFollow ?? true}
+                              onChange={(e) => updateSettingField("defaultRobotsFollow", e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social / OpenGraph & Twitter/X Cards Settings */}
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Social Media Sharing &amp; Twitter/X Cards
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Configure OpenGraph (Facebook/WhatsApp/LinkedIn) and Twitter cards metadata.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">OpenGraph (OG) Title</label>
+                          <input
+                            type="text"
+                            value={settings.ogTitle}
+                            onChange={(e) => updateSettingField("ogTitle", e.target.value)}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">OpenGraph (OG) Description</label>
+                          <input
+                            type="text"
+                            value={settings.ogDescription}
+                            onChange={(e) => updateSettingField("ogDescription", e.target.value)}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Card Type</label>
+                          <select
+                            value={settings.twitterCard || "summary_large_image"}
+                            onChange={(e) => updateSettingField("twitterCard", e.target.value as "summary" | "summary_large_image")}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
+                          >
+                            <option value="summary_large_image">summary_large_image (Large Hero Card)</option>
+                            <option value="summary">summary (Standard Square Card)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Site Handle</label>
+                          <input
+                            type="text"
+                            value={settings.twitterSite || "@SaffronCityPk"}
+                            onChange={(e) => updateSettingField("twitterSite", e.target.value)}
+                            placeholder="@SaffronCityPk"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Creator Handle</label>
+                          <input
+                            type="text"
+                            value={settings.twitterCreator || "@SaffronCityPk"}
+                            onChange={(e) => updateSettingField("twitterCreator", e.target.value)}
+                            placeholder="@SaffronCityPk"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                      </div>
+
                       <FileUploadField
-                        label="Social Share Preview Image (OG:Image 1200×630)"
+                        label="Social Share & OpenGraph Image (1200×630)"
                         currentValue={settings.ogImage}
                         onUploadSuccess={(url) => updateSettingField("ogImage", url)}
-                        helperText="Image displayed when sharing link on Facebook, WhatsApp, or Twitter."
+                        helperText="Displays automatically when sharing links on Facebook, WhatsApp, Twitter, and LinkedIn."
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleSaveSettings()}
-                    disabled={savingSettings}
-                    className="px-6 py-3 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save SEO Configuration</span>
-                  </button>
+                  {/* Organization Schema & Analytics Scripts */}
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Structured Data (Organization Schema) &amp; Analytics
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          JSON-LD business schema parameters and tracking container IDs.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Organization Legal Name</label>
+                          <input
+                            type="text"
+                            value={settings.orgLegalName || ""}
+                            onChange={(e) => updateSettingField("orgLegalName", e.target.value)}
+                            placeholder="Saffron City Developers (SKB Group)"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Price Range</label>
+                          <input
+                            type="text"
+                            value={settings.orgPriceRange || ""}
+                            onChange={(e) => updateSettingField("orgPriceRange", e.target.value)}
+                            placeholder="PKR 4,500,000 - 35,000,000"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Country Code</label>
+                          <input
+                            type="text"
+                            value={settings.orgAddressCountry || "PK"}
+                            onChange={(e) => updateSettingField("orgAddressCountry", e.target.value)}
+                            placeholder="PK"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 uppercase font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Street Address</label>
+                          <input
+                            type="text"
+                            value={settings.orgStreetAddress || ""}
+                            onChange={(e) => updateSettingField("orgStreetAddress", e.target.value)}
+                            placeholder="Main GT Road, Near T-Chowk, Rawat"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">City / Locality</label>
+                          <input
+                            type="text"
+                            value={settings.orgAddressLocality || ""}
+                            onChange={(e) => updateSettingField("orgAddressLocality", e.target.value)}
+                            placeholder="Islamabad / Rawalpindi"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">State / Province &amp; Postal Code</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={settings.orgAddressRegion || ""}
+                              onChange={(e) => updateSettingField("orgAddressRegion", e.target.value)}
+                              placeholder="Punjab"
+                              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                            />
+                            <input
+                              type="text"
+                              value={settings.orgPostalCode || ""}
+                              onChange={(e) => updateSettingField("orgPostalCode", e.target.value)}
+                              placeholder="46000"
+                              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Geo Latitude</label>
+                          <input
+                            type="text"
+                            value={settings.orgGeoLat || ""}
+                            onChange={(e) => updateSettingField("orgGeoLat", e.target.value)}
+                            placeholder="33.5186"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Geo Longitude</label>
+                          <input
+                            type="text"
+                            value={settings.orgGeoLng || ""}
+                            onChange={(e) => updateSettingField("orgGeoLng", e.target.value)}
+                            placeholder="73.1932"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Opening Time</label>
+                          <input
+                            type="text"
+                            value={settings.orgOpeningHoursOpens || "09:00"}
+                            onChange={(e) => updateSettingField("orgOpeningHoursOpens", e.target.value)}
+                            placeholder="09:00"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Closing Time</label>
+                          <input
+                            type="text"
+                            value={settings.orgOpeningHoursCloses || "19:00"}
+                            onChange={(e) => updateSettingField("orgOpeningHoursCloses", e.target.value)}
+                            placeholder="19:00"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Operating Days (comma separated)</label>
+                        <input
+                          type="text"
+                          value={settings.orgOpeningDays || "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"}
+                          onChange={(e) => updateSettingField("orgOpeningDays", e.target.value)}
+                          placeholder="Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
+                        />
+                      </div>
+
+                      {/* Social Profile Links for SameAs Schema */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-amber-50/30 border border-amber-200">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Facebook Page URL</label>
+                          <input
+                            type="text"
+                            value={settings.facebookUrl || ""}
+                            onChange={(e) => updateSettingField("facebookUrl", e.target.value)}
+                            placeholder="https://facebook.com/saffroncityofficial"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Instagram Profile URL</label>
+                          <input
+                            type="text"
+                            value={settings.instagramUrl || ""}
+                            onChange={(e) => updateSettingField("instagramUrl", e.target.value)}
+                            placeholder="https://instagram.com/saffroncityofficial"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">YouTube Channel URL</label>
+                          <input
+                            type="text"
+                            value={settings.youtubeUrl || ""}
+                            onChange={(e) => updateSettingField("youtubeUrl", e.target.value)}
+                            placeholder="https://youtube.com/@saffroncityofficial"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">LinkedIn Company URL</label>
+                          <input
+                            type="text"
+                            value={settings.linkedinUrl || ""}
+                            onChange={(e) => updateSettingField("linkedinUrl", e.target.value)}
+                            placeholder="https://linkedin.com/company/saffron-city"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Profile URL</label>
+                          <input
+                            type="text"
+                            value={settings.twitterUrl || ""}
+                            onChange={(e) => updateSettingField("twitterUrl", e.target.value)}
+                            placeholder="https://twitter.com/SaffronCityPk"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Analytics Integration IDs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Google Analytics (GA4) Measurement ID</label>
+                          <input
+                            type="text"
+                            value={settings.googleAnalyticsId || ""}
+                            onChange={(e) => updateSettingField("googleAnalyticsId", e.target.value)}
+                            placeholder="e.g. G-XXXXXXXXXX"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Google Tag Manager (GTM) Container ID</label>
+                          <input
+                            type="text"
+                            value={settings.googleTagManagerId || ""}
+                            onChange={(e) => updateSettingField("googleTagManagerId", e.target.value)}
+                            placeholder="e.g. GTM-XXXXXXX"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Custom Head Script / Verification Tags</label>
+                        <textarea
+                          rows={2}
+                          value={settings.customHeadScript || ""}
+                          onChange={(e) => updateSettingField("customHeadScript", e.target.value)}
+                          placeholder="<!-- Custom meta or verification tags to inject in <head> -->"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveSettings()}
+                          disabled={savingSettings}
+                          className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Save Global SEO Configuration</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 2: PAGE-BY-PAGE SEO MANAGER
+              ---------------------------------------------------- */}
+              {seoSubTab === "pages" && (
+                <div className="space-y-6">
+                  {/* Page Selector Bar */}
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-5 shadow-sm space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Page-Level Technical SEO Editor
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Select any route to independently customize titles, meta descriptions, canonical URLs, robots directives, and schema markup.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={fetchPageSeo}
+                          disabled={loadingPageSeo}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                          title="Refresh page list"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${loadingPageSeo ? "animate-spin" : ""}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Page Quick Tabs Selector */}
+                    <div className="flex flex-wrap gap-2">
+                      {pageSeoList.map((p) => (
+                        <button
+                          key={p.path}
+                          type="button"
+                          onClick={() => handleSelectPageSeo(p.path)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            selectedPagePath === p.path
+                              ? "bg-slate-900 text-amber-400 border border-amber-400/40 shadow-sm"
+                              : "bg-slate-50 hover:bg-amber-50 border border-slate-200 text-slate-700"
+                          }`}
+                        >
+                          <span className="font-mono text-[11px] text-amber-500">{p.path}</span>
+                          <span className="text-slate-400">&bull;</span>
+                          <span>{p.pageName}</span>
+                          {!p.robotsIndex && (
+                            <span className="text-[9px] font-bold bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded">
+                              noindex
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Selected Page Editor Form */}
+                  {selectedPageSeo && (
+                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-900 font-mono font-bold text-xs">
+                            {selectedPageSeo.path}
+                          </span>
+                          <h4 className="font-bold text-slate-900 text-sm">
+                            Editing SEO: {selectedPageSeo.pageName}
+                          </h4>
+                        </div>
+                        {pageSeoSuccessMsg && (
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" />
+                            <span>{pageSeoSuccessMsg}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Live SERP Preview for this specific page */}
+                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                          Google Search Result Simulation
+                        </span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
+                          <span className="text-slate-700 font-medium">https://saffroncity.org</span>
+                          <span className="text-slate-400">{selectedPageSeo.path}</span>
+                        </div>
+                        <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
+                          {selectedPageSeo.metaTitle || "Default Site Title"}
+                        </div>
+                        <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                          {selectedPageSeo.metaDescription || "Default description for this route..."}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">Page Display Name</label>
+                            <input
+                              type="text"
+                              value={selectedPageSeo.pageName}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, pageName: e.target.value })
+                              }
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
+                            />
+                          </div>
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">
+                              Independent Display H1 Heading
+                            </label>
+                            <input
+                              type="text"
+                              value={selectedPageSeo.h1Heading || ""}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, h1Heading: e.target.value })
+                              }
+                              placeholder="Hero H1 heading for this page"
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="font-bold text-slate-700">SEO / Meta Title Tag *</label>
+                            <span className={`text-[11px] font-mono ${selectedPageSeo.metaTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                              {selectedPageSeo.metaTitle.length}/65 chars recommended
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={selectedPageSeo.metaTitle}
+                            onChange={(e) =>
+                              setSelectedPageSeo({ ...selectedPageSeo, metaTitle: e.target.value })
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-xs text-slate-900 focus:border-[#D49E17] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="font-bold text-slate-700">Meta Description *</label>
+                            <span className={`text-[11px] font-mono ${selectedPageSeo.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                              {selectedPageSeo.metaDescription.length}/160 chars recommended
+                            </span>
+                          </div>
+                          <textarea
+                            rows={3}
+                            required
+                            value={selectedPageSeo.metaDescription}
+                            onChange={(e) =>
+                              setSelectedPageSeo({ ...selectedPageSeo, metaDescription: e.target.value })
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed text-xs text-slate-900 focus:border-[#D49E17] outline-none"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">Primary / Focus Keyword</label>
+                            <input
+                              type="text"
+                              value={selectedPageSeo.focusKeyword || ""}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, focusKeyword: e.target.value })
+                              }
+                              placeholder="e.g. Saffron City NOC Status"
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                            />
+                          </div>
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">Secondary Target Keywords</label>
+                            <input
+                              type="text"
+                              value={selectedPageSeo.secondaryKeywords || ""}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, secondaryKeywords: e.target.value })
+                              }
+                              placeholder="e.g. RDA approved plots, legal society Rawat"
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">Canonical URL Override</label>
+                            <input
+                              type="text"
+                              value={selectedPageSeo.canonicalUrl || ""}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, canonicalUrl: e.target.value })
+                              }
+                              placeholder={`https://saffroncity.org${selectedPageSeo.path}`}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
+                            />
+                          </div>
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">Schema Markup Type</label>
+                            <select
+                              value={selectedPageSeo.schemaType || "ItemPage"}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, schemaType: e.target.value as any })
+                              }
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
+                            >
+                              <option value="WebSite">WebSite (Home Page)</option>
+                              <option value="RealEstateListing">RealEstateListing (Sectors &amp; Plots)</option>
+                              <option value="AboutPage">AboutPage (About Company)</option>
+                              <option value="ContactPage">ContactPage (Contact &amp; Booking)</option>
+                              <option value="FAQPage">FAQPage (Payment Plans / NOC)</option>
+                              <option value="ItemPage">ItemPage (General Landing)</option>
+                              <option value="Custom">Custom JSON-LD</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Robots Directives Toggle Box */}
+                        <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-bold text-slate-900 block text-xs">Robots Index Directive</span>
+                              <span className="text-[10px] text-slate-500">
+                                {selectedPageSeo.robotsIndex ? "Index (Search engines can index this page)" : "NoIndex (Hide from Google search)"}
+                              </span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedPageSeo.robotsIndex ?? true}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, robotsIndex: e.target.checked })
+                                }
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-bold text-slate-900 block text-xs">Robots Follow Directive</span>
+                              <span className="text-[10px] text-slate-500">
+                                {selectedPageSeo.robotsFollow ? "Follow links on page" : "NoFollow (Don't crawl links)"}
+                              </span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedPageSeo.robotsFollow ?? true}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, robotsFollow: e.target.checked })
+                                }
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Custom JSON-LD if Custom is selected */}
+                        {selectedPageSeo.schemaType === "Custom" && (
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-1">
+                              Custom JSON-LD Structured Data (Paste raw JSON)
+                            </label>
+                            <textarea
+                              rows={4}
+                              value={selectedPageSeo.customJsonLd || ""}
+                              onChange={(e) =>
+                                setSelectedPageSeo({ ...selectedPageSeo, customJsonLd: e.target.value })
+                              }
+                              placeholder='{ "@context": "https://schema.org", "@type": "Product", "name": "Saffron City" }'
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex justify-end pt-2">
+                          <button
+                            type="button"
+                            onClick={handleSavePageSeo}
+                            disabled={savingPageSeo}
+                            className="px-6 py-3 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-2"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>{savingPageSeo ? "Saving Page SEO..." : `Save SEO for ${selectedPageSeo.path}`}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 3: 301 REDIRECT MANAGER
+              ---------------------------------------------------- */}
+              {seoSubTab === "redirects" && (
+                <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                    <div>
+                      <h3 className="font-bold text-slate-900 font-heading text-base">
+                        301 / 302 URL Redirect Manager
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Handle URL restructuring, old backlinks, and prevent broken 404 links with server-level redirects.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddRedirect}
+                      className="px-4 py-2.5 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add 301 Redirect Rule</span>
+                    </button>
+                  </div>
+
+                  {/* Redirects Table */}
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">Source URL / Path</th>
+                          <th className="py-3 px-4">Target Destination</th>
+                          <th className="py-3 px-4 text-center">Status</th>
+                          <th className="py-3 px-4 text-center">Hits</th>
+                          <th className="py-3 px-4 text-center">Active</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
+                        {redirectsList.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                              No custom redirect rules configured yet. Click &quot;Add 301 Redirect Rule&quot; to create one.
+                            </td>
+                          </tr>
+                        ) : (
+                          redirectsList.map((red) => (
+                            <tr key={red.id} className="hover:bg-amber-50/30 transition-colors">
+                              <td className="py-3.5 px-4 font-mono font-bold text-rose-700">
+                                {red.sourcePath}
+                              </td>
+                              <td className="py-3.5 px-4 font-mono text-emerald-700 font-bold">
+                                {red.destinationUrl}
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <span className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${
+                                  red.statusCode === 301 ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
+                                }`}>
+                                  {red.statusCode} {red.statusCode === 301 ? "Permanent" : "Temporary"}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-mono text-slate-500">
+                                {red.hitCount || 0}
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleRedirect(red)}
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition ${
+                                    red.isActive
+                                      ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                      : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+                                  }`}
+                                >
+                                  {red.isActive ? "Active" : "Disabled"}
+                                </button>
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditRedirect(red)}
+                                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 transition"
+                                    title="Edit rule"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteRedirect(red.id)}
+                                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700 transition"
+                                    title="Delete rule"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 4: TECHNICAL SEO HEALTH & SITEMAP
+              ---------------------------------------------------- */}
+              {seoSubTab === "health" && (
+                <div className="space-y-6">
+                  {/* Live Endpoint Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                      <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
+                          <Globe className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm">Dynamic XML Sitemap</h4>
+                          <span className="text-[11px] text-emerald-600 font-semibold">Auto-Generated &amp; Live</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Next.js dynamic feed indexing all core pages and active blog posts, updating whenever new content is published.
+                      </p>
+                      <a
+                        href="/sitemap.xml"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition"
+                      >
+                        <span>Open /sitemap.xml</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+
+                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                      <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
+                          <ShieldCheck className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm">Dynamic Robots.txt</h4>
+                          <span className="text-[11px] text-emerald-600 font-semibold">Crawl Rules Configured</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Directs Googlebot and other web spiders, protecting admin dashboards and API routes while indexing public pages.
+                      </p>
+                      <a
+                        href="/robots.txt"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition"
+                      >
+                        <span>Open /robots.txt</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Technical SEO Audit Checklist */}
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Technical SEO Implementation Health Audit</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">SSR HTML Rendered Metadata</strong>
+                          <span className="text-slate-600 text-[11px]">Titles and meta tags are output in server HTML source.</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">Self-Referencing Canonical URLs</strong>
+                          <span className="text-slate-600 text-[11px]">Prevents duplicate content issues on all domain routes.</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">OpenGraph &amp; Twitter/X Cards</strong>
+                          <span className="text-slate-600 text-[11px]">Rich social preview cards rendered across all pages.</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">JSON-LD Structured Data Schema</strong>
+                          <span className="text-slate-600 text-[11px]">Organization, Articles, and Breadcrumbs schemas outputted.</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">Edge 301 Redirect Middleware</strong>
+                          <span className="text-slate-600 text-[11px]">Instant 301 redirects to protect link equity and SEO value.</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-slate-900 block font-bold">Automatic Slug-Change 301 Redirects</strong>
+                          <span className="text-slate-600 text-[11px]">Editing blog slugs automatically registers a 301 rule.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2562,7 +3795,7 @@ export default function AdminDashboardPage() {
               {/* Contact Information */}
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Phone className="w-4 h-4 text-[#D4A017]" />
+                  <Phone className="w-4 h-4 text-[#D49E17]" />
                   <h3 className="font-bold text-slate-900 font-heading text-base">
                     Official Contact &amp; Location Details
                   </h3>
@@ -2650,7 +3883,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <Send className="w-4 h-4 text-[#D4A017]" />
+                    <Send className="w-4 h-4 text-[#D49E17]" />
                     <h3 className="font-bold text-slate-900 font-heading text-base">
                       SMTP &amp; Lead Email Alert Notification
                     </h3>
@@ -2661,7 +3894,7 @@ export default function AdminDashboardPage() {
                       type="checkbox"
                       checked={settings.smtpEnabled}
                       onChange={(e) => updateSettingField("smtpEnabled", e.target.checked)}
-                      className="w-4 h-4 rounded text-[#D4A017] accent-[#D4A017]"
+                      className="w-4 h-4 rounded text-[#D49E17] accent-[#D49E17]"
                     />
                     <span>Enable SMTP Lead Emails</span>
                   </label>
@@ -2776,7 +4009,7 @@ export default function AdminDashboardPage() {
                   type="button"
                   onClick={() => handleSaveSettings()}
                   disabled={savingSettings}
-                  className="px-6 py-3 rounded-2xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Contact &amp; SMTP Configuration</span>
@@ -2792,11 +4025,11 @@ export default function AdminDashboardPage() {
             <div className="space-y-6">
               {/* Header Banner */}
               <div className="bg-gradient-to-r from-slate-900 via-[#1e293b] to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-amber-300/30 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A017]/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-0 right-0 w-80 h-80 bg-[#D49E17]/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                   <div className="space-y-1.5">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-[#D4A017] text-[11px] font-bold uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-[#D49E17] text-[11px] font-bold uppercase tracking-wider">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>Role-Based Access Control (RBAC)</span>
                     </div>
@@ -2815,7 +4048,7 @@ export default function AdminDashboardPage() {
                       setUserModalMessage("");
                       setShowAddUserModal(true);
                     }}
-                    className="self-start sm:self-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-[0_4px_20px_rgba(212,160,23,0.35)] transition-all flex items-center gap-2 cursor-pointer shrink-0 active:scale-95"
+                    className="self-start sm:self-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-[0_4px_20px_rgba(212, 158, 23,0.35)] transition-all flex items-center gap-2 cursor-pointer shrink-0 active:scale-95"
                   >
                     <UserPlus className="w-4 h-4" />
                     <span>Create Team User</span>
@@ -2828,7 +4061,7 @@ export default function AdminDashboardPage() {
                 <div className="bg-white border border-amber-200/80 rounded-3xl p-5 shadow-sm space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 uppercase">Total Accounts</span>
-                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#D4A017] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#D49E17] flex items-center justify-center">
                       <Users className="w-4 h-4" />
                     </div>
                   </div>
@@ -2894,7 +4127,7 @@ export default function AdminDashboardPage() {
                     onClick={fetchUsersList}
                     className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${loadingUsers ? "animate-spin text-[#D4A017]" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingUsers ? "animate-spin text-[#D49E17]" : ""}`} />
                     <span>Refresh Team</span>
                   </button>
                 </div>
@@ -2929,14 +4162,14 @@ export default function AdminDashboardPage() {
                               {/* Profile */}
                               <td className="py-4 px-5">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 via-[#D4A017] to-amber-600 text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0">
+                                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 via-[#D49E17] to-amber-600 text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0">
                                     {user.name?.charAt(0)?.toUpperCase() || "U"}
                                   </div>
                                   <div>
                                     <div className="font-bold text-slate-900 flex items-center gap-1.5">
                                       <span>{user.name}</span>
                                       {isSuperAdmin && (
-                                        <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-[#D4A017] text-[10px] font-extrabold flex items-center gap-0.5">
+                                        <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-[#D49E17] text-[10px] font-extrabold flex items-center gap-0.5">
                                           ★ Primary SuperAdmin
                                         </span>
                                       )}
@@ -2970,7 +4203,7 @@ export default function AdminDashboardPage() {
                               {/* Permissions */}
                               <td className="py-4 px-4">
                                 {isSuperAdmin ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-[#D4A017] border border-amber-200 font-bold text-[11px]">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-[#D49E17] border border-amber-200 font-bold text-[11px]">
                                     <Check className="w-3 h-3" />
                                     <span>All 9 Modules Unlocked</span>
                                   </span>
@@ -3010,7 +4243,7 @@ export default function AdminDashboardPage() {
                                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                       <span>Active &amp; Secure</span>
                                     </span>
-                                    {user.failedAttempts > 0 && (
+                                    {Boolean(user.failedAttempts && user.failedAttempts > 0) && (
                                       <div className="text-[10px] text-amber-700 font-semibold">
                                         {user.failedAttempts}/3 failed tries
                                       </div>
@@ -3093,7 +4326,7 @@ export default function AdminDashboardPage() {
             </button>
 
             <div className="flex items-center gap-3 mb-5 pb-3 border-b border-slate-100">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D4A017] border border-amber-200 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
                 <UserPlus className="w-5 h-5" />
               </div>
               <div>
@@ -3125,7 +4358,7 @@ export default function AdminDashboardPage() {
                   value={newUserForm.name}
                   onChange={(e) => setNewUserForm({ ...newUserForm, name: e.target.value })}
                   placeholder="e.g. Tariq Khan"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
                 />
               </div>
 
@@ -3138,7 +4371,7 @@ export default function AdminDashboardPage() {
                     value={newUserForm.email}
                     onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
                     placeholder="user@saffroncity.pk"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
                   />
                 </div>
 
@@ -3160,7 +4393,7 @@ export default function AdminDashboardPage() {
                       }
                       setNewUserForm({ ...newUserForm, role: newRole, permissions: rolePerms });
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:border-[#D4A017] outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:border-[#D49E17] outline-none"
                   >
                     <option value="ADMIN">Admin (Full Control)</option>
                     <option value="MANAGER">Sales Manager</option>
@@ -3181,7 +4414,7 @@ export default function AdminDashboardPage() {
                   value={newUserForm.password}
                   onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
                   placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
                 />
               </div>
 
@@ -3200,7 +4433,7 @@ export default function AdminDashboardPage() {
                           permissions: ALL_PERMISSIONS.map((p) => p.id),
                         })
                       }
-                      className="text-[#D4A017] hover:underline font-bold"
+                      className="text-[#D49E17] hover:underline font-bold"
                     >
                       Select All
                     </button>
@@ -3241,7 +4474,7 @@ export default function AdminDashboardPage() {
                               });
                             }
                           }}
-                          className="w-4 h-4 rounded text-[#D4A017] accent-[#D4A017] mt-0.5"
+                          className="w-4 h-4 rounded text-[#D49E17] accent-[#D49E17] mt-0.5"
                         />
                         <div>
                           <div className="font-bold text-slate-900 text-[11px]">{perm.label}</div>
@@ -3263,7 +4496,7 @@ export default function AdminDashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>Create Account</span>
@@ -3327,7 +4560,7 @@ export default function AdminDashboardPage() {
                           setEditPermissionsForm(editPermissionsForm.filter((p) => p !== perm.id));
                         }
                       }}
-                      className="w-4 h-4 rounded text-[#D4A017] accent-[#D4A017] mt-0.5"
+                      className="w-4 h-4 rounded text-[#D49E17] accent-[#D49E17] mt-0.5"
                     />
                     <div>
                       <div className="font-bold text-slate-900 text-xs">{perm.label}</div>
@@ -3349,7 +4582,7 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={handleUpdatePermissions}
-                className="px-5 py-2.5 rounded-xl bg-[#D4A017] hover:bg-amber-600 text-white font-bold shadow-md transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold shadow-md transition-all flex items-center gap-1.5"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Permissions</span>
@@ -3359,10 +4592,10 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* 4. Create / Edit Blog Post Modal */}
+      {/* 4. Create / Edit Blog Post Modal with Full Technical SEO Suite */}
       {showBlogModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 text-slate-900 shadow-2xl relative border border-amber-300 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 text-slate-900 shadow-2xl relative border border-amber-300 max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setShowBlogModal(false)}
@@ -3371,202 +4604,498 @@ export default function AdminDashboardPage() {
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-5 pb-3 border-b border-slate-100">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D4A017] border border-amber-200 flex items-center justify-center font-bold">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-lg font-bold font-serif text-slate-900">
-                  {editingBlog ? "Edit Blog Article" : "Create New Blog Article"}
+                  {editingBlog ? "Edit Blog Article & SEO" : "Create New Blog Article"}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Authoritative news, sector milestones, and real estate market analysis
+                  Manage content body, SERP search rankings, and social OpenGraph cards
                 </p>
               </div>
             </div>
 
+            {/* Modal Internal Tabs: Content vs SEO */}
+            <div className="flex items-center gap-2 mb-4 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setBlogModalTab("content")}
+                className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  blogModalTab === "content" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Article Content</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBlogModalTab("seo")}
+                className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  blogModalTab === "seo" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5 text-[#D49E17]" />
+                <span>SEO &amp; Social Metadata</span>
+              </button>
+            </div>
+
             <form onSubmit={handleSaveBlog} className="space-y-4 text-xs">
-              {/* Title */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Article Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={blogForm.title}
-                  onChange={(e) => {
-                    const newTitle = e.target.value;
-                    const autoSlug = !editingBlog
-                      ? newTitle
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, "-")
-                          .replace(/(^-|-$)/g, "")
-                      : blogForm.slug;
-                    setBlogForm({ ...blogForm, title: newTitle, slug: autoSlug });
-                  }}
-                  placeholder="e.g. Rawalpindi Ring Road Interchange — Transformative Value for Saffron City"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:border-[#D4A017] focus:bg-white outline-none"
-                />
-              </div>
+              {/* TAB 1: ARTICLE CONTENT */}
+              {blogModalTab === "content" && (
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Article Title *</label>
+                    <input
+                      type="text"
+                      required
+                      value={blogForm.title}
+                      onChange={(e) => {
+                        const newTitle = e.target.value;
+                        const autoSlug = !editingBlog
+                          ? newTitle
+                              .toLowerCase()
+                              .replace(/[^a-z0-9]+/g, "-")
+                              .replace(/(^-|-$)/g, "")
+                          : blogForm.slug;
+                        setBlogForm({
+                          ...blogForm,
+                          title: newTitle,
+                          slug: autoSlug,
+                          seoTitle: blogForm.seoTitle || newTitle,
+                          h1Heading: blogForm.h1Heading || newTitle,
+                        });
+                      }}
+                      placeholder="e.g. Rawalpindi Ring Road Interchange — Transformative Value for Saffron City"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:border-[#D49E17] focus:bg-white outline-none"
+                    />
+                  </div>
 
-              {/* URL Slug */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-700 block">URL Path Slug *</label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const genSlug = blogForm.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, "");
-                      setBlogForm({ ...blogForm, slug: genSlug });
-                    }}
-                    className="text-[10px] font-bold text-[#D4A017] hover:underline"
-                  >
-                    Auto-generate from Title
-                  </button>
+                  {/* URL Slug */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700 block">URL Path Slug *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const genSlug = blogForm.title
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/(^-|-$)/g, "");
+                          setBlogForm({ ...blogForm, slug: genSlug });
+                        }}
+                        className="text-[10px] font-bold text-[#D49E17] hover:underline"
+                      >
+                        Auto-generate from Title
+                      </button>
+                    </div>
+                    <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-[#D49E17]">
+                      <span className="px-3 py-2 text-[11px] text-slate-400 bg-slate-100/70 border-r border-slate-200 font-mono">
+                        /blogs/
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        value={blogForm.slug}
+                        onChange={(e) => setBlogForm({ ...blogForm, slug: e.target.value })}
+                        placeholder="my-article-url-slug"
+                        className="w-full px-3 py-2 bg-transparent text-xs font-mono text-slate-800 outline-none"
+                      />
+                    </div>
+                    {editingBlog && editingBlog.slug !== blogForm.slug && (
+                      <p className="text-[10px] text-amber-700 font-semibold mt-1">
+                        ⚠️ Changing this slug will automatically generate a 301 permanent redirect from /blogs/{editingBlog.slug} to /blogs/{blogForm.slug}.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Category, Author, ReadTime in Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Category</label>
+                      <input
+                        type="text"
+                        list="category-suggestions"
+                        value={blogForm.category}
+                        onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
+                        placeholder="e.g. Market Insights"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
+                      />
+                      <datalist id="category-suggestions">
+                        <option value="Market Insights" />
+                        <option value="Development Update" />
+                        <option value="Legal & Investment" />
+                        <option value="Master Plan" />
+                        <option value="News & Updates" />
+                      </datalist>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Author Name</label>
+                      <input
+                        type="text"
+                        value={blogForm.author}
+                        onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
+                        placeholder="Saffron City Official"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Estimated Read Time</label>
+                      <input
+                        type="text"
+                        value={blogForm.readTime}
+                        onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
+                        placeholder="4 min read"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Featured Image */}
+                  <div>
+                    <FileUploadField
+                      label="Featured Banner Image"
+                      currentValue={blogForm.image}
+                      onUploadSuccess={(url) => setBlogForm({ ...blogForm, image: url })}
+                      helperText="Recommended size 1200×630. Appears on blog cards, headers, and social share previews."
+                    />
+                  </div>
+
+                  {/* Excerpt */}
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">
+                      Executive Excerpt / Summary (Displayed on Cards &amp; Google Snippets)
+                    </label>
+                    <textarea
+                      rows={2}
+                      required
+                      value={blogForm.excerpt}
+                      onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
+                      placeholder="A concise 2-line summary highlighting the key takeaway..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Full Content */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700 block">Full Article Content *</label>
+                      <span className="text-[10px] text-slate-400">
+                        Separate paragraphs with blank lines. Standalone short lines render as sub-headings.
+                      </span>
+                    </div>
+                    <textarea
+                      rows={8}
+                      required
+                      value={blogForm.content}
+                      onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
+                      placeholder="Write the complete article content here..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono focus:border-[#D49E17] outline-none leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Publish Toggle Switch */}
+                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-slate-900 block text-xs">Publish Article Live</span>
+                      <span className="text-[10px] text-slate-500">
+                        When enabled, this article is visible on the public website, homepage, and sitemap.xml.
+                      </span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={blogForm.isPublished}
+                        onChange={(e) => setBlogForm({ ...blogForm, isPublished: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                    </label>
+                  </div>
                 </div>
-                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-[#D4A017]">
-                  <span className="px-3 py-2 text-[11px] text-slate-400 bg-slate-100/70 border-r border-slate-200 font-mono">
-                    /blogs/
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={blogForm.slug}
-                    onChange={(e) => setBlogForm({ ...blogForm, slug: e.target.value })}
-                    placeholder="my-article-url-slug"
-                    className="w-full px-3 py-2 bg-transparent text-xs font-mono text-slate-800 outline-none"
-                  />
+              )}
+
+              {/* TAB 2: SEO & SOCIAL METADATA */}
+              {blogModalTab === "seo" && (
+                <div className="space-y-4">
+                  {/* Google SERP Preview for this Blog */}
+                  <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Google Search Result Snippet Preview
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
+                      <span className="text-slate-700 font-medium">https://saffroncity.org</span>
+                      <span className="text-slate-400">&rsaquo; blogs &rsaquo; {blogForm.slug || "slug"}</span>
+                    </div>
+                    <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
+                      {blogForm.seoTitle || blogForm.title || "Blog Article Title"}
+                    </div>
+                    <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                      {blogForm.metaDescription || blogForm.excerpt || "Article summary snippet appearing on Google search..."}
+                    </div>
+                  </div>
+
+                  {/* SEO Title & Description */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700">SEO / Meta Title Tag</label>
+                      <span className={`text-[11px] font-mono ${blogForm.seoTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                        {blogForm.seoTitle.length}/65 chars
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      value={blogForm.seoTitle}
+                      onChange={(e) => setBlogForm({ ...blogForm, seoTitle: e.target.value })}
+                      placeholder="Leave blank to use Article Title"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700">Meta Description Tag</label>
+                      <span className={`text-[11px] font-mono ${blogForm.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
+                        {blogForm.metaDescription.length}/160 chars
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={blogForm.metaDescription}
+                      onChange={(e) => setBlogForm({ ...blogForm, metaDescription: e.target.value })}
+                      placeholder="Leave blank to use Excerpt"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Target Keywords & Image Alt */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Focus Keyword</label>
+                      <input
+                        type="text"
+                        value={blogForm.focusKeyword}
+                        onChange={(e) => setBlogForm({ ...blogForm, focusKeyword: e.target.value })}
+                        placeholder="e.g. Ring Road Saffron City"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Secondary Target Keywords</label>
+                      <input
+                        type="text"
+                        value={blogForm.secondaryKeywords}
+                        onChange={(e) => setBlogForm({ ...blogForm, secondaryKeywords: e.target.value })}
+                        placeholder="e.g. Rawalpindi property investment, RDA NOC"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Featured Image Alt Text</label>
+                      <input
+                        type="text"
+                        value={blogForm.imageAlt}
+                        onChange={(e) => setBlogForm({ ...blogForm, imageAlt: e.target.value })}
+                        placeholder="Descriptive alt text for Google Image SEO"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Canonical URL Override</label>
+                      <input
+                        type="text"
+                        value={blogForm.canonicalUrl}
+                        onChange={(e) => setBlogForm({ ...blogForm, canonicalUrl: e.target.value })}
+                        placeholder={`https://saffroncity.org/blogs/${blogForm.slug || "slug"}`}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Robots Directives */}
+                  <div className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-slate-900 block text-xs">Robots Index Directive</span>
+                        <span className="text-[10px] text-slate-500">Allow search bots to index this post</span>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={blogForm.robotsIndex}
+                          onChange={(e) => setBlogForm({ ...blogForm, robotsIndex: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-slate-900 block text-xs">Robots Follow Directive</span>
+                        <span className="text-[10px] text-slate-500">Allow search bots to crawl outbound links</span>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={blogForm.robotsFollow}
+                          onChange={(e) => setBlogForm({ ...blogForm, robotsFollow: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Custom JSON-LD schema */}
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">
+                      Custom JSON-LD Structured Data Schema (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={blogForm.customSchema}
+                      onChange={(e) => setBlogForm({ ...blogForm, customSchema: e.target.value })}
+                      placeholder='{ "@context": "https://schema.org", "@type": "NewsArticle", ... }'
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono"
+                    />
+                  </div>
                 </div>
-              </div>
-
-              {/* Category, Author, ReadTime in Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Category</label>
-                  <input
-                    type="text"
-                    list="category-suggestions"
-                    value={blogForm.category}
-                    onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
-                    placeholder="e.g. Market Insights"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
-                  />
-                  <datalist id="category-suggestions">
-                    <option value="Market Insights" />
-                    <option value="Development Update" />
-                    <option value="Legal & Investment" />
-                    <option value="Master Plan" />
-                    <option value="News & Updates" />
-                  </datalist>
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Author Name</label>
-                  <input
-                    type="text"
-                    value={blogForm.author}
-                    onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
-                    placeholder="Saffron City Official"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Estimated Read Time</label>
-                  <input
-                    type="text"
-                    value={blogForm.readTime}
-                    onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
-                    placeholder="4 min read"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Featured Image */}
-              <div>
-                <FileUploadField
-                  label="Featured Banner Image"
-                  currentValue={blogForm.image}
-                  onUploadSuccess={(url) => setBlogForm({ ...blogForm, image: url })}
-                  helperText="Recommended size 1200×630. Appears on blog cards, headers, and social share previews."
-                />
-              </div>
-
-              {/* Excerpt */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Executive Excerpt / Summary (Displayed on Cards &amp; Google Snippets)
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  value={blogForm.excerpt}
-                  onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
-                  placeholder="A concise 2-line summary highlighting the key takeaway..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D4A017] outline-none leading-relaxed"
-                />
-              </div>
-
-              {/* Full Content */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-slate-700 block">
-                    Full Article Content *
-                  </label>
-                  <span className="text-[10px] text-slate-400">
-                    Separate paragraphs with a blank line. Short standalone lines will render as sub-headings.
-                  </span>
-                </div>
-                <textarea
-                  rows={8}
-                  required
-                  value={blogForm.content}
-                  onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                  placeholder="Write the complete article content here. Use blank lines between paragraphs.
-
-Key Milestone Overview
-Paragraph describing the construction milestones, underground utilities, or Ring Road connectivity..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono focus:border-[#D4A017] outline-none leading-relaxed"
-                />
-              </div>
-
-              {/* Publish Toggle Switch */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-slate-900 block text-xs">Publish Article Live</span>
-                  <span className="text-[10px] text-slate-500">
-                    When enabled, this article is visible on the public website and homepage.
-                  </span>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={blogForm.isPublished}
-                    onChange={(e) => setBlogForm({ ...blogForm, isPublished: e.target.checked })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4A017]"></div>
-                </label>
-              </div>
+              )}
 
               {/* Action Buttons */}
               <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowBlogModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{editingBlog ? "Update Article & SEO" : "Publish Article"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Add / Edit 301 Redirect Modal */}
+      {showRedirectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-900 shadow-2xl relative border border-amber-300">
+            <button
+              type="button"
+              onClick={() => setShowRedirectModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
+                <RefreshCw className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold font-serif text-slate-900">
+                  {editingRedirect ? "Edit 301 Redirect Rule" : "Add 301 Redirect Rule"}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Forward legacy URLs to new target destinations seamlessly
+                </p>
+              </div>
+            </div>
+
+            {redirectError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{redirectError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveRedirect} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">
+                  Source Request Path * (e.g. /old-payment-plan)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={redirectForm.sourcePath}
+                  onChange={(e) => setRedirectForm({ ...redirectForm, sourcePath: e.target.value })}
+                  placeholder="/old-page-url"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono text-slate-900 focus:border-[#D49E17] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">
+                  Destination Target URL * (e.g. /payment-plan)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={redirectForm.destinationUrl}
+                  onChange={(e) => setRedirectForm({ ...redirectForm, destinationUrl: e.target.value })}
+                  placeholder="/new-page-url"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono text-slate-900 focus:border-[#D49E17] outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">HTTP Status Code</label>
+                  <select
+                    value={redirectForm.statusCode}
+                    onChange={(e) => setRedirectForm({ ...redirectForm, statusCode: Number(e.target.value) as 301 | 302 })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold"
+                  >
+                    <option value={301}>301 (Permanent Redirect)</option>
+                    <option value={302}>302 (Temporary Redirect)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Active State</label>
+                  <select
+                    value={redirectForm.isActive ? "true" : "false"}
+                    onChange={(e) => setRedirectForm({ ...redirectForm, isActive: e.target.value === "true" })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold"
+                  >
+                    <option value="true">Active &amp; Enabled</option>
+                    <option value="false">Disabled (Paused)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRedirectModal(false)}
                   className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                  disabled={savingRedirect}
+                  className="px-6 py-2.5 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
-                  <span>{editingBlog ? "Update Article" : "Publish Article"}</span>
+                  <span>{savingRedirect ? "Saving..." : "Save Redirect Rule"}</span>
                 </button>
               </div>
             </form>
@@ -3576,3 +5105,4 @@ Paragraph describing the construction milestones, underground utilities, or Ring
     </div>
   );
 }
+ 

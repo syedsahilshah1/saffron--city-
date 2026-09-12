@@ -29,7 +29,7 @@ export default function InstallmentCalculator() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
           <div className="flex items-start sm:items-center gap-3.5">
             {/* Calculator Icon Box */}
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] shrink-0 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] shrink-0 shadow-sm">
               <Calculator className="w-6 h-6" />
             </div>
 
@@ -39,7 +39,7 @@ export default function InstallmentCalculator() {
                   Official Installment Calculator
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-300 text-[10px] font-bold text-amber-900 uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-[#D4A017]" />
+                  <Sparkles className="w-3 h-3 text-[#D49E17]" />
                   2026 NEW RATES
                 </span>
               </div>
@@ -60,7 +60,7 @@ export default function InstallmentCalculator() {
                   onClick={() => setSelectedSize(plot.size)}
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer select-none ${
                     isSelected
-                      ? "bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white shadow-lg shadow-amber-500/30 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
+                      ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-lg shadow-amber-500/30 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
                       : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm hover:scale-[1.03] active:scale-95"
                   }`}
                 >
@@ -91,7 +91,7 @@ export default function InstallmentCalculator() {
             <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">
               {isCommercial ? "DOWN PAYMENT" : "BOOKING (10%)"}
             </span>
-            <span className="text-2xl lg:text-3xl font-bold text-[#D4A017] font-heading block">
+            <span className="text-2xl lg:text-3xl font-bold text-[#D49E17] font-heading block">
               {currentPlot.bookingAmountFormatted}
             </span>
             <span className="text-[11px] text-slate-600 block pt-0.5">
@@ -160,7 +160,7 @@ export default function InstallmentCalculator() {
           <button
             type="button"
             onClick={() => setIsDownloadModalOpen(true)}
-            className="w-full py-3.5 px-6 rounded-2xl bg-[#D4A017] hover:bg-amber-600 text-slate-950 font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg cursor-pointer"
+            className="w-full py-3.5 px-6 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-slate-950 font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Download Official Rate Flyer</span>

@@ -60,6 +60,22 @@ export async function POST(req: NextRequest) {
       author: author || "Saffron City Official",
       readTime: readTime || "4 min read",
       isPublished: isPublished !== undefined ? isPublished : true,
+      seoTitle: body.seoTitle || title,
+      metaDescription: body.metaDescription || excerpt || title,
+      canonicalUrl: body.canonicalUrl || `https://saffroncity.org/blogs/${slug}`,
+      robotsIndex: body.robotsIndex !== undefined ? body.robotsIndex : true,
+      robotsFollow: body.robotsFollow !== undefined ? body.robotsFollow : true,
+      focusKeyword: body.focusKeyword,
+      secondaryKeywords: body.secondaryKeywords,
+      h1Heading: body.h1Heading || title,
+      imageAlt: body.imageAlt || title,
+      ogTitle: body.ogTitle || body.seoTitle || title,
+      ogDescription: body.ogDescription || body.metaDescription || excerpt || title,
+      ogImage: body.ogImage || image || "/images/hero-bg.jpg",
+      twitterTitle: body.twitterTitle || body.seoTitle || title,
+      twitterDescription: body.twitterDescription || body.metaDescription || excerpt || title,
+      twitterImage: body.twitterImage || image || "/images/hero-bg.jpg",
+      customSchema: body.customSchema,
     });
 
     return NextResponse.json(

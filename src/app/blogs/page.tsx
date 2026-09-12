@@ -3,13 +3,13 @@ import { Sparkles } from "lucide-react";
 import { db } from "@/lib/db";
 import BlogsListingClient from "@/components/blogs/BlogsListingClient";
 
+import { getPageMetadata } from "@/lib/seo";
+
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Saffron City News & Market Insights | Official Blog",
-  description:
-    "Read the latest market analysis, development updates, master plan milestones, and legal insights for Saffron City Islamabad.",
-};
+export async function generateMetadata() {
+  return await getPageMetadata("/blogs");
+}
 
 export default async function BlogsPage() {
   const blogs = await db.getBlogs(true);
@@ -29,7 +29,7 @@ export default async function BlogsPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#D49E17]" />
             <span>Official Journal &amp; Market Insights</span>
           </div>
 

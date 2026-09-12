@@ -6,6 +6,8 @@
 
 :root {
   --font-playfair: 'Playfair Display', Georgia, serif;
+  --color-primary-gold: #D49E17;
+  --color-primary-gold-rgb: 212, 158, 23;
   --background: #ffffff;
   --foreground: #0f172a;
 }
@@ -46,20 +48,20 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
-  border: 1px solid rgba(212, 160, 23, 0.2);
+  border: 1px solid rgba(212, 158, 23, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D4A017;
+  background: #D49E17;
 }
 
 /* Gold glow utility classes */
 .saffron-glow {
-  box-shadow: 0 0 35px -5px rgba(212, 160, 23, 0.35);
+  box-shadow: 0 0 35px -5px rgba(212, 158, 23, 0.35);
 }
 
 .saffron-text-glow {
-  text-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
+  text-shadow: 0 0 20px rgba(212, 158, 23, 0.4);
 }
 
 /* GPU Hardware Acceleration Utilities */
@@ -135,6 +137,6 @@ body {
 
 .hover-lift-gold:hover {
   transform: translateY(-4px);
-  border-color: #D4A017;
-  box-shadow: 0 20px 25px -5px rgba(212, 160, 23, 0.15), 0 8px 10px -6px rgba(212, 160, 23, 0.1);
+  border-color: #D49E17;
+  box-shadow: 0 20px 25px -5px rgba(212, 158, 23, 0.15), 0 8px 10px -6px rgba(212, 158, 23, 0.1);
 }

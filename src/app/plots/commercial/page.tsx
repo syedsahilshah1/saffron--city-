@@ -22,10 +22,13 @@ import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { COMMERCIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Commercial Plots | GT Road Frontage & Signature 30×40",
-  description: "Invest in high-footfall commercial plots on Main GT Road (N-5 Highway). Signature 30×40 (5.33 Marla), 4 Marla and 8 Marla commercial plots in Saffron City on easy 3-year installments.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/plots/commercial");
+}
 
 const COMMERCIAL_PLOT_CARDS = [
   {
@@ -86,17 +89,10 @@ export default function CommercialPlotsPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#D4A017] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
-              <span>Prime Highway Commercial Zone</span>
-            </div>
-          </ScrollReveal>
-
           <WordReveal
             text="Commercial Plots for Sale: High Footfall & High Yield"
             highlightWords={["Commercial", "Plots", "Sale", "Footfall", "Yield"]}
@@ -118,11 +114,11 @@ export default function CommercialPlotsPage() {
                 <p className="text-xs text-slate-300 font-medium">Launch Discount</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">0 Min</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">0 Min</span>
                 <p className="text-xs text-slate-300 font-medium">GT Road Visibility</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">3 Years</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
                 <p className="text-xs text-slate-300 font-medium">Payment Plan</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -135,7 +131,7 @@ export default function CommercialPlotsPage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#commercial-inventory"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               Explore Commercial Plots
             </a>
@@ -158,12 +154,6 @@ export default function CommercialPlotsPage() {
         {/* Commercial Overview */}
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4A017]" />
-                <span>Commercial Advantage</span>
-              </div>
-            </ScrollReveal>
 
             <WordReveal
               text="Commercial Overview: The Business Hub of Rawat"
@@ -182,7 +172,7 @@ export default function CommercialPlotsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ScrollReveal animation="fade-right" delay={100}>
               <div className="p-6 rounded-3xl bg-amber-50/40 border border-amber-200 space-y-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-[#D4A017]">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-[#D49E17]">
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <h4 className="font-bold text-slate-900 text-base">Unbeatable Highway Exposure</h4>
@@ -233,7 +223,7 @@ export default function CommercialPlotsPage() {
                 animation={idx === 0 ? "fade-right" : idx === 1 ? "fade-up" : "fade-left"}
                 delay={idx * 100}
               >
-                <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
                   <div>
                     <div className="relative h-52 w-full overflow-hidden bg-slate-100">
                       <img
@@ -243,7 +233,7 @@ export default function CommercialPlotsPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                       <div className="absolute top-3 right-3">
-                        <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D4A017] border border-[#D4A017]/40 text-[10px] font-bold">
+                        <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D49E17] border border-[#D49E17]/40 text-[10px] font-bold">
                           {plot.tag}
                         </span>
                       </div>
@@ -258,7 +248,7 @@ export default function CommercialPlotsPage() {
                           {plot.discountBadge}
                         </div>
                         <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                        <p className="text-2xl font-black text-[#D4A017]">{plot.totalPrice}</p>
+                        <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
                       </div>
 
                       <p className="text-xs text-slate-600 leading-relaxed">
@@ -334,7 +324,7 @@ export default function CommercialPlotsPage() {
                   {COMMERCIAL_PRICES.map((p) => (
                     <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017]">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17]">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>

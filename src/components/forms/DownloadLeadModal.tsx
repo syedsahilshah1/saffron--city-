@@ -96,12 +96,12 @@ export default function DownloadLeadModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Decorative Top Gold Strip */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-[#D4A017] to-amber-600" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-[#D49E17] to-amber-600" />
 
         {/* Modal Header */}
         <div className="flex items-start justify-between p-5 pb-3 sm:px-7 sm:pt-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] shrink-0 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] shrink-0 shadow-sm">
               <FileDown className="w-5 h-5" />
             </div>
             <div>
@@ -141,7 +141,7 @@ export default function DownloadLeadModal({
               </div>
 
               <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-center justify-center gap-2 max-w-md mx-auto">
-                <ShieldCheck className="w-4 h-4 text-[#D4A017] shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-[#D49E17] shrink-0" />
                 <span>Our official facilitation team has logged your inquiry for priority assistance.</span>
               </div>
 
@@ -151,13 +151,13 @@ export default function DownloadLeadModal({
                   onClick={triggerDownload}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-950 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-[#D4A017]" />
+                  <Download className="w-3.5 h-3.5 text-[#D49E17]" />
                   <span>Click Here If Download Didn't Start</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleResetAndClose}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 text-xs font-bold transition-colors cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 text-xs font-bold transition-colors cursor-pointer"
                 >
                   Done
                 </button>
@@ -186,7 +186,7 @@ export default function DownloadLeadModal({
                   placeholder="e.g. Muhammad Ali"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D49E17] focus:ring-1 focus:ring-[#D49E17] transition-all"
                 />
               </div>
 
@@ -201,7 +201,7 @@ export default function DownloadLeadModal({
                     placeholder="0333 1113551"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D49E17] focus:ring-1 focus:ring-[#D49E17] transition-all"
                   />
                 </div>
 
@@ -214,7 +214,7 @@ export default function DownloadLeadModal({
                     placeholder="name@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D49E17] focus:ring-1 focus:ring-[#D49E17] transition-all"
                   />
                 </div>
               </div>
@@ -228,7 +228,7 @@ export default function DownloadLeadModal({
                   placeholder="e.g. Looking for 5 Marla / 10 Marla installment options or site visit"
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all resize-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#D49E17] focus:ring-1 focus:ring-[#D49E17] transition-all resize-none"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export default function DownloadLeadModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 border border-amber-400 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 cursor-pointer"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 border border-amber-400 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 cursor-pointer"
                 >
                   {loading ? (
                     <>

@@ -21,7 +21,7 @@ export default function WordReveal({
   className = "",
   wordClassName = "",
   highlightWords = [],
-  highlightClassName = "text-[#D4A017]",
+  highlightClassName = "text-[#D49E17]",
   staggerMs = 60,
   delayMs = 0,
   threshold = 0.15,

@@ -303,7 +303,7 @@ export default function MasterPlanViewer({
               className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer"
               title="Download Master Plan"
             >
-              <Download className="w-4 h-4 text-[#D4A017]" />
+              <Download className="w-4 h-4 text-[#D49E17]" />
             </button>
 
             <button
@@ -314,7 +314,7 @@ export default function MasterPlanViewer({
                 setModalPosition({ x: 0, y: 0 });
                 setIsModalOpen(true);
               }}
-              className="p-2 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 transition-colors cursor-pointer ml-0.5"
+              className="p-2 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 transition-colors cursor-pointer ml-0.5"
               title="Fullscreen Deep Zoom"
             >
               <Maximize2 className="w-4 h-4" />
@@ -389,7 +389,7 @@ export default function MasterPlanViewer({
                   className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
                   title="Download Master Plan"
                 >
-                  <Download className="w-4 h-4 text-[#D4A017]" />
+                  <Download className="w-4 h-4 text-[#D49E17]" />
                   <span className="hidden sm:inline">Save HD</span>
                 </button>
 
@@ -440,7 +440,7 @@ export default function MasterPlanViewer({
             {/* Modal Footer Note */}
             <div className="px-6 py-2.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
               <span>Scroll mouse wheel or pinch to zoom deep • Drag anywhere to pan across sectors</span>
-              <span className="text-[#D4A017] font-bold">4K Ultra-HD Layout</span>
+              <span className="text-[#D49E17] font-bold">4K Ultra-HD Layout</span>
             </div>
           </div>
         </div>

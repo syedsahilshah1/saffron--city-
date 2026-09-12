@@ -28,7 +28,7 @@ const DEFAULT_TEXT_ITEMS: ScrollingTextItem[] = [
     badge: "Sector A (Block B)",
     text: "5, 10 Marla & 1 Kanal Residential Plots",
     highlight: "New Official Rates",
-    icon: <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />,
+    icon: <Building2 className="w-3.5 h-3.5 text-[#D49E17]" />,
     variant: "saffron",
   },
   {
@@ -44,7 +44,7 @@ const DEFAULT_TEXT_ITEMS: ScrollingTextItem[] = [
     badge: "Signature Commercial",
     text: "30×40 (5.33 Marla) Commercial Plots",
     highlight: "PKR 45 Lac Discount",
-    icon: <TrendingUp className="w-3.5 h-3.5 text-[#D4A017]" />,
+    icon: <TrendingUp className="w-3.5 h-3.5 text-[#D49E17]" />,
     variant: "saffron",
   },
   {
@@ -127,8 +127,8 @@ export default function ScrollingTextButtons({
       default:
         return {
           badge: "bg-amber-50 text-amber-900 border-amber-300",
-          highlight: "text-[#D4A017]",
-          dot: "bg-[#D4A017] shadow-[0_0_8px_rgba(212,160,23,0.8)]",
+          highlight: "text-[#D49E17]",
+          dot: "bg-[#D49E17] shadow-[0_0_8px_rgba(212, 158, 23,0.8)]",
         };
     }
   };

@@ -21,10 +21,13 @@ import WordReveal from "@/components/animations/WordReveal";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City NOC Status | Legal & Regulatory Approvals",
-  description: "Saffron City NOC status and legal verification on Main GT Road Rawat. Check official legal approval status, verify on the Punjab portal, and inspect documents.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/noc-status");
+}
 
 const NOC_LEGAL_DOCUMENTS = [
   {
@@ -102,7 +105,7 @@ export default function NocStatusPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
@@ -121,7 +124,7 @@ export default function NocStatusPage() {
                 <p className="text-xs text-slate-300 font-medium">Approved Area</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">RDA</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">RDA</span>
                 <p className="text-xs text-slate-300 font-medium">Regulatory Authority</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -129,7 +132,7 @@ export default function NocStatusPage() {
                 <p className="text-xs text-slate-300 font-medium">Clear Legal Title</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">Active</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">Active</span>
                 <p className="text-xs text-slate-300 font-medium">Ground Construction</p>
               </div>
             </div>
@@ -140,7 +143,7 @@ export default function NocStatusPage() {
               href={SITE_CONFIG.rdaVerificationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2"
             >
               <span>Verify on Punjab Govt Portal</span>
               <ExternalLink className="w-4 h-4" />
@@ -149,7 +152,7 @@ export default function NocStatusPage() {
               href="#legal-documents"
               className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
             >
-              <FileText className="w-4 h-4 text-[#D4A017]" />
+              <FileText className="w-4 h-4 text-[#D49E17]" />
               <span>Inspect Legal Documents</span>
             </a>
           </ScrollReveal>
@@ -162,12 +165,6 @@ export default function NocStatusPage() {
         {/* 1. Official Regulatory Sanctions & Legal Documents (With Real Images!) */}
         <section id="legal-documents" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Documentation</span>
-              </div>
-            </ScrollReveal>
 
             <WordReveal
               text="Official Regulatory Sanctions & Documents"
@@ -249,26 +246,26 @@ export default function NocStatusPage() {
             staggerDelay={70}
             direction="up"
           >
-            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D4A017] transition-all">
-              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D4A017] flex items-center justify-center font-bold font-mono">1</span>
+            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D49E17] transition-all">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D49E17] flex items-center justify-center font-bold font-mono">1</span>
               <h5 className="font-bold text-slate-900 text-sm">Visit RDA Portal</h5>
               <p className="text-slate-600">Open your browser and navigate to <code>rda.gop.pk</code> or <code>ptc.punjab.gov.pk</code></p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D4A017] transition-all">
-              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D4A017] flex items-center justify-center font-bold font-mono">2</span>
+            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D49E17] transition-all">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D49E17] flex items-center justify-center font-bold font-mono">2</span>
               <h5 className="font-bold text-slate-900 text-sm">Approved Schemes</h5>
               <p className="text-slate-600">Navigate to the official registry of RDA Approved Housing Schemes in Rawalpindi.</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D4A017] transition-all">
-              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D4A017] flex items-center justify-center font-bold font-mono">3</span>
+            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D49E17] transition-all">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D49E17] flex items-center justify-center font-bold font-mono">3</span>
               <h5 className="font-bold text-slate-900 text-sm">Search Saffron City</h5>
               <p className="text-slate-600">Search for &ldquo;Saffron City&rdquo; to review the approved 15,000 Kanal area status.</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D4A017] transition-all">
-              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D4A017] flex items-center justify-center font-bold font-mono">4</span>
+            <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-2 hover:border-[#D49E17] transition-all">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 text-[#D49E17] flex items-center justify-center font-bold font-mono">4</span>
               <h5 className="font-bold text-slate-900 text-sm">Cross-Check Letters</h5>
               <p className="text-slate-600">Request the official signed clearance copies directly from our sales advisors.</p>
             </div>
@@ -278,12 +275,7 @@ export default function NocStatusPage() {
         {/* 3. Redesigned Interactive Frequently Asked Questions */}
         <section className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Legal Questions</span>
-              </div>
-            </ScrollReveal>
+
 
             <WordReveal
               text="Frequently Asked Questions on NOC Status"

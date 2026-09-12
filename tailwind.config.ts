@@ -17,11 +17,11 @@ export default {
           200: '#f5e8cd',
           300: '#ecd5a3',
           400: '#e0bb6c',
-          500: '#D4A017', // Official Saffron City Golden
-          600: '#b8860b',
+          500: '#b18c30ff', // Official Saffron City Golden
+          600: '#9e7729ff',
           700: '#946608',
           800: '#79500e',
-          900: '#644211',
+          900: '#9e7729ff',
           950: '#392205',
         },
         saffron: {
@@ -30,7 +30,7 @@ export default {
           200: '#f5e8cd',
           300: '#ecd5a3',
           400: '#e0bb6c',
-          500: '#D4A017', // Official Gold
+          500: '#D49E17', // Official Gold
           600: '#b8860b',
           700: '#946608',
           800: '#79500e',

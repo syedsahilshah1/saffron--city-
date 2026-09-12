@@ -50,7 +50,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search news, keywords, or topics..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#D4A017] focus:ring-2 focus:ring-[#D4A017]/20 transition-all shadow-sm"
+              className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#D49E17] focus:ring-2 focus:ring-[#D49E17]/20 transition-all shadow-sm"
             />
             {searchTerm && (
               <button
@@ -73,7 +73,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
         {/* Category Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
-            <Tag className="w-3 h-3 text-[#D4A017]" />
+            <Tag className="w-3 h-3 text-[#D49E17]" />
             <span>Topics:</span>
           </span>
           {categories.map((cat) => {
@@ -85,8 +85,8 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   isSelected
-                    ? "bg-[#D4A017] text-white shadow-md shadow-amber-500/20 scale-[1.02]"
-                    : "bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:text-[#D4A017]"
+                    ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20 scale-[1.02]"
+                    : "bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:text-[#D49E17]"
                 }`}
               >
                 {cat}
@@ -99,7 +99,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
       {/* Grid of Articles */}
       {filteredBlogs.length === 0 ? (
         <div className="p-12 text-center bg-slate-50 border border-slate-200 rounded-3xl space-y-4">
-          <BookOpen className="w-12 h-12 mx-auto text-[#D4A017]" />
+          <BookOpen className="w-12 h-12 mx-auto text-[#D49E17]" />
           <div className="space-y-1">
             <h3 className="font-bold text-slate-900 text-lg font-heading">
               No matching articles found
@@ -114,7 +114,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
               setSearchTerm("");
               setSelectedCategory("All");
             }}
-            className="px-5 py-2 rounded-xl bg-[#D4A017] text-white font-bold text-xs shadow-md hover:bg-amber-600 transition-all cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:bg-amber-600 transition-all cursor-pointer"
           >
             Reset Filters
           </button>
@@ -128,7 +128,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
           {filteredBlogs.map((blog) => (
             <article
               key={blog.id}
-              className="group rounded-3xl overflow-hidden bg-white border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+              className="group rounded-3xl overflow-hidden bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
             >
               <div className="space-y-4">
                 {/* Featured Image */}
@@ -141,7 +141,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                   {/* Category Badge */}
-                  <div className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-amber-200 text-[#D4A017] text-[11px] font-bold tracking-wide shadow-md">
+                  <div className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-amber-200 text-[#D49E17] text-[11px] font-bold tracking-wide shadow-md">
                     {blog.category}
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                 <div className="px-6 space-y-3">
                   <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium">
                     <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-[#D4A017]" />
+                      <Calendar className="w-3.5 h-3.5 text-[#D49E17]" />
                       <span>
                         {new Date(blog.createdAt).toLocaleDateString("en-US", {
                           month: "short",
@@ -160,12 +160,12 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-[#D4A017]" />
+                      <Clock className="w-3.5 h-3.5 text-[#D49E17]" />
                       <span>{blog.readTime || "4 min read"}</span>
                     </div>
                   </div>
 
-                  <h2 className="font-bold text-slate-900 text-lg sm:text-xl font-heading leading-snug group-hover:text-[#D4A017] transition-colors line-clamp-2">
+                  <h2 className="font-bold text-slate-900 text-lg sm:text-xl font-heading leading-snug group-hover:text-[#D49E17] transition-colors line-clamp-2">
                     <Link href={`/blogs/${blog.slug}`}>{blog.title}</Link>
                   </h2>
 
@@ -182,7 +182,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                 </span>
                 <Link
                   href={`/blogs/${blog.slug}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A017] group-hover:text-amber-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D49E17] group-hover:text-amber-700 transition-colors"
                 >
                   <span>Read Article</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

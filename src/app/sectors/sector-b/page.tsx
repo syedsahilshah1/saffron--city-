@@ -28,10 +28,13 @@ import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 
-export const metadata = {
-  title: "Saffron City Sector B | Affordable Family Plots for Sale with 3-Year Installments",
-  description: "Explore Sector B plots for sale in Saffron City Islamabad — designed for budget-conscious families with easy 10% down payment, community parks, sector mosque, and 3-year installment plans.",
-};
+import { getPageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return await getPageMetadata("/sectors/sector-b");
+}
 
 const SECTOR_B_PLOTS_FOR_SALE = [
   {
@@ -112,7 +115,7 @@ const SECTOR_B_NEARBY_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
     time: "0 Minutes Direct",
-    timeHighlight: "text-[#D4A017]",
+    timeHighlight: "text-[#D49E17]",
     distance: "Direct Project Access",
     bgClass: "bg-emerald-50/70 border-emerald-300",
     image: "/images/amenities/amenity_boulevard.jpg",
@@ -187,16 +190,10 @@ export default function SectorBPage() {
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4A017_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <ScrollReveal animation="fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-              <Users className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Family &amp; Investor Friendly Residential Sector</span>
-            </div>
-          </ScrollReveal>
 
           <WordReveal
             text="Sector B: Plots for Sale & Family Living"
@@ -219,11 +216,11 @@ export default function SectorBPage() {
                 <p className="text-xs text-slate-300 font-medium">Down Payment</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">3 Years</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
                 <p className="text-xs text-slate-300 font-medium">Installment Schedule</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D4A017] font-mono">15,000 K</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">15,000 K</span>
                 <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
@@ -236,7 +233,7 @@ export default function SectorBPage() {
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
             <a
               href="#plots-for-sale"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
             >
               View Sector B Plots For Sale
             </a>
@@ -266,13 +263,6 @@ export default function SectorBPage() {
         {/* 1. Dedicated Sector B Overview Section */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <Home className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Sector Overview</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Sector B Overview: Affordable Family Living"
               highlightWords={["Sector", "B", "Overview", "Affordable", "Family"]}
@@ -301,8 +291,8 @@ export default function SectorBPage() {
             </ScrollReveal>
 
             <ScrollReveal animation="fade-up" delay={120}>
-              <div className="p-7 rounded-3xl bg-amber-50/40 border border-amber-200 hover:border-[#D4A017] transition-all space-y-3 h-full">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-[#D4A017] shadow-sm">
+              <div className="p-7 rounded-3xl bg-amber-50/40 border border-amber-200 hover:border-[#D49E17] transition-all space-y-3 h-full">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-[#D49E17] shadow-sm">
                   <Trees className="w-6 h-6" />
                 </div>
                 <h4 className="font-bold text-slate-900 text-base">Dedicated Parks &amp; Playgrounds</h4>
@@ -329,13 +319,6 @@ export default function SectorBPage() {
         {/* 2. Available Plots in Sector B (With Photographic Image Headers!) */}
         <section id="plots-for-sale" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Sector B Inventory</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Available Residential Plots in Sector B"
               highlightWords={["Residential", "Plots", "Sector", "B"]}
@@ -386,7 +369,7 @@ export default function SectorBPage() {
                       <div className="p-6 space-y-4">
                         <div className="space-y-1">
                           <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                          <p className="text-2xl font-black text-[#D4A017]">{plot.totalPrice}</p>
+                          <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
                         </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed">
@@ -446,9 +429,6 @@ export default function SectorBPage() {
         {/* 3. Detailed Sector B Pricing Schedule Table */}
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
-              Official Rate Schedule
-            </span>
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
               Sector B 3-Year Installment Breakdown
             </h3>
@@ -477,7 +457,7 @@ export default function SectorBPage() {
                     <tr key={p.size} className="hover:bg-emerald-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
                       <td className="py-4 px-5 text-slate-500 font-mono">{p.dimensions}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017] text-sm">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17] text-sm">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
@@ -494,13 +474,6 @@ export default function SectorBPage() {
         {/* 4. Sector B Community Amenities (4 Cards with Images) */}
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Sector B Amenities</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Sector B Community Highlights"
               highlightWords={["Community", "Highlights"]}
@@ -559,12 +532,6 @@ export default function SectorBPage() {
         {/* 5. DEDICATED SEPARATE SECTION: Nearby Landmarks with Image Thumbnails */}
         <section id="nearby-landmarks" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Prime Highway Access</span>
-              </div>
-            </ScrollReveal>
 
             <WordReveal
               text="Nearby Landmarks & Travel Distances"
@@ -622,12 +589,7 @@ export default function SectorBPage() {
         {/* 6. Sector B Location & Embedded Google Map */}
         <section id="sector-location" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <Compass className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Sector B Location</span>
-              </div>
-            </ScrollReveal>
+
 
             <WordReveal
               text="Sector B Location & Google Map"
@@ -671,7 +633,7 @@ export default function SectorBPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-800">Authority Jurisdiction:</span>
-                    <span className="font-bold text-[#D4A017]">RDA Approved</span>
+                    <span className="font-bold text-[#D49E17]">RDA Approved</span>
                   </div>
                 </div>
 
@@ -736,7 +698,7 @@ export default function SectorBPage() {
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 href="/master-plan"
-                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
+                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <Layers className="w-4 h-4" />
                 <span>Open Master Plan Viewer</span>
@@ -754,13 +716,6 @@ export default function SectorBPage() {
         {/* 8. Sector B FAQs */}
         <section className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-3">
-            <ScrollReveal animation="fade-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide uppercase">
-                <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Sector B FAQs</span>
-              </div>
-            </ScrollReveal>
-
             <WordReveal
               text="Frequently Asked Questions"
               highlightWords={["Frequently", "Questions"]}

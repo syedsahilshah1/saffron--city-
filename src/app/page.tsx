@@ -82,8 +82,8 @@ export default async function HomePage() {
             alt="Saffron City Master Community"
             className="w-full h-full object-cover object-center scale-105"
           />
-          {/* Subtle multi-layer gradient overlay to ensure text and form stand out with luxury clarity */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/30 to-white/75 sm:bg-gradient-to-r sm:from-white/80 sm:via-white/50 sm:to-white/20" />
+          {/* Subtle dark gradient overlay so text is 100% crisp and readable while keeping background image vivid */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/45 sm:to-black/10" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -92,16 +92,16 @@ export default async function HomePage() {
             leftContent={
               <div className="space-y-6 relative max-w-xl pb-3 sm:pb-5 lg:pb-0">
                 {/* Headline: Strictly 2 lines with uniform Playfair Display font weight */}
-                <h1 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-serif font-normal text-slate-900 tracking-normal leading-[1.2] max-w-xl">
+                <h1 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-serif font-normal text-white drop-shadow-md tracking-normal leading-[1.2] max-w-xl">
                   Invest in Premium Living
                   <br />
-                  <span className="italic font-serif font-normal text-slate-800 pr-2">at</span>
-                  <span>{settings.heroHighlightedWord || "Saffron City"}</span>
+                  <span className="italic font-serif font-normal text-amber-200/90 pr-2">at</span>
+                  <span className="text-amber-400 font-semibold">{settings.heroHighlightedWord || "Saffron City"}</span>
                 </h1>
 
                 {/* Subtitle */}
                 {settings.heroSubtitle && (
-                  <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                  <p className="text-sm sm:text-base text-slate-100 drop-shadow leading-relaxed font-normal">
                     {settings.heroSubtitle}
                   </p>
                 )}
@@ -110,7 +110,7 @@ export default async function HomePage() {
                 <div className="pt-2 hidden lg:flex flex-wrap items-center gap-3">
                   <a
                     href="#hero-booking-form"
-                    className="shimmer-gold-btn inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                    className="shimmer-gold-btn inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                   >
                     <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -118,9 +118,9 @@ export default async function HomePage() {
                   <a
                     href={settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf}
                     download="Saffron-City-Master-Plan-Model.pdf"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/70 backdrop-blur-md border border-amber-300/80 text-slate-800 hover:bg-white font-bold text-sm shadow-sm transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 border border-white/60 font-bold text-sm shadow-md hover:shadow-lg transition-all"
                   >
-                    <Download className="w-4 h-4 text-[#D4A017]" />
+                    <Download className="w-4 h-4 text-[#D49E17]" />
                     <span>Download Master Plan</span>
                   </a>
                 </div>
@@ -137,7 +137,7 @@ export default async function HomePage() {
                 <div className="w-full max-w-lg flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 lg:hidden pt-1">
                   <a
                     href="#hero-booking-form"
-                    className="shimmer-gold-btn inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 text-white font-bold text-xs shadow-md transition-all text-center"
+                    className="shimmer-gold-btn inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white font-bold text-xs shadow-md transition-all text-center"
                   >
                     <span>{settings.heroButtonText || "Book Your Plot"}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -147,7 +147,7 @@ export default async function HomePage() {
                     download="Saffron-City-Master-Plan-Model.pdf"
                     className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-white/90 backdrop-blur-md border border-amber-300 text-slate-800 font-bold text-xs shadow-sm transition-all text-center"
                   >
-                    <Download className="w-4 h-4 text-[#D4A017]" />
+                    <Download className="w-4 h-4 text-[#D49E17]" />
                     <span>Download Master Plan</span>
                   </a>
                 </div>
@@ -196,7 +196,7 @@ export default async function HomePage() {
                     href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shimmer-gold-btn inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
+                    className="shimmer-gold-btn inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
                   >
                     <Compass className="w-4 h-4" />
                     <span>Get Directions on Google Maps</span>
@@ -232,61 +232,61 @@ export default async function HomePage() {
                 subtitle: "Main GT Road Junction",
                 driveTime: "5 Mins Drive",
                 image: "/images/landmark_t_chowk.jpg",
-                icon: <Compass className="w-4 h-4 text-[#D4A017]" />,
+                icon: <Compass className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Giga Mall & DHA",
                 subtitle: "Premier Shopping & Dining",
                 driveTime: "12 Mins Drive",
                 image: "/images/landmark_giga_mall.jpg",
-                icon: <ShoppingBag className="w-4 h-4 text-[#D4A017]" />,
+                icon: <ShoppingBag className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "DHA Islamabad",
                 subtitle: "Executive Housing Society",
                 driveTime: "10 Mins Drive",
                 image: "/images/landmark_dha_islamabad.jpg",
-                icon: <Building2 className="w-4 h-4 text-[#D4A017]" />,
+                icon: <Building2 className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Zero Point & Blue Area",
                 subtitle: "Capital Business District",
                 driveTime: "20 Mins Drive",
                 image: "/images/hero-bg.jpg",
-                icon: <TrendingUp className="w-4 h-4 text-[#D4A017]" />,
+                icon: <TrendingUp className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Bahria Town",
                 subtitle: "Gated Residential Community",
                 driveTime: "10 Mins Drive",
                 image: "/images/imgi_25_saffron-city-islamabad.jpg",
-                icon: <Landmark className="w-4 h-4 text-[#D4A017]" />,
+                icon: <Landmark className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Islamabad Airport",
                 subtitle: "International Air Terminal",
                 driveTime: "30 Mins Drive",
                 image: "/images/landmark_t_chowk.jpg",
-                icon: <Plane className="w-4 h-4 text-[#D4A017]" />,
+                icon: <Plane className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Rawalpindi Ring Road",
                 subtitle: "Direct Bypass Interchange",
                 driveTime: "2 Mins Drive",
                 image: "/images/imgi_25_saffron-city-islamabad.jpg",
-                icon: <Navigation className="w-4 h-4 text-[#D4A017]" />,
+                icon: <Navigation className="w-4 h-4 text-[#D49E17]" />,
               },
               {
                 title: "Islamabad Expressway",
                 subtitle: "Signal-Free Arterial Route",
                 driveTime: "15 Mins Drive",
                 image: "/images/hero-bg.jpg",
-                icon: <ShieldCheck className="w-4 h-4 text-[#D4A017]" />,
+                icon: <ShieldCheck className="w-4 h-4 text-[#D49E17]" />,
               },
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+                className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
               >
                 {/* Image Area with Badge */}
                 <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-slate-100">
@@ -298,18 +298,18 @@ export default async function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                   {/* Drive Time Badge on Top-Right */}
-                  <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-[#D4A017] text-white text-[11px] font-bold tracking-wide shadow-md">
+                  <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-[#D49E17] text-white text-[11px] font-bold tracking-wide shadow-md">
                     {item.driveTime}
                   </div>
                 </div>
 
                 {/* Bottom Content Area */}
                 <div className="p-4 sm:p-5 flex items-center gap-3.5 flex-1 bg-white border-t border-slate-100">
-                  <div className="w-10 h-10 rounded-xl border border-amber-200 bg-amber-50 flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#D4A017] group-hover:bg-amber-100 transition-all">
+                  <div className="w-10 h-10 rounded-xl border border-amber-200 bg-amber-50 flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#D49E17] group-hover:bg-amber-100 transition-all">
                     {item.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] tracking-tight font-heading leading-snug group-hover:text-[#D4A017] transition-colors truncate">
+                    <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] tracking-tight font-heading leading-snug group-hover:text-[#D49E17] transition-colors truncate">
                       {item.title}
                     </h3>
                     <p className="text-xs text-slate-500 truncate mt-0.5 font-medium">
@@ -342,7 +342,7 @@ export default async function HomePage() {
                 <div className="pt-2 flex flex-wrap gap-3">
                   <Link
                     href="/master-plan"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
                   >
                     <span>View Detailed Master Plan</span>
                     <ArrowRight className="w-4 h-4" />
@@ -352,7 +352,7 @@ export default async function HomePage() {
                     download="Saffron-City-Master-Plan-Model.pdf"
                     className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
                   >
-                    <Download className="w-4 h-4 text-[#D4A017]" />
+                    <Download className="w-4 h-4 text-[#D49E17]" />
                     <span>Download Plan PDF</span>
                   </a>
                 </div>
@@ -419,7 +419,7 @@ export default async function HomePage() {
             {AMENITIES.map((item, idx) => (
               <div
                 key={idx}
-                className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+                className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
               >
                 {/* Amenity Image */}
                 <div className="relative w-full h-40 sm:h-44 overflow-hidden bg-slate-100">
@@ -433,7 +433,7 @@ export default async function HomePage() {
 
                 {/* Amenity Content */}
                 <div className="p-4 sm:p-5 flex-1 flex items-center justify-center text-center bg-white border-t border-slate-100">
-                  <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D4A017] transition-colors font-heading">
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors font-heading">
                     {item.title}
                   </h4>
                 </div>
@@ -496,7 +496,7 @@ export default async function HomePage() {
                   <a
                     href={settings.residentialPaymentPlanImage || SITE_CONFIG.residentialPaymentPlanImg}
                     download="Saffron-City-Residential-Payment-Plan.jpg"
-                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
+                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download Residential Flyer</span>
@@ -516,7 +516,7 @@ export default async function HomePage() {
               <div className="p-6 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-4 flex flex-col justify-between h-full">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="px-3 py-1 rounded-full bg-[#D4A017] text-white font-bold text-xs uppercase tracking-wider">
+                    <span className="px-3 py-1 rounded-full bg-[#D49E17] text-white font-bold text-xs uppercase tracking-wider">
                       Signature Commercial (30×40)
                     </span>
                     <span className="text-xs font-bold text-amber-700">Save 45 Lac</span>
@@ -541,7 +541,7 @@ export default async function HomePage() {
                   <a
                     href={settings.commercialPaymentPlanImage || SITE_CONFIG.commercialPaymentPlanImg}
                     download="Saffron-City-Commercial-Payment-Plan.jpg"
-                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
+                    className="shimmer-gold-btn flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs text-center shadow-md flex items-center justify-center gap-2"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download Commercial Flyer</span>
@@ -578,7 +578,7 @@ export default async function HomePage() {
                   {RESIDENTIAL_PRICES.map((plot) => (
                     <tr key={plot.size} className="hover:bg-amber-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{plot.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D4A017]">{plot.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-[#D49E17]">{plot.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{plot.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{plot.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{plot.monthlyInstallmentFormatted}</td>
@@ -618,12 +618,12 @@ export default async function HomePage() {
             {BOOKING_STEPS.map((step) => (
               <div
                 key={step.step}
-                className="p-6 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] shadow-md hover:shadow-xl transition-all group"
+                className="p-6 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all group"
               >
-                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] font-bold text-sm mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] font-bold text-sm mb-4 group-hover:scale-110 transition-transform">
                   {step.step}
                 </div>
-                <h4 className="text-base font-bold text-slate-900 mb-2 group-hover:text-[#D4A017] transition-colors">
+                <h4 className="text-base font-bold text-slate-900 mb-2 group-hover:text-[#D49E17] transition-colors">
                   {step.title}
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
@@ -664,17 +664,17 @@ export default async function HomePage() {
             {REVIEWS.map((rev) => (
               <div
                 key={rev.id}
-                className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D4A017] transition-all duration-300 relative shadow-md hover:shadow-xl hover:-translate-y-1 group flex flex-col justify-between h-full"
+                className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] transition-all duration-300 relative shadow-md hover:shadow-xl hover:-translate-y-1 group flex flex-col justify-between h-full"
               >
                 <div className="space-y-4">
                   {/* Header: Rating Stars & Quote Icon */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-[#D4A017]">
+                    <div className="flex items-center gap-1 text-[#D49E17]">
                       {[...Array(rev.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-[#D4A017] text-[#D4A017]" />
+                        <Star key={i} className="w-4 h-4 fill-[#D49E17] text-[#D49E17]" />
                       ))}
                     </div>
-                    <Quote className="w-7 h-7 text-amber-200/80 group-hover:text-[#D4A017] transition-colors" />
+                    <Quote className="w-7 h-7 text-amber-200/80 group-hover:text-[#D49E17] transition-colors" />
                   </div>
 
                   {/* Review Text with consistent height */}
@@ -685,15 +685,15 @@ export default async function HomePage() {
 
                 {/* Author Info */}
                 <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4A017] font-bold text-sm shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] font-bold text-sm shrink-0">
                     {rev.author.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 text-sm block font-heading group-hover:text-[#D4A017] transition-colors">
+                    <h4 className="font-bold text-slate-900 text-sm block font-heading group-hover:text-[#D49E17] transition-colors">
                       {rev.author}
                     </h4>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                      <span className="text-[#D4A017] font-semibold">{rev.location}</span>
+                      <span className="text-[#D49E17] font-semibold">{rev.location}</span>
                       {rev.role && (
                         <>
                           <span>•</span>

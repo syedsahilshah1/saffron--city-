@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       password,
       role: role || "AGENT",
       permissions: Array.isArray(permissions) ? permissions : ["overview", "leads"],
+      isActive: true,
     });
 
     return NextResponse.json(

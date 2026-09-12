@@ -381,13 +381,13 @@ export default function PlotsInventoryExplorer() {
         {/* Top Search Bar */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-[#D4A017]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-[#D49E17]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search size (5M, 10M, 1K), sector, or tag..."
-              className="w-full pl-10 sm:pl-12 pr-10 py-2.5 sm:py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#D4A017] focus:bg-white focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition-all font-medium"
+              className="w-full pl-10 sm:pl-12 pr-10 py-2.5 sm:py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#D49E17] focus:bg-white focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition-all font-medium"
             />
             {searchQuery && (
               <button 
@@ -404,7 +404,7 @@ export default function PlotsInventoryExplorer() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-              className="md:hidden flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-[#D4A017] text-xs font-bold"
+              className="md:hidden flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-[#D49E17] text-xs font-bold"
             >
               <Filter className="w-3.5 h-3.5" />
               <span>Filters</span>
@@ -430,7 +430,7 @@ export default function PlotsInventoryExplorer() {
             {hasActiveFilters && (
               <button
                 onClick={resetAllFilters}
-                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Reset</span>
@@ -445,7 +445,7 @@ export default function PlotsInventoryExplorer() {
           {/* Category Filter */}
           <div className="space-y-1 sm:space-y-1.5">
             <label className="font-bold text-slate-700 block flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-[#D4A017]" />
+              <Building2 className="w-3.5 h-3.5 text-[#D49E17]" />
               <span>Plot Category</span>
             </label>
             <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
@@ -462,7 +462,7 @@ export default function PlotsInventoryExplorer() {
                 type="button"
                 onClick={() => setSelectedCategory("residential")}
                 className={`flex-1 py-1 sm:py-1.5 rounded-lg font-bold text-xs transition-all ${
-                  selectedCategory === "residential" ? "bg-[#D4A017] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  selectedCategory === "residential" ? "bg-[#D49E17] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Res.
@@ -471,7 +471,7 @@ export default function PlotsInventoryExplorer() {
                 type="button"
                 onClick={() => setSelectedCategory("commercial")}
                 className={`flex-1 py-1 sm:py-1.5 rounded-lg font-bold text-xs transition-all ${
-                  selectedCategory === "commercial" ? "bg-[#D4A017] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  selectedCategory === "commercial" ? "bg-[#D49E17] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Comm.
@@ -482,13 +482,13 @@ export default function PlotsInventoryExplorer() {
           {/* Sector / Block Filter */}
           <div className="space-y-1 sm:space-y-1.5">
             <label className="font-bold text-slate-700 block flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#D4A017]" />
+              <MapPin className="w-3.5 h-3.5 text-[#D49E17]" />
               <span>Sector / Block</span>
             </label>
             <select
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D4A017] focus:outline-none cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D49E17] focus:outline-none cursor-pointer"
             >
               <option value="all">All Sectors &amp; Blocks</option>
               <option value="Sector A (Block B)">Sector A (Block B)</option>
@@ -501,13 +501,13 @@ export default function PlotsInventoryExplorer() {
           {/* Plot Size Scale Filter */}
           <div className="space-y-1 sm:space-y-1.5">
             <label className="font-bold text-slate-700 block flex items-center gap-1.5">
-              <Ruler className="w-3.5 h-3.5 text-[#D4A017]" />
+              <Ruler className="w-3.5 h-3.5 text-[#D49E17]" />
               <span>Plot Size / Scale</span>
             </label>
             <select
               value={selectedScale}
               onChange={(e) => setSelectedScale(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D4A017] focus:outline-none cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D49E17] focus:outline-none cursor-pointer"
             >
               <option value="all">All Sizes</option>
               <option value="5 Marla">5 Marla (25×45)</option>
@@ -528,7 +528,7 @@ export default function PlotsInventoryExplorer() {
             <select
               value={budgetTier}
               onChange={(e) => setBudgetTier(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D4A017] focus:outline-none cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-[#D49E17] focus:outline-none cursor-pointer"
             >
               <option value="all">Any Price</option>
               <option value="under-50">&lt; 50 Lakh (5 Marla)</option>
@@ -554,7 +554,7 @@ export default function PlotsInventoryExplorer() {
       {/* 2. Real-Time Plots for Sale Grid */}
       {filteredInventory.length === 0 ? (
         <div className="text-center py-12 sm:py-16 p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-          <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full bg-amber-100 flex items-center justify-center text-[#D4A017] mx-auto">
+          <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full bg-amber-100 flex items-center justify-center text-[#D49E17] mx-auto">
             <Search className="w-7 sm:w-8 h-7 sm:h-8" />
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-slate-900 font-heading">No matching plots found</h3>
@@ -563,7 +563,7 @@ export default function PlotsInventoryExplorer() {
           </p>
           <button
             onClick={resetAllFilters}
-            className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-[#D4A017] hover:text-slate-950 transition-all cursor-pointer"
+            className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-[#D49E17] hover:text-slate-950 transition-all cursor-pointer"
           >
             Reset All Filters
           </button>
@@ -581,7 +581,7 @@ export default function PlotsInventoryExplorer() {
                 return (
                   <div
                     key={`mob-inv-${plot.id}`}
-                    className="group rounded-2xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-sm flex flex-col justify-between overflow-hidden"
+                    className="group rounded-2xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-sm flex flex-col justify-between overflow-hidden"
                   >
                     <div>
                       <div className="relative h-28 w-full overflow-hidden bg-slate-100">
@@ -610,7 +610,7 @@ export default function PlotsInventoryExplorer() {
                           {plot.title}
                         </h4>
                         <div className="flex items-center gap-1 text-[10px] text-slate-600 truncate">
-                          <MapPin className="w-2.5 h-2.5 text-[#D4A017] shrink-0" />
+                          <MapPin className="w-2.5 h-2.5 text-[#D49E17] shrink-0" />
                           <span className="truncate">{plot.sector}</span>
                         </div>
                         <div className="text-[10px] text-emerald-700 font-semibold truncate">
@@ -647,7 +647,7 @@ export default function PlotsInventoryExplorer() {
                 <button
                   type="button"
                   onClick={() => setMobileShowAll(!mobileShowAll)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#D4A017] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#D49E17] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer"
                 >
                   {mobileShowAll ? (
                     <>
@@ -681,7 +681,7 @@ export default function PlotsInventoryExplorer() {
                 return (
                   <div
                     key={plot.id}
-                    className="group rounded-3xl bg-white border border-amber-200 hover:border-[#D4A017] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                    className="group rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
                   >
                     <div>
                       {/* Plot Photographic Header */}
@@ -701,7 +701,7 @@ export default function PlotsInventoryExplorer() {
                         </div>
                         <div className="absolute top-3 right-3 z-10 flex gap-1.5">
                           <span className={`px-2.5 py-1 rounded-full text-white text-[10px] font-bold uppercase shadow backdrop-blur-md ${
-                            plot.category === "Residential" ? "bg-[#D4A017]" : "bg-emerald-600"
+                            plot.category === "Residential" ? "bg-[#D49E17]" : "bg-emerald-600"
                           }`}>
                             {plot.category}
                           </span>
@@ -719,7 +719,7 @@ export default function PlotsInventoryExplorer() {
                           </div>
                           <div className="text-right">
                             <span className="text-[10px] text-slate-300 block">Total Price</span>
-                            <span className="text-lg font-black text-[#D4A017] font-mono">
+                            <span className="text-lg font-black text-[#D49E17] font-mono">
                               {plot.totalPriceFormatted}
                             </span>
                           </div>
@@ -731,7 +731,7 @@ export default function PlotsInventoryExplorer() {
                         {/* Sector & Dimensions */}
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-1.5 text-slate-700 font-bold">
-                            <MapPin className="w-3.5 h-3.5 text-[#D4A017] shrink-0" />
+                            <MapPin className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                             <span>{plot.sector}</span>
                           </div>
                           <span className="px-2.5 py-0.5 rounded bg-slate-100 font-mono text-slate-600 font-semibold">
@@ -788,7 +788,7 @@ export default function PlotsInventoryExplorer() {
                         </Link>
                         <Link
                           href="/payment-plan"
-                          className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D4A017] font-bold text-xs text-center transition-colors"
+                          className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] font-bold text-xs text-center transition-colors"
                         >
                           Payment Plan
                         </Link>
@@ -805,7 +805,7 @@ export default function PlotsInventoryExplorer() {
       {/* 3. Budget & Installment Matcher Box */}
       <div className="p-6 sm:p-10 rounded-3xl bg-gradient-to-r from-amber-50 via-white to-amber-50 border border-amber-200 shadow-xl space-y-4 sm:space-y-6">
         <div className="max-w-3xl space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-bold uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D49E17]/10 text-[#D49E17] text-xs font-bold uppercase">
             <CreditCard className="w-3.5 h-3.5" />
             <span>Smart Budget Matcher</span>
           </div>
@@ -831,7 +831,7 @@ export default function PlotsInventoryExplorer() {
           </a>
           <Link
             href="/payment-plan"
-            className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-slate-900 hover:bg-[#D4A017] text-white hover:text-slate-950 font-bold text-xs transition-all flex items-center justify-center gap-2 text-center"
+            className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs transition-all flex items-center justify-center gap-2 text-center"
           >
             <span>View Full 3-Year Payment Structure</span>
             <ArrowRight className="w-4 h-4" />

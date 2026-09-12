@@ -19,7 +19,7 @@ export default function LocationMapCard() {
             onClick={() => setMode("official")}
             className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               mode === "official"
-                ? "bg-slate-900 text-[#D4A017] shadow-sm"
+                ? "bg-slate-900 text-[#D49E17] shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -31,7 +31,7 @@ export default function LocationMapCard() {
             onClick={() => setMode("map")}
             className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               mode === "map"
-                ? "bg-slate-900 text-[#D4A017] shadow-sm"
+                ? "bg-slate-900 text-[#D49E17] shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -50,7 +50,7 @@ export default function LocationMapCard() {
             <div className="absolute bottom-4 left-4 z-10 flex flex-wrap items-center gap-2">
               <Link
                 href="/location"
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-[#D4A017] text-white hover:text-slate-950 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-lg backdrop-blur-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-[#D49E17] text-white hover:text-slate-950 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-lg backdrop-blur-sm"
               >
                 <span>Interactive Location Page</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export default function LocationMapCard() {
 
       {/* Top Floating Badge */}
       <div className="absolute top-4 left-4 z-10 px-3.5 py-1.5 rounded-full bg-white/95 border border-amber-300 text-amber-900 text-xs font-bold backdrop-blur-md flex items-center gap-2 shadow-lg pointer-events-none">
-        <MapPin className="w-3.5 h-3.5 text-[#D4A017] animate-pulse" />
+        <MapPin className="w-3.5 h-3.5 text-[#D49E17] animate-pulse" />
         <span>Saffron City — Main GT Road, Rawat</span>
       </div>
 

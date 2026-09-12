@@ -20,7 +20,7 @@ export default function Error({
     <div className="min-h-[85vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-28 pb-20 bg-gradient-to-b from-red-50/30 via-white to-amber-50/20 text-slate-900">
       <div className="max-w-xl w-full text-center space-y-6 p-8 sm:p-12 rounded-3xl bg-white border border-red-200 shadow-2xl relative overflow-hidden">
         {/* Top Red-Gold Accent Bar */}
-        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-[#D4A017]" />
+        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-[#D49E17]" />
 
         {/* Icon */}
         <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 mx-auto flex items-center justify-center text-red-600 shadow-sm">
@@ -45,7 +45,7 @@ export default function Error({
           <button
             type="button"
             onClick={() => reset()}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D4A017] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Try Again</span>
@@ -66,7 +66,7 @@ export default function Error({
             href={`https://wa.me/${SITE_CONFIG.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold text-[#D4A017] hover:underline inline-flex items-center gap-1"
+            className="font-bold text-[#D49E17] hover:underline inline-flex items-center gap-1"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Contact Support on WhatsApp</span>
