@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import ScrollReveal from "@/components/animations/ScrollReveal";
@@ -112,11 +113,15 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           className="lg:col-span-5 flex flex-col justify-center items-center lg:items-end relative"
         >
           <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg flex justify-center lg:justify-end">
-            <img
+            <Image
               src={portrait}
               alt={`${title} ${name} - Saffron City`}
               title={`${title} ${name} - Saffron City`}
+              width={500}
+              height={670}
               className="w-full h-auto object-contain select-none pointer-events-none transition-all duration-500"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 

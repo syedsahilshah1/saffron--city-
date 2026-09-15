@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdminAuth(req, "leads");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const { id } = await params;
     const body = await req.json();
@@ -33,6 +37,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdminAuth(req, "leads");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const { id } = await params;
     const deleted = await db.deleteInquiry(id);

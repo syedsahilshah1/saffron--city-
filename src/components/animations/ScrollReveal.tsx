@@ -39,11 +39,9 @@ export default function ScrollReveal({
     const el = ref.current;
     if (!el) return;
 
-    // Check if element is already in viewport on mount
-    const rect = el.getBoundingClientRect();
-    if (rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.95) {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
       setIsVisible(true);
-      if (once) return;
+      return;
     }
 
     const observer = new IntersectionObserver(
@@ -59,7 +57,7 @@ export default function ScrollReveal({
       },
       {
         threshold,
-        rootMargin: "0px 0px -40px 0px",
+        rootMargin: "0px 0px 50px 0px",
       }
     );
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     if (!body.path) {
@@ -55,6 +59,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -78,7 +85,7 @@ export async function DELETE(req: NextRequest) {
   } catch (error: any) {
     console.error("Page SEO DELETE error:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Failed to delete page SEO" },
+      { success: false, message: "Failed to delete page SEO" },
       { status: 500 }
     );
   }

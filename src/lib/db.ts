@@ -120,6 +120,34 @@ function verifyUserPasswordInDb(inputPassword: string, storedHash: string, store
   return false;
 }
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __dbOfflineLogged: boolean | undefined;
+}
+
+function logDbNotice(context: string, err: any): void {
+  const code = err?.code || err?.errno;
+  const isConnError =
+    code === "ECONNREFUSED" ||
+    code === "ETIMEDOUT" ||
+    code === "ENOTFOUND" ||
+    code === "PROTOCOL_CONNECTION_LOST" ||
+    code === "ER_ACCESS_DENIED_ERROR" ||
+    code === "EHOSTUNREACH";
+
+  if (isConnError) {
+    if (process.env.NODE_ENV === "development" && !globalThis.__dbOfflineLogged) {
+      console.info("[Database Notice] MySQL server is offline. Serving gracefully with resilient fallback data.");
+      globalThis.__dbOfflineLogged = true;
+    }
+  } else {
+    // Only log unexpected database logic errors
+    if (err?.message) {
+      console.warn(`[${context}]`, err.message);
+    }
+  }
+}
+
 // -------------------------------------------------------------
 // Safe query helper with table name fallback
 // -------------------------------------------------------------
@@ -296,7 +324,7 @@ export const db = {
         };
       }
     } catch (err: any) {
-      console.error("[MySQL getUserById Error]:", err?.message);
+      logDbNotice("getUserById", err);
     }
     return null;
   },
@@ -320,7 +348,7 @@ export const db = {
         }));
       }
     } catch (err: any) {
-      console.error("[MySQL getUsers Error]:", err?.message);
+      logDbNotice("getUsers", err);
     }
     return [];
   },
@@ -529,7 +557,7 @@ export const db = {
         totalBlogs: Number(blogRows[0]?.total) || 0,
       };
     } catch (err: any) {
-      console.error("[MySQL getStats Error]:", err?.message);
+      logDbNotice("getStats", err);
       return {
         totalLeads: 0,
         unreadLeads: 0,
@@ -553,7 +581,7 @@ export const db = {
       );
       if (rows && Array.isArray(rows)) return rows;
     } catch (err: any) {
-      console.error("[MySQL getInquiries Error]:", err?.message);
+      logDbNotice("getInquiries", err);
     }
     return [];
   },
@@ -580,7 +608,7 @@ export const db = {
         ]
       );
     } catch (err: any) {
-      console.error("[MySQL createInquiry Error]:", err?.message);
+      logDbNotice("createInquiry", err);
     }
 
     return {
@@ -593,11 +621,14 @@ export const db = {
 
   updateInquiry: async (id: string, updates: Partial<StoredInquiry>): Promise<StoredInquiry | null> => {
     try {
+      const allowedColumns = new Set([
+        "name", "phone", "email", "message", "plotSize", "plotType", "sector", "status", "source", "notes"
+      ]);
       const fields: string[] = [];
       const values: any[] = [];
 
       for (const [key, val] of Object.entries(updates)) {
-        if (key !== "id") {
+        if (allowedColumns.has(key)) {
           fields.push(`\`${key}\` = ?`);
           values.push(val);
         }
@@ -619,7 +650,7 @@ export const db = {
       );
       return rows && rows.length > 0 ? rows[0] : null;
     } catch (err: any) {
-      console.error("[MySQL updateInquiry Error]:", err?.message);
+      logDbNotice("updateInquiry", err);
     }
     return null;
   },
@@ -660,7 +691,7 @@ export const db = {
         backendCache.set("plots_all", result, 60);
       }
     } catch (err: any) {
-      console.error("[MySQL getPlots Error]:", err?.message);
+      logDbNotice("getPlots", err);
     }
 
     return result;
@@ -699,11 +730,14 @@ export const db = {
   updatePlot: async (id: string, updates: Partial<StoredPlot>): Promise<StoredPlot | null> => {
     backendCache.delete("plots_all");
     try {
+      const allowedColumns = new Set([
+        "plotNumber", "sector", "category", "type", "totalPrice", "downPayment", "monthlyInst", "status", "features", "image"
+      ]);
       const fields: string[] = [];
       const values: any[] = [];
 
       for (const [key, val] of Object.entries(updates)) {
-        if (key !== "id") {
+        if (allowedColumns.has(key)) {
           fields.push(`\`${key}\` = ?`);
           values.push(val);
         }
@@ -764,7 +798,21 @@ export const db = {
         ];
         return fallbacks[idx % fallbacks.length];
       }
-      return img.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp");
+      return img;
+    };
+
+    const parseBlogFaqs = (rawFaqs: any): any[] => {
+      if (!rawFaqs) return [];
+      if (Array.isArray(rawFaqs)) return rawFaqs;
+      if (typeof rawFaqs === "string") {
+        try {
+          const p = JSON.parse(rawFaqs);
+          return Array.isArray(p) ? p : [];
+        } catch {
+          return [];
+        }
+      }
+      return [];
     };
 
     let result: StoredBlog[] = [];
@@ -777,15 +825,19 @@ export const db = {
       if (rows && Array.isArray(rows)) {
         result = rows.map((b: any, index: number) => ({
           ...b,
+          authorRole: b.authorRole || undefined,
+          authorBio: b.authorBio || undefined,
+          showProjectSnapshot: Boolean(b.showProjectSnapshot),
           image: normalizeBlogImage(b.image || b.coverImage, index),
           coverImage: normalizeBlogImage(b.coverImage || b.image, index),
           isPublished: Boolean(b.isPublished),
           robotsIndex: Boolean(b.robotsIndex),
           robotsFollow: Boolean(b.robotsFollow),
+          faqs: parseBlogFaqs(b.faqs),
         }));
       }
     } catch (err: any) {
-      console.error("[MySQL getBlogs Error]:", err?.message);
+      logDbNotice("getBlogs", err);
     }
 
     backendCache.set(cacheKey, result, 60);
@@ -809,7 +861,21 @@ export const db = {
         ];
         return fallbacks[idx % fallbacks.length];
       }
-      return img.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp");
+      return img;
+    };
+
+    const parseBlogFaqs = (rawFaqs: any): any[] => {
+      if (!rawFaqs) return [];
+      if (Array.isArray(rawFaqs)) return rawFaqs;
+      if (typeof rawFaqs === "string") {
+        try {
+          const p = JSON.parse(rawFaqs);
+          return Array.isArray(p) ? p : [];
+        } catch {
+          return [];
+        }
+      }
+      return [];
     };
 
     try {
@@ -819,17 +885,21 @@ export const db = {
         const b = rows[0];
         const res = {
           ...b,
+          authorRole: b.authorRole || undefined,
+          authorBio: b.authorBio || undefined,
+          showProjectSnapshot: Boolean(b.showProjectSnapshot),
           image: normalizeBlogImage(b.image || b.coverImage, 0),
           coverImage: normalizeBlogImage(b.coverImage || b.image, 0),
           isPublished: Boolean(b.isPublished),
           robotsIndex: Boolean(b.robotsIndex),
           robotsFollow: Boolean(b.robotsFollow),
+          faqs: parseBlogFaqs(b.faqs),
         };
         backendCache.set(cacheKey, res, 60);
         return res;
       }
     } catch (err: any) {
-      console.error("[MySQL getBlogBySlug Error]:", err?.message);
+      logDbNotice("getBlogBySlug", err);
     }
 
     return null;
@@ -841,9 +911,13 @@ export const db = {
     const id = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
       const pool = getMySQLPool();
+      await pool.query("ALTER TABLE `blogs` ADD COLUMN `faqs` JSON NULL;").catch(() => {});
+      await pool.query("ALTER TABLE `blogs` ADD COLUMN `authorRole` VARCHAR(191) NULL;").catch(() => {});
+      await pool.query("ALTER TABLE `blogs` ADD COLUMN `authorBio` TEXT NULL;").catch(() => {});
+      await pool.query("ALTER TABLE `blogs` ADD COLUMN `showProjectSnapshot` BOOLEAN DEFAULT 0;").catch(() => {});
       await pool.query(
-        `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`createdAt\`) ` +
-          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`authorRole\`, \`authorBio\`, \`showProjectSnapshot\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`imageAlt\`, \`faqs\`, \`createdAt\`) ` +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
         [
           id,
           blog.slug,
@@ -853,6 +927,9 @@ export const db = {
           blog.image || "/images/hero-bg.webp",
           blog.category || "General",
           blog.author || "Editorial Team",
+          blog.authorRole || null,
+          blog.authorBio || null,
+          blog.showProjectSnapshot ? 1 : 0,
           blog.readTime || "5 min read",
           blog.isPublished ? 1 : 0,
           blog.seoTitle || null,
@@ -863,10 +940,42 @@ export const db = {
           blog.focusKeyword || null,
           blog.secondaryKeywords || null,
           blog.h1Heading || null,
+          blog.imageAlt || null,
+          blog.faqs ? JSON.stringify(blog.faqs) : null,
         ]
       );
     } catch (err: any) {
-      console.error("[MySQL createBlog Error]:", err?.message);
+      logDbNotice("createBlog", err);
+      // Fallback in case table schema lacks custom columns
+      try {
+        const pool = getMySQLPool();
+        await pool.query(
+          `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`createdAt\`) ` +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+          [
+            id,
+            blog.slug,
+            blog.title,
+            blog.excerpt || "",
+            blog.content || "",
+            blog.image || "/images/hero-bg.webp",
+            blog.category || "General",
+            blog.author || "Editorial Team",
+            blog.readTime || "5 min read",
+            blog.isPublished ? 1 : 0,
+            blog.seoTitle || null,
+            blog.metaDescription || null,
+            blog.canonicalUrl || null,
+            blog.robotsIndex ? 1 : 0,
+            blog.robotsFollow ? 1 : 0,
+            blog.focusKeyword || null,
+            blog.secondaryKeywords || null,
+            blog.h1Heading || null,
+          ]
+        );
+      } catch (fallbackErr: any) {
+        logDbNotice("createBlog Fallback", fallbackErr);
+      }
     }
 
     return {
@@ -883,23 +992,59 @@ export const db = {
     if (updates.slug) backendCache.delete(`blog_slug_${updates.slug}`);
     backendCache.delete(`blog_slug_${id}`);
     try {
+      const allowedColumns = new Set([
+        "slug", "title", "excerpt", "content", "image", "coverImage", "category",
+        "author", "authorRole", "authorBio", "showProjectSnapshot", "readTime", "isPublished", "seoTitle", "metaDescription",
+        "canonicalUrl", "robotsIndex", "robotsFollow", "focusKeyword",
+        "secondaryKeywords", "h1Heading", "imageAlt", "ogTitle", "ogDescription",
+        "ogImage", "twitterTitle", "twitterDescription", "twitterImage", "customSchema", "faqs"
+      ]);
       const pool = getMySQLPool();
       const fields: string[] = [];
       const values: any[] = [];
 
       for (const [key, val] of Object.entries(updates)) {
-        if (key !== "id") {
+        if (allowedColumns.has(key)) {
           fields.push(`\`${key}\` = ?`);
-          values.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+          if (key === "faqs") {
+            values.push(val ? (typeof val === "string" ? val : JSON.stringify(val)) : null);
+          } else {
+            values.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+          }
         }
       }
 
       if (fields.length > 0) {
-        values.push(id);
-        await pool.query(`UPDATE \`blogs\` SET ${fields.join(", ")} WHERE \`id\` = ?`, values);
+        fields.push("`updatedAt` = NOW()");
+        values.push(id, id);
+        await pool.query(`UPDATE \`blogs\` SET ${fields.join(", ")} WHERE \`id\` = ? OR \`slug\` = ?`, values);
       }
 
-      return (await db.getBlogBySlug(updates.slug || id)) || null;
+      const [rows]: any = await pool.query("SELECT * FROM `blogs` WHERE `id` = ? OR `slug` = ? LIMIT 1", [id, updates.slug || id]);
+      if (rows && rows.length > 0) {
+        const b = rows[0];
+        backendCache.delete(`blog_slug_${b.slug}`);
+        return {
+          ...b,
+          image: b.image || b.coverImage || "/images/hero-bg.webp",
+          coverImage: b.coverImage || b.image || "/images/hero-bg.webp",
+          isPublished: Boolean(b.isPublished),
+          robotsIndex: Boolean(b.robotsIndex),
+          robotsFollow: Boolean(b.robotsFollow),
+          faqs: Array.isArray(b.faqs)
+            ? b.faqs
+            : typeof b.faqs === "string"
+            ? (() => {
+                try {
+                  const p = JSON.parse(b.faqs);
+                  return Array.isArray(p) ? p : [];
+                } catch {
+                  return [];
+                }
+              })()
+            : [],
+        };
+      }
     } catch (err: any) {
       console.error("[MySQL updateBlog Error]:", err?.message);
     }
@@ -987,7 +1132,7 @@ export const db = {
         return settings;
       }
     } catch (err: any) {
-      console.error("[MySQL getSettings Error]:", err?.message);
+      logDbNotice("getSettings", err);
     }
 
     const defaultFallback: StoredSettings = {
@@ -1151,7 +1296,7 @@ export const db = {
         }));
       }
     } catch (err: any) {
-      console.error("[MySQL getPageSeoList Error]:", err?.message);
+      logDbNotice("getPageSeoList", err);
     }
     return [];
   },
@@ -1175,7 +1320,7 @@ export const db = {
         return res;
       }
     } catch (err: any) {
-      console.error("[MySQL getPageSeoByPath Error]:", err?.message);
+      logDbNotice("getPageSeoByPath", err);
     }
 
     return null;
@@ -1234,7 +1379,7 @@ export const db = {
         ]
       );
     } catch (err: any) {
-      console.error("[MySQL upsertPageSeo Error]:", err?.message);
+      logDbNotice("upsertPageSeo", err);
     }
 
     return await db.getPageSeoByPath(data.path);
@@ -1269,7 +1414,7 @@ export const db = {
         }));
       }
     } catch (err: any) {
-      console.error("[MySQL getRedirects Error]:", err?.message);
+      logDbNotice("getRedirects", err);
     }
 
     backendCache.set("redirects_all", result, 60);
@@ -1302,12 +1447,13 @@ export const db = {
   updateRedirect: async (id: string, updates: Partial<StoredRedirect>): Promise<StoredRedirect | null> => {
     backendCache.delete("redirects_all");
     try {
+      const allowedColumns = new Set(["sourcePath", "destinationUrl", "statusCode", "isActive"]);
       const pool = getMySQLPool();
       const fields: string[] = [];
       const values: any[] = [];
 
       for (const [key, val] of Object.entries(updates)) {
-        if (key !== "id") {
+        if (allowedColumns.has(key)) {
           fields.push(`\`${key}\` = ?`);
           values.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
         }

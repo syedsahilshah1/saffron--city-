@@ -23,12 +23,16 @@ export async function getPageMetadata(
     const canonicalBase = settings?.canonicalUrl?.replace(/\/$/, "") || DEFAULT_BASE_URL;
     const pageUrl = `${canonicalBase}${cleanPath === "/" ? "" : cleanPath}`;
 
+    const DEFAULT_FALLBACK_TITLE = "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat";
+    const DEFAULT_FALLBACK_DESC =
+      "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat near T-Chowk. 5, 10 Marla & 1 Kanal residential and commercial plots on easy 3-year installment plans.";
+
     // Compute Title & Description
     const metaTitle =
       pageSeo?.metaTitle ||
-      (cleanPath === "/" ? settings?.metaTitle : `${siteName}`);
+      (cleanPath === "/" ? (settings?.metaTitle || DEFAULT_FALLBACK_TITLE) : `${siteName}`);
     const metaDescription =
-      pageSeo?.metaDescription || settings?.metaDescription || "";
+      pageSeo?.metaDescription || settings?.metaDescription || DEFAULT_FALLBACK_DESC;
 
     // Canonical & Robots
     const canonicalUrl = pageSeo?.canonicalUrl || pageUrl;

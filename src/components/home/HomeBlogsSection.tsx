@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Calendar, Clock, BookOpen, Sparkles } from "lucide-react";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
@@ -78,21 +79,19 @@ export default function HomeBlogsSection({
             <div className="space-y-4">
               {/* Featured Image */}
               <div className="relative w-full h-52 sm:h-56 overflow-hidden bg-slate-100">
-                <img
+                <Image
                   src={
                     blog.image && blog.image.trim().length > 5
-                      ? blog.image.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp")
+                      ? blog.image
                       : "/images/hero-bg.webp"
                   }
                   alt={blog.title}
                   title={blog.title}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes("/images/hero-bg.webp")) {
-                      target.src = "/images/hero-bg.webp";
-                    }
-                  }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                  loading="lazy"
+                  decoding="async"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 

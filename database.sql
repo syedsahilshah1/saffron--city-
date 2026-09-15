@@ -65,14 +65,6 @@ CREATE TABLE IF NOT EXISTS `inquiries` (
   `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `inquiries` (`id`, `name`, `phone`, `email`, `message`, `plotSize`, `plotType`, `sector`, `status`, `source`, `notes`, `createdAt`)
-VALUES
-('lead-001', 'Tariq Mehmood', '+92 321 5554321', 'tariq@example.com', 'Interested in 1 Kanal residential plot in Sector A with park facing option.', '1 Kanal', 'Residential', 'Sector A', 'New', 'Website Hero Form', 'Requires remote overseas booking guidance.', NOW()),
-('lead-002', 'Dr. Usman Farooq', '+92 300 9876543', 'usman@example.com', 'Looking for 4 Marla commercial plot on GT Road frontage for clinic setup.', '4 Marla', 'Commercial', 'Commercial Block', 'Contacted', 'WhatsApp Lead', 'Sent payment plan brochure. Follow-up scheduled.', NOW()),
-('lead-003', 'Bilal Ahmad', '+92 333 1234567', 'bilal@example.com', 'I need a 5 Marla plot in Saffron City Sector B on 3-year installment.', '5 Marla', 'Residential', 'Sector B', 'FollowUp', 'Plot For Sale Page', 'Checking down payment readiness.', NOW()),
-('lead-004', 'Sahil', '345678', NULL, 'Inquiry from web lead modal', '5 Marla', 'Residential', 'Sector A (Block B)', 'New', 'Website Form', 'Lead received via Website', NOW())
-ON DUPLICATE KEY UPDATE `id` = VALUES(`id`);
-
 -- -------------------------------------------------------------
 -- 4. Plots & Real Estate Inventory Table
 -- -------------------------------------------------------------
@@ -133,6 +125,7 @@ CREATE TABLE IF NOT EXISTS `blogs` (
   `twitterDescription` TEXT NULL,
   `twitterImage` VARCHAR(500) NULL,
   `customSchema` TEXT NULL,
+  `faqs` JSON NULL,
   `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

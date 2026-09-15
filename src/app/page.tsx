@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShieldCheck,
   ArrowRight,
@@ -62,6 +63,12 @@ import SeeMoreDrawer from "@/components/ui/SeeMoreDrawer";
 import PaymentPlanCard from "@/components/home/PaymentPlanCard";
 
 import { db } from "@/lib/db";
+import { getPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return await getPageMetadata("/");
+}
 
 export default async function HomePage() {
   const settings = await db.getSettings();
@@ -81,14 +88,15 @@ export default async function HomePage() {
       <section className="relative pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-20 flex flex-col justify-center overflow-hidden border-b border-amber-200/60 bg-transparent min-h-[92vh] sm:min-h-0">
         {/* Full-Cover Background Image extending behind headline and form on mobile and desktop */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <img
+          <Image
             src={settings.heroBgImage || "/images/hero-bg.webp"}
             alt="Saffron City Master Community"
             title="Saffron City Master Community"
-            className="w-full h-full object-cover object-center scale-105"
-            fetchPriority="high"
-            loading="eager"
-            decoding="async"
+            fill
+            priority
+            quality={75}
+            sizes="100vw"
+            className="object-cover object-center scale-105"
           />
           {/* Subtle dark gradient overlay so text is 100% crisp and readable while keeping background image vivid and visible in the center */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-black/75 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/45 sm:to-black/10" />
@@ -182,6 +190,7 @@ export default async function HomePage() {
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <GsapSplitReveal
             leftContent={<LocationMapCard />}
+            leftClassName="order-2 lg:order-1"
             rightContent={
               <div className="space-y-6 flex flex-col justify-center h-full">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal leading-[1.18]">
@@ -198,6 +207,7 @@ export default async function HomePage() {
                 </p>
               </div>
             }
+            rightClassName="order-1 lg:order-2"
           />
         </section>
 
@@ -282,11 +292,15 @@ export default async function HomePage() {
               >
                 {/* Image Area with Badge */}
                 <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-slate-100">
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.title}
                     title={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    fill
+                    sizes="(max-width: 640px) 380px, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
@@ -441,20 +455,24 @@ export default async function HomePage() {
               >
                 {/* Amenity Image */}
                 <div className="relative w-full h-40 sm:h-44 overflow-hidden bg-slate-100">
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.title}
                     title={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 </div>
 
                 {/* Amenity Content */}
                 <div className="p-4 sm:p-5 flex-1 flex items-center justify-center text-center bg-white border-t border-slate-100">
-                  <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors font-heading">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#D49E17] transition-colors font-heading">
                     {item.title}
-                  </h4>
+                  </h3>
                 </div>
               </div>
             );

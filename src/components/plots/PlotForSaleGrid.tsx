@@ -121,10 +121,69 @@ export const PLOT_LISTINGS: PlotListingItem[] = [
   }
 ];
 
-export default function PlotForSaleGrid() {
-  const [filter, setFilter] = useState<"all" | "residential" | "commercial">("all");
+interface PlotForSaleGridProps {
+  initialPlots?: any[];
+}
 
-  const filteredPlots = PLOT_LISTINGS.filter((item) => {
+export default function PlotForSaleGrid({ initialPlots = [] }: PlotForSaleGridProps) {
+  const [filter, setFilter] = useState<"all" | "residential" | "commercial">("all");
+  const [plotsData, setPlotsData] = useState<any[]>(initialPlots);
+
+  React.useEffect(() => {
+    fetch("/api/plots")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setPlotsData(json.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const dynamicPlots = React.useMemo<PlotListingItem[]>(() => {
+    if (plotsData && plotsData.length > 0) {
+      return plotsData.map((p: any) => {
+        const isComm = (p.type && p.type.toLowerCase().includes("commercial")) || (p.category && p.category.toLowerCase().includes("commercial"));
+        const priceNum = Number(p.totalPrice) || 0;
+        const normalizedPrice = priceNum > 0 && priceNum <= 500 ? priceNum * 100000 : priceNum;
+        const downPayment = Number(p.downPayment) || (normalizedPrice * 0.1);
+
+        let dimensions = "Standard Layout";
+        if (p.category?.includes("5 Marla")) dimensions = "25 × 45 ft";
+        else if (p.category?.includes("10 Marla")) dimensions = "35 × 65 ft";
+        else if (p.category?.includes("1 Kanal")) dimensions = "50 × 90 ft";
+        else if (p.category?.includes("4 Marla")) dimensions = "30 × 30 ft";
+        else if (p.category?.includes("8 Marla")) dimensions = "40 × 45 ft";
+
+        let priceShort = `PKR ${normalizedPrice.toLocaleString()}`;
+        if (normalizedPrice >= 10000000) {
+          priceShort = `PKR ${(normalizedPrice / 10000000).toFixed(2)} Crore`;
+        } else if (normalizedPrice >= 100000) {
+          priceShort = `PKR ${(normalizedPrice / 100000).toFixed(1)} Lac`;
+        }
+
+        return {
+          id: p.id,
+          code: p.plotNumber?.startsWith("#") ? p.plotNumber : `#${p.plotNumber || "PLT"}`,
+          size: p.category || "Plot",
+          title: `${p.category || "Plot"} (${p.type || "Residential"})`,
+          category: isComm ? "commercial" : "residential",
+          sector: p.sector || "Saffron City",
+          priceFormatted: `PKR ${normalizedPrice.toLocaleString()}`,
+          priceShort,
+          bookingFormatted: `PKR ${Math.round(downPayment).toLocaleString()}`,
+          dimensions,
+          image: p.image && p.image.trim().length > 3 ? p.image : "/images/sectors/sector-a-luxury.webp",
+          trend: p.status || "Active",
+          features: p.features ? [p.features] : ["RDA Approved", "Underground Electricity", "3-Year Plan"],
+          href: isComm ? "/plots/commercial" : "/plots/residential",
+        };
+      });
+    }
+    return PLOT_LISTINGS;
+  }, [plotsData]);
+
+  const filteredPlots = dynamicPlots.filter((item) => {
     if (filter === "all") return true;
     return item.category === filter;
   });

@@ -124,10 +124,11 @@ export default function EnquiryForm({
           )}
 
           <div>
-            <label className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
+            <label htmlFor="enquiry-name" className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
               Your Name *
             </label>
             <input
+              id="enquiry-name"
               type="text"
               required
               placeholder="e.g. Syed Sahil Shah"
@@ -142,10 +143,11 @@ export default function EnquiryForm({
           </div>
 
           <div>
-            <label className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
+            <label htmlFor="enquiry-phone" className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
               Phone / WhatsApp Number *
             </label>
             <input
+              id="enquiry-phone"
               type="tel"
               required
               placeholder="e.g. 0333 111 3551"
@@ -161,10 +163,11 @@ export default function EnquiryForm({
 
 
           <div>
-            <label className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
+            <label htmlFor="enquiry-message" className={`block text-xs font-bold mb-1.5 uppercase tracking-wider ${isDark ? "text-amber-300" : "text-slate-700"}`}>
               Message / Specific Requirements
             </label>
             <textarea
+              id="enquiry-message"
               rows={2}
               placeholder="e.g. Inquiring about 5 Marla booking in Sector A Block B"
               value={formData.message}

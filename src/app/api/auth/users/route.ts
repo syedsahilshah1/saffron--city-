@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, ALL_PERMISSIONS } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "users");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const users = await db.getUsers();
     const res = NextResponse.json({
@@ -26,6 +30,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "users");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const { name, email, password, role, permissions } = body;
@@ -44,11 +51,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Only SUPER_ADMIN can create another SUPER_ADMIN
+    const assignedRole = role === "SUPER_ADMIN" && auth.user?.role !== "SUPER_ADMIN" ? "ADMIN" : (role || "AGENT");
+
     const newUser = await db.createUser({
-      name,
-      email,
+      name: String(name).trim().slice(0, 150),
+      email: String(email).trim().toLowerCase().slice(0, 150),
       password,
-      role: role || "AGENT",
+      role: assignedRole,
       permissions: Array.isArray(permissions) ? permissions : ["overview", "leads"],
       isActive: true,
     });

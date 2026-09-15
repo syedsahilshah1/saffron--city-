@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "overview");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const stats = await db.getStats();
     const res = NextResponse.json({ success: true, data: stats });

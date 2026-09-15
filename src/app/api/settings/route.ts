@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "settings");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const updated = await db.updateSettings(body);

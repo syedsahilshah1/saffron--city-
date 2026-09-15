@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Menu,
@@ -81,7 +82,7 @@ export default function Navbar() {
   const handleProjectLeave = () => {
     projectTimeoutRef.current = setTimeout(() => {
       setProjectDropdown(false);
-    }, 150);
+    }, 250);
   };
 
   const handleBlocksEnter = () => {
@@ -92,7 +93,7 @@ export default function Navbar() {
   const handleBlocksLeave = () => {
     blocksTimeoutRef.current = setTimeout(() => {
       setBlocksDropdown(false);
-    }, 150);
+    }, 250);
   };
 
   const projectSubLinks = [
@@ -139,14 +140,14 @@ export default function Navbar() {
             className="flex items-center group flex-shrink-0"
             aria-label="Saffron City Islamabad Official Homepage"
           >
-            <img
+            <Image
               src="/images/saffron-city-logo.webp"
               alt="Saffron City Islamabad Official Logo"
               title="Saffron City Islamabad Official Logo"
+              width={160}
+              height={56}
+              priority
               className="h-14 lg:h-16 w-auto object-contain group-hover:scale-105 transition-all flex-shrink-0 drop-shadow-sm"
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
             />
             <span className="sr-only">Saffron City Islamabad</span>
           </Link>
@@ -177,80 +178,92 @@ export default function Navbar() {
 
             {/* Project Overview Dropdown */}
             <div
-              className="relative"
+              className="relative group py-1.5"
               onMouseEnter={handleProjectEnter}
               onMouseLeave={handleProjectLeave}
             >
               <button
                 type="button"
-                className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors ${
                   isProjectActive
                     ? "text-[#D49E17] border-b-2 border-[#D49E17]"
-                    : "text-slate-700 hover:text-[#D49E17]"
+                    : "text-slate-700 hover:text-[#D49E17] group-hover:text-[#D49E17]"
                 }`}
                 onClick={() => setProjectDropdown((prev) => !prev)}
               >
                 <span>Project Overview</span>
                 <ChevronDown
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    projectDropdown ? "rotate-180 text-[#D49E17]" : "opacity-70"
+                    projectDropdown ? "rotate-180 text-[#D49E17]" : "opacity-70 group-hover:rotate-180 group-hover:text-[#D49E17]"
                   }`}
                 />
               </button>
 
-              {projectDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-56 rounded-2xl bg-white border border-amber-200 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150 z-50">
+              <div
+                className={`absolute top-full left-0 pt-2 w-56 transition-all duration-200 z-50 ${
+                  projectDropdown
+                    ? "opacity-100 pointer-events-auto translate-y-0 visible"
+                    : "opacity-0 pointer-events-none -translate-y-1 invisible group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:visible"
+                }`}
+              >
+                <div className="rounded-2xl bg-white border border-amber-200 p-2 shadow-2xl backdrop-blur-xl">
                   {projectSubLinks.map((sub) => (
                     <Link
                       key={sub.name}
                       href={sub.href}
                       onClick={() => setProjectDropdown(false)}
-                      className="block px-3.5 py-2 text-xs font-semibold text-slate-700 rounded-xl hover:bg-amber-50 hover:text-[#D49E17] transition-colors"
+                      className="block px-3.5 py-2.5 text-xs font-semibold text-slate-700 rounded-xl hover:bg-amber-50 hover:text-[#D49E17] transition-colors"
                     >
                       {sub.name}
                     </Link>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Blocks & Plots Dropdown */}
             <div
-              className="relative"
+              className="relative group py-1.5"
               onMouseEnter={handleBlocksEnter}
               onMouseLeave={handleBlocksLeave}
             >
               <button
                 type="button"
-                className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors py-1.5 ${
+                className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors ${
                   isBlocksActive
                     ? "text-[#D49E17] border-b-2 border-[#D49E17]"
-                    : "text-slate-700 hover:text-[#D49E17]"
+                    : "text-slate-700 hover:text-[#D49E17] group-hover:text-[#D49E17]"
                 }`}
                 onClick={() => setBlocksDropdown((prev) => !prev)}
               >
                 <span>Blocks & Plots</span>
                 <ChevronDown
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    blocksDropdown ? "rotate-180 text-[#D49E17]" : "opacity-70"
+                    blocksDropdown ? "rotate-180 text-[#D49E17]" : "opacity-70 group-hover:rotate-180 group-hover:text-[#D49E17]"
                   }`}
                 />
               </button>
 
-              {blocksDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-64 rounded-2xl bg-white border border-amber-200 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150 z-50">
+              <div
+                className={`absolute top-full left-0 pt-2 w-64 transition-all duration-200 z-50 ${
+                  blocksDropdown
+                    ? "opacity-100 pointer-events-auto translate-y-0 visible"
+                    : "opacity-0 pointer-events-none -translate-y-1 invisible group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:visible"
+                }`}
+              >
+                <div className="rounded-2xl bg-white border border-amber-200 p-2 shadow-2xl backdrop-blur-xl">
                   {blockSubLinks.map((sub) => (
                     <Link
                       key={sub.name}
                       href={sub.href}
                       onClick={() => setBlocksDropdown(false)}
-                      className="block px-3.5 py-2 text-xs font-semibold text-slate-700 rounded-xl hover:bg-amber-50 hover:text-[#D49E17] transition-colors"
+                      className="block px-3.5 py-2.5 text-xs font-semibold text-slate-700 rounded-xl hover:bg-amber-50 hover:text-[#D49E17] transition-colors"
                     >
                       {sub.name}
                     </Link>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
 
             <Link
@@ -299,14 +312,14 @@ export default function Navbar() {
             className="flex items-center group"
             aria-label="Saffron City Islamabad Official Homepage"
           >
-            <img
+            <Image
               src="/images/saffron-city-logo.webp"
               alt="Saffron City Islamabad Official Logo"
               title="Saffron City Islamabad Official Logo"
-              className="h-12 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0 drop-shadow-sm"
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
+              width={140}
+              height={48}
+              priority
+              className="h-11 sm:h-13 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0 drop-shadow-sm"
             />
             <span className="sr-only">Saffron City Islamabad</span>
           </Link>
@@ -315,10 +328,11 @@ export default function Navbar() {
             {/* Quick Call Pill on Mobile */}
             <a
               href={`tel:${phone}`}
+              aria-label={`Call Saffron City sales office at ${phone}`}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-[#D49E17] text-white text-xs font-bold shadow-sm"
             >
               <Phone className="w-3 h-3 fill-white text-white" />
-              <span className="hidden sm:inline">{phone}</span>
+              <span className="sr-only sm:not-sr-only">{phone}</span>
             </a>
 
             <button

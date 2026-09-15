@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +33,24 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "blogs");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
-    const { title, excerpt, content, image, category, author, readTime, isPublished } = body;
+    const {
+      title,
+      excerpt,
+      content,
+      image,
+      category,
+      author,
+      authorRole,
+      authorBio,
+      showProjectSnapshot,
+      readTime,
+      isPublished,
+    } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -51,24 +67,27 @@ export async function POST(req: NextRequest) {
         .replace(/(^-|-$)/g, "");
 
     const newBlog = await db.createBlog({
-      slug,
-      title,
-      excerpt: excerpt || title,
-      content,
+      slug: String(slug).trim().slice(0, 200),
+      title: String(title).trim().slice(0, 300),
+      excerpt: excerpt ? String(excerpt).slice(0, 1000) : title,
+      content: String(content),
       image: image || "/images/hero-bg.webp",
       category: category || "News & Updates",
-      author: author || "Saffron City Official",
+      author: author || auth.user?.name || "Saffron City Official",
+      authorRole: authorRole ? String(authorRole).trim().slice(0, 100) : undefined,
+      authorBio: authorBio ? String(authorBio).trim().slice(0, 1000) : undefined,
+      showProjectSnapshot: Boolean(showProjectSnapshot),
       readTime: readTime || "4 min read",
       isPublished: isPublished !== undefined ? isPublished : true,
-      seoTitle: body.seoTitle || title,
-      metaDescription: body.metaDescription || excerpt || title,
+      seoTitle: body.seoTitle ? String(body.seoTitle).slice(0, 200) : title,
+      metaDescription: body.metaDescription ? String(body.metaDescription).slice(0, 500) : (excerpt || title),
       canonicalUrl: body.canonicalUrl || `https://saffroncity.org/blogs/${slug}`,
       robotsIndex: body.robotsIndex !== undefined ? body.robotsIndex : true,
       robotsFollow: body.robotsFollow !== undefined ? body.robotsFollow : true,
-      focusKeyword: body.focusKeyword,
-      secondaryKeywords: body.secondaryKeywords,
-      h1Heading: body.h1Heading || title,
-      imageAlt: body.imageAlt || title,
+      focusKeyword: body.focusKeyword ? String(body.focusKeyword).slice(0, 100) : undefined,
+      secondaryKeywords: body.secondaryKeywords ? String(body.secondaryKeywords).slice(0, 300) : undefined,
+      h1Heading: body.h1Heading ? String(body.h1Heading).slice(0, 300) : title,
+      imageAlt: body.imageAlt ? String(body.imageAlt).slice(0, 200) : title,
       ogTitle: body.ogTitle || body.seoTitle || title,
       ogDescription: body.ogDescription || body.metaDescription || excerpt || title,
       ogImage: body.ogImage || image || "/images/hero-bg.webp",
@@ -76,6 +95,7 @@ export async function POST(req: NextRequest) {
       twitterDescription: body.twitterDescription || body.metaDescription || excerpt || title,
       twitterImage: body.twitterImage || image || "/images/hero-bg.webp",
       customSchema: body.customSchema,
+      faqs: Array.isArray(body.faqs) ? body.faqs : [],
     });
 
     return NextResponse.json(
@@ -92,6 +112,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "blogs");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const { id, ...updates } = body;
@@ -126,6 +149,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "blogs");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

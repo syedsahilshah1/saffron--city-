@@ -55,7 +55,17 @@ import {
   BadgeCheck,
   Edit3,
   FileDown,
-  BookOpen
+  BookOpen,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  List,
+  ListOrdered,
+  Link2,
+  Quote,
+  HelpCircle,
+  ImagePlus
 } from "lucide-react";
 import {
   StoredInquiry,
@@ -67,10 +77,13 @@ import {
   StoredRedirect,
   DashboardPermission,
   UserRole,
-  ALL_PERMISSIONS
+  ALL_PERMISSIONS,
+  BlogFAQ
 } from "@/lib/types";
 import { formatPKR } from "@/lib/utils";
 import FileUploadField from "@/components/dashboard/FileUploadField";
+import MediaGalleryModal from "@/components/dashboard/MediaGalleryModal";
+import RichTextEditor from "@/components/dashboard/RichTextEditor";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -117,6 +130,12 @@ export default function AdminDashboardPage() {
     }
   }, [currentUser]);
 
+  // Media Gallery Modal & Editor Toolbar States
+  const [showMediaGallery, setShowMediaGallery] = useState(false);
+  const [galleryTarget, setGalleryTarget] = useState<"blogCover" | "blogContent" | "pageOg" | "globalOg">("blogCover");
+  const [insertPhotoAlt, setInsertPhotoAlt] = useState<string>("");
+  const [insertedEditorImage, setInsertedEditorImage] = useState<{ url: string; alt: string } | null>(null);
+
   // Blog Management States
   const [blogsList, setBlogsList] = useState<StoredBlog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
@@ -132,6 +151,9 @@ export default function AdminDashboardPage() {
     image: string;
     category: string;
     author: string;
+    authorRole: string;
+    authorBio: string;
+    showProjectSnapshot: boolean;
     readTime: string;
     isPublished: boolean;
     seoTitle: string;
@@ -150,6 +172,7 @@ export default function AdminDashboardPage() {
     twitterDescription: string;
     twitterImage: string;
     customSchema: string;
+    faqs: BlogFAQ[];
   }>({
     title: "",
     slug: "",
@@ -157,7 +180,10 @@ export default function AdminDashboardPage() {
     content: "",
     image: "/images/hero-bg.webp",
     category: "Market Update",
-    author: "Saffron City Official",
+    author: "Admin",
+    authorRole: "",
+    authorBio: "",
+    showProjectSnapshot: false,
     readTime: "4 min read",
     isPublished: true,
     seoTitle: "",
@@ -176,10 +202,11 @@ export default function AdminDashboardPage() {
     twitterDescription: "",
     twitterImage: "/images/hero-bg.webp",
     customSchema: "",
+    faqs: [],
   });
 
-  // SEO Suite & Redirects States
-  const [seoSubTab, setSeoSubTab] = useState<"global" | "pages" | "redirects" | "health">("global");
+  // SEO Suite & Redirects States (Matching Reference Layout)
+  const [seoSubTab, setSeoSubTab] = useState<"pages" | "canonical_sitemap" | "robots_indexing" | "redirects">("pages");
   const [pageSeoList, setPageSeoList] = useState<StoredPageSeo[]>([]);
   const [selectedPagePath, setSelectedPagePath] = useState<string>("/");
   const [selectedPageSeo, setSelectedPageSeo] = useState<StoredPageSeo | null>(null);
@@ -321,13 +348,14 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [leadsRes, plotsRes, statsRes, blogsRes, pageSeoRes, redirectsRes] = await Promise.all([
+      const [leadsRes, plotsRes, statsRes, blogsRes, pageSeoRes, redirectsRes, settingsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/plots"),
         fetch("/api/dashboard/stats"),
         fetch("/api/blogs"),
         fetch("/api/seo/pages"),
         fetch("/api/seo/redirects"),
+        fetch("/api/settings"),
       ]);
 
       const leadsData = await leadsRes.json();
@@ -336,6 +364,7 @@ export default function AdminDashboardPage() {
       const blogsData = await blogsRes.json();
       const pageSeoData = await pageSeoRes.json();
       const redirectsData = await redirectsRes.json();
+      const settingsData = await settingsRes.json();
 
       if (leadsData.success) setLeads(leadsData.data);
       if (plotsData.success) setPlots(plotsData.data);
@@ -351,7 +380,9 @@ export default function AdminDashboardPage() {
       if (redirectsData.success && redirectsData.data) {
         setRedirectsList(redirectsData.data);
       }
-      if (statsData.success && statsData.data.settings) {
+      if (settingsData.success && settingsData.data) {
+        setSettings(settingsData.data);
+      } else if (statsData.success && statsData.data.settings) {
         setSettings(statsData.data.settings);
       }
       fetchUsersList();
@@ -400,6 +431,37 @@ export default function AdminDashboardPage() {
     if (found) {
       setSelectedPageSeo({ ...found });
     } else {
+      // If path is a blog post
+      if (path.startsWith("/blogs/")) {
+        const blogSlug = path.replace("/blogs/", "");
+        const blog = blogsList.find((b) => b.slug === blogSlug);
+        if (blog) {
+          setSelectedPageSeo({
+            id: blog.id,
+            path: `/blogs/${blog.slug}`,
+            pageName: `Blog: ${blog.title}`,
+            metaTitle: blog.seoTitle || blog.title,
+            metaDescription: blog.metaDescription || blog.excerpt,
+            h1Heading: blog.h1Heading || blog.title,
+            focusKeyword: blog.focusKeyword || "",
+            secondaryKeywords: blog.secondaryKeywords || "",
+            canonicalUrl: blog.canonicalUrl || `https://saffroncity.org/blogs/${blog.slug}`,
+            robotsIndex: blog.robotsIndex ?? true,
+            robotsFollow: blog.robotsFollow ?? true,
+            ogTitle: blog.ogTitle || blog.seoTitle || blog.title,
+            ogDescription: blog.ogDescription || blog.metaDescription || blog.excerpt,
+            ogImage: blog.ogImage || blog.image || "/images/hero-bg.webp",
+            twitterTitle: blog.twitterTitle || blog.seoTitle || blog.title,
+            twitterDescription: blog.twitterDescription || blog.metaDescription || blog.excerpt,
+            twitterImage: blog.twitterImage || blog.image || "/images/hero-bg.webp",
+            schemaType: "ItemPage",
+            customJsonLd: blog.customSchema || "",
+            updatedAt: blog.updatedAt || new Date().toISOString(),
+          });
+          return;
+        }
+      }
+
       setSelectedPageSeo({
         id: "",
         path,
@@ -412,7 +474,14 @@ export default function AdminDashboardPage() {
         canonicalUrl: "",
         robotsIndex: true,
         robotsFollow: true,
+        ogTitle: "",
+        ogDescription: "",
+        ogImage: "/images/hero-bg.webp",
+        twitterTitle: "",
+        twitterDescription: "",
+        twitterImage: "/images/hero-bg.webp",
         schemaType: "ItemPage",
+        customJsonLd: "",
         updatedAt: new Date().toISOString(),
       });
     }
@@ -423,6 +492,44 @@ export default function AdminDashboardPage() {
     setSavingPageSeo(true);
     setPageSeoSuccessMsg("");
     try {
+      // Check if saving SEO for a blog article
+      if (selectedPageSeo.path.startsWith("/blogs/")) {
+        const blogSlug = selectedPageSeo.path.replace("/blogs/", "");
+        const blog = blogsList.find((b) => b.slug === blogSlug || b.id === selectedPageSeo.id);
+        if (blog) {
+          const res = await fetch("/api/blogs", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: blog.id,
+              seoTitle: selectedPageSeo.metaTitle,
+              metaDescription: selectedPageSeo.metaDescription,
+              h1Heading: selectedPageSeo.h1Heading,
+              focusKeyword: selectedPageSeo.focusKeyword,
+              secondaryKeywords: selectedPageSeo.secondaryKeywords,
+              canonicalUrl: selectedPageSeo.canonicalUrl,
+              robotsIndex: selectedPageSeo.robotsIndex,
+              robotsFollow: selectedPageSeo.robotsFollow,
+              ogTitle: selectedPageSeo.ogTitle,
+              ogDescription: selectedPageSeo.ogDescription,
+              ogImage: selectedPageSeo.ogImage,
+              twitterTitle: selectedPageSeo.twitterTitle,
+              twitterDescription: selectedPageSeo.twitterDescription,
+              twitterImage: selectedPageSeo.twitterImage,
+              customSchema: selectedPageSeo.customJsonLd,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            setPageSeoSuccessMsg(`SEO saved for article: "${blog.title}"!`);
+            fetchBlogs();
+            setTimeout(() => setPageSeoSuccessMsg(""), 4000);
+          }
+          return;
+        }
+      }
+
+      // Standard page SEO route
       const res = await fetch("/api/seo/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -430,7 +537,7 @@ export default function AdminDashboardPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setPageSeoSuccessMsg("Page SEO settings saved & live in page HTML!");
+        setPageSeoSuccessMsg(`SEO for ${selectedPageSeo.path} saved & live!`);
         fetchPageSeo();
         setTimeout(() => setPageSeoSuccessMsg(""), 4000);
       }
@@ -535,6 +642,51 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // FAQ dynamic builder handlers
+  const handleAddFaq = () => {
+    setBlogForm((prev) => ({
+      ...prev,
+      faqs: [...(prev.faqs || []), { question: "", answer: "" }],
+    }));
+  };
+
+  const handleUpdateFaq = (index: number, field: "question" | "answer", val: string) => {
+    setBlogForm((prev) => {
+      const nextFaqs = [...(prev.faqs || [])];
+      nextFaqs[index] = { ...nextFaqs[index], [field]: val };
+      return { ...prev, faqs: nextFaqs };
+    });
+  };
+
+  const handleRemoveFaq = (index: number) => {
+    setBlogForm((prev) => ({
+      ...prev,
+      faqs: (prev.faqs || []).filter((_, i) => i !== index),
+    }));
+  };
+
+
+
+  const handleSelectMediaFromGallery = (url: string, altText?: string) => {
+    if (galleryTarget === "blogCover") {
+      setBlogForm((prev) => ({
+        ...prev,
+        image: url,
+        ogImage: url,
+        twitterImage: url,
+        imageAlt: altText || prev.imageAlt || prev.title,
+      }));
+    } else if (galleryTarget === "blogContent") {
+      const alt = altText || insertPhotoAlt || "Saffron City Real Estate Article Photo";
+      setInsertedEditorImage({ url, alt });
+    } else if (galleryTarget === "pageOg" && selectedPageSeo) {
+      setSelectedPageSeo((prev) => (prev ? { ...prev, ogImage: url, twitterImage: url } : null));
+    } else if (galleryTarget === "globalOg" && settings) {
+      updateSettingField("ogImage", url);
+      updateSettingField("twitterImage", url);
+    }
+  };
+
   const handleOpenCreateBlog = () => {
     setEditingBlog(null);
     setBlogModalTab("content");
@@ -545,7 +697,10 @@ export default function AdminDashboardPage() {
       content: "",
       image: "/images/hero-bg.webp",
       category: "Market Update",
-      author: currentUser?.name || "Saffron City Official",
+      author: currentUser?.name || "Admin",
+      authorRole: "",
+      authorBio: "",
+      showProjectSnapshot: false,
       readTime: "4 min read",
       isPublished: true,
       seoTitle: "",
@@ -564,6 +719,7 @@ export default function AdminDashboardPage() {
       twitterDescription: "",
       twitterImage: "/images/hero-bg.webp",
       customSchema: "",
+      faqs: [],
     });
     setShowBlogModal(true);
   };
@@ -577,8 +733,11 @@ export default function AdminDashboardPage() {
       excerpt: blog.excerpt,
       content: blog.content,
       image: blog.image || "/images/hero-bg.webp",
-      category: blog.category,
-      author: blog.author,
+      category: blog.category || "Market Update",
+      author: blog.author || "Admin",
+      authorRole: blog.authorRole || "",
+      authorBio: blog.authorBio || "",
+      showProjectSnapshot: Boolean(blog.showProjectSnapshot),
       readTime: blog.readTime || "4 min read",
       isPublished: blog.isPublished ?? true,
       seoTitle: blog.seoTitle || blog.title,
@@ -597,6 +756,7 @@ export default function AdminDashboardPage() {
       twitterDescription: blog.twitterDescription || blog.metaDescription || blog.excerpt,
       twitterImage: blog.twitterImage || blog.image || "/images/hero-bg.webp",
       customSchema: blog.customSchema || "",
+      faqs: Array.isArray(blog.faqs) ? blog.faqs : [],
     });
     setShowBlogModal(true);
   };
@@ -1127,58 +1287,101 @@ export default function AdminDashboardPage() {
 
       {/* 2. BODY WITH SIDEBAR & CONTENT */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
+        {/* MOBILE SIDEBAR BACKDROP */}
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+          />
+        )}
+
         {/* LEFT SIDEBAR */}
         <aside
           className={`${
-            sidebarOpen ? "w-64 block" : "hidden lg:w-20 lg:block"
+            sidebarOpen
+              ? "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl lg:static lg:w-64 lg:shadow-none lg:bg-transparent"
+              : "hidden lg:block lg:w-20"
           } shrink-0 transition-all duration-300`}
         >
-          <div className="bg-white border border-amber-200/80 rounded-3xl shadow-lg p-3 space-y-4 sticky top-24">
+          <div className="bg-white border border-amber-200/80 rounded-3xl shadow-lg p-3 space-y-3 sticky top-24 h-full lg:h-auto overflow-y-auto max-h-[calc(100vh-7rem)]">
+            {/* Mobile Header inside drawer */}
+            <div className="flex items-center justify-between p-2 pb-3 border-b border-slate-100 lg:hidden">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-[#D49E17] flex items-center justify-center text-white">
+                  <LayoutDashboard className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-xs text-slate-900">Saffron City Portal</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-800 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             {/* Sidebar Navigation Links */}
             {(hasAccess("overview") || hasAccess("leads") || hasAccess("plots")) && (
               <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                  Main Console
-                </span>
+                {sidebarOpen && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                    Main Console
+                  </span>
+                )}
 
                 {hasAccess("overview") && (
                   <button
-                    onClick={() => setActiveTab("overview")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("overview");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Overview Dashboard"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "overview"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <LayoutDashboard className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Overview</span>
+                      <LayoutDashboard className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Overview</span>}
                     </div>
                   </button>
                 )}
 
                 {hasAccess("leads") && (
                   <button
-                    onClick={() => setActiveTab("leads")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("leads");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Leads CRM"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
                       activeTab === "leads"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Users className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Leads CRM</span>
+                      <Users className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Leads CRM</span>}
                     </div>
                     {newLeadsCount > 0 && (
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`${
+                          sidebarOpen
+                            ? "px-2 py-0.5 rounded-full text-[10px]"
+                            : "absolute top-1.5 right-2 w-2 h-2 rounded-full ring-2 ring-white"
+                        } font-bold ${
                           activeTab === "leads"
-                            ? "bg-white text-slate-950"
-                            : "bg-emerald-100 text-emerald-800"
+                            ? sidebarOpen
+                              ? "bg-white text-slate-950"
+                              : "bg-white"
+                            : "bg-emerald-500 text-white"
                         }`}
                       >
-                        {newLeadsCount}
+                        {sidebarOpen ? newLeadsCount : ""}
                       </span>
                     )}
                   </button>
@@ -1186,26 +1389,38 @@ export default function AdminDashboardPage() {
 
                 {hasAccess("plots") && (
                   <button
-                    onClick={() => setActiveTab("plots")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("plots");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Plots Inventory"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
                       activeTab === "plots"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Building2 className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Plots Inventory</span>
+                      <Building2 className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Plots Inventory</span>}
                     </div>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        activeTab === "plots"
-                          ? "bg-white text-slate-950"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {plots.length}
-                    </span>
+                    {plots.length > 0 && (
+                      <span
+                        className={`${
+                          sidebarOpen
+                            ? "px-2 py-0.5 rounded-full text-[10px]"
+                            : "absolute top-1.5 right-2 w-2 h-2 rounded-full ring-2 ring-white"
+                        } font-bold ${
+                          activeTab === "plots"
+                            ? sidebarOpen
+                              ? "bg-white text-slate-950"
+                              : "bg-white"
+                            : "bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        {sidebarOpen ? plots.length : ""}
+                      </span>
+                    )}
                   </button>
                 )}
               </div>
@@ -1213,79 +1428,105 @@ export default function AdminDashboardPage() {
 
             {(hasAccess("blogs") || hasAccess("content") || hasAccess("masterplan") || hasAccess("paymentplans")) && (
               <div className="space-y-1 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                  CMS &amp; Media Control
-                </span>
+                {sidebarOpen && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                    CMS &amp; Media Control
+                  </span>
+                )}
 
                 {hasAccess("blogs") && (
                   <button
-                    onClick={() => setActiveTab("blogs")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("blogs");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Blogs & News CMS"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
                       activeTab === "blogs"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <BookOpen className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Blogs &amp; News CMS</span>
+                      <BookOpen className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Blogs &amp; News CMS</span>}
                     </div>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        activeTab === "blogs"
-                          ? "bg-white text-slate-950"
-                          : "bg-amber-100 text-amber-900"
-                      }`}
-                    >
-                      {blogsList.length}
-                    </span>
+                    {blogsList.length > 0 && (
+                      <span
+                        className={`${
+                          sidebarOpen
+                            ? "px-2 py-0.5 rounded-full text-[10px]"
+                            : "absolute top-1.5 right-2 w-2 h-2 rounded-full ring-2 ring-white"
+                        } font-bold ${
+                          activeTab === "blogs"
+                            ? sidebarOpen
+                              ? "bg-white text-slate-950"
+                              : "bg-white"
+                            : "bg-amber-100 text-amber-900"
+                        }`}
+                      >
+                        {sidebarOpen ? blogsList.length : ""}
+                      </span>
+                    )}
                   </button>
                 )}
 
                 {hasAccess("content") && (
                   <button
-                    onClick={() => setActiveTab("content")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("content");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Content & Images"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "content"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <ImageIcon className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Content &amp; Images</span>
+                      <ImageIcon className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Content &amp; Images</span>}
                     </div>
                   </button>
                 )}
 
                 {hasAccess("masterplan") && (
                   <button
-                    onClick={() => setActiveTab("masterplan")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("masterplan");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Master Plan & Media"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "masterplan"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Compass className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Master Plan &amp; Media</span>
+                      <Compass className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Master Plan &amp; Media</span>}
                     </div>
                   </button>
                 )}
 
                 {hasAccess("paymentplans") && (
                   <button
-                    onClick={() => setActiveTab("paymentplans")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("paymentplans");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Payment Plans"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "paymentplans"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <CreditCard className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Payment Plans</span>
+                      <CreditCard className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Payment Plans</span>}
                     </div>
                   </button>
                 )}
@@ -1294,68 +1535,94 @@ export default function AdminDashboardPage() {
 
             {(hasAccess("seo") || hasAccess("settings")) && (
               <div className="space-y-1 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                  Configuration &amp; SEO
-                </span>
+                {sidebarOpen && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                    Configuration &amp; SEO
+                  </span>
+                )}
 
                 {hasAccess("seo") && (
                   <button
-                    onClick={() => setActiveTab("seo")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("seo");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="SEO & Meta Tags"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "seo"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Globe className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>SEO &amp; Meta Tags</span>
+                      <Globe className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>SEO &amp; Meta Tags</span>}
                     </div>
                   </button>
                 )}
 
                 {hasAccess("settings") && (
                   <button
-                    onClick={() => setActiveTab("settings")}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setActiveTab("settings");
+                      if (window.innerWidth < 1024) setSidebarOpen(false);
+                    }}
+                    title="Contact & SMTP"
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "settings"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Mail className="w-4 h-4" />
-                      <span className={sidebarOpen ? "inline" : "lg:hidden"}>Contact &amp; SMTP</span>
+                      <Mail className="w-4 h-4 shrink-0" />
+                      {sidebarOpen && <span>Contact &amp; SMTP</span>}
                     </div>
                   </button>
                 )}
               </div>
             )}
 
-            {/* User & Access Management Section in Sidebar (Only for SuperAdmin or users with 'users' permission) */}
+            {/* User & Access Management Section in Sidebar */}
             {(isSuperAdmin || hasAccess("users")) && (
               <div className="space-y-1 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                  Security &amp; Team
-                </span>
+                {sidebarOpen && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                    Security &amp; Team
+                  </span>
+                )}
 
                 <button
-                  onClick={() => setActiveTab("users")}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  onClick={() => {
+                    setActiveTab("users");
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  title="Users & Team Access"
+                  className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
                     activeTab === "users"
                       ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                       : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                   }`} 
                 >
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-amber-500" />
-                    <span className={sidebarOpen ? "inline" : "lg:hidden"}>Users &amp; Access</span>
+                    <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                    {sidebarOpen && <span>Users &amp; Access</span>}
                   </div>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    activeTab === "users" ? "bg-white text-slate-950" : "bg-amber-100 text-amber-900"
-                  }`}>
-                    {usersList.length}
-                  </span>
+                  {usersList.length > 0 && (
+                    <span className={`${
+                      sidebarOpen
+                        ? "px-1.5 py-0.5 rounded-full text-[10px]"
+                        : "absolute top-1.5 right-2 w-2 h-2 rounded-full ring-2 ring-white"
+                    } font-bold ${
+                      activeTab === "users"
+                        ? sidebarOpen
+                          ? "bg-white text-slate-950"
+                          : "bg-white"
+                        : "bg-amber-100 text-amber-900"
+                    }`}>
+                      {sidebarOpen ? usersList.length : ""}
+                    </span>
+                  )}
                 </button>
               </div>
             )}
@@ -2693,1050 +2960,609 @@ export default function AdminDashboardPage() {
           ======================================================== */}
           {activeTab === "seo" && hasAccess("seo") && settings && (
             <div className="space-y-6">
-              {/* Top SEO Sub-Tabs Navigation */}
-              <div className="bg-white border border-amber-200/80 rounded-3xl p-3 shadow-sm flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSeoSubTab("global")}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    seoSubTab === "global"
-                      ? "bg-[#D49E17] text-white shadow-md"
-                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
-                  }`}
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Global SEO &amp; Social</span>
-                </button>
+              {/* Top SEO Header matching Reference Image 3 */}
+              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#800020] text-[11px] font-bold uppercase tracking-wider">
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Search &amp; Metadata Engine</span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                      SEO, Metadata &amp; Technical SEO Management
+                    </h2>
+                    <p className="text-xs text-slate-500 max-w-3xl leading-relaxed">
+                      Comprehensive on-page, OpenGraph &amp; social preview engine. Fine-tune your website&apos;s search performance, rich snippet schemas and indexing rules across all marketing landing pages.
+                    </p>
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSeoSubTab("pages");
-                    if (pageSeoList.length === 0) fetchPageSeo();
-                  }}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    seoSubTab === "pages"
-                      ? "bg-[#D49E17] text-white shadow-md"
-                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Page-by-Page SEO ({pageSeoList.length || 13})</span>
-                </button>
+                  <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => handleSaveSettings()}
+                      disabled={savingSettings}
+                      className="px-5 py-2.5 rounded-2xl bg-[#800020] hover:bg-[#6b1424] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Save All Global SEO</span>
+                    </button>
+                  </div>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSeoSubTab("redirects");
-                    if (redirectsList.length === 0) fetchRedirects();
-                  }}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    seoSubTab === "redirects"
-                      ? "bg-[#D49E17] text-white shadow-md"
-                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
-                  }`}
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>301 Redirect Manager ({redirectsList.length})</span>
-                </button>
+                {/* Sub-Navigation Tabs matching Image 3 */}
+                <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSeoSubTab("pages");
+                      if (pageSeoList.length === 0) fetchPageSeo();
+                    }}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      seoSubTab === "pages"
+                        ? "bg-[#800020] text-white shadow-md"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Page-Level SEO &amp; Meta Overrides</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setSeoSubTab("health")}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    seoSubTab === "health"
-                      ? "bg-[#D49E17] text-white shadow-md"
-                      : "text-slate-600 hover:bg-amber-50 hover:text-amber-900"
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Sitemap &amp; Health</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setSeoSubTab("canonical_sitemap")}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      seoSubTab === "canonical_sitemap"
+                        ? "bg-[#800020] text-white shadow-md"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    <span>Canonical &amp; Sitemap</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSeoSubTab("robots_indexing")}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      seoSubTab === "robots_indexing"
+                        ? "bg-[#800020] text-white shadow-md"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Robots.txt, Indexation &amp; Crawlers</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSeoSubTab("redirects");
+                      if (redirectsList.length === 0) fetchRedirects();
+                    }}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      seoSubTab === "redirects"
+                        ? "bg-[#800020] text-white shadow-md"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>301/302 URL Redirection Manager</span>
+                    <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black">
+                      {redirectsList.length}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {/* ----------------------------------------------------
-                  SUB-TAB 1: GLOBAL SEO & SOCIAL SHARING
-              ---------------------------------------------------- */}
-              {seoSubTab === "global" && (
-                <div className="space-y-6">
-                  {/* Google SERP & Social Card Live Mockup Preview */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {/* Google SERP Preview Card */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                          <Search className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Google Search Snippet Preview</span>
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                              <Check className="w-3 h-3 text-emerald-600" /> SEO Pass
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                              <X className="w-3 h-3 text-rose-600" /> Needs Review
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 font-sans space-y-1">
-                        <div className="flex items-center gap-2 text-[11px] text-[#202124]">
-                          <div className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] font-bold">
-                            S
-                          </div>
-                          <span className="text-slate-700 font-medium">saffroncity.org</span>
-                          <span className="text-slate-400">&rsaquo;</span>
-                        </div>
-                        <div className="text-base text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1 leading-snug">
-                          {settings.metaTitle || "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat"}
-                        </div>
-                        <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
-                          {settings.metaDescription || "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments."}
-                        </div>
-                      </div>
-
-                      {/* SERP Audit Status Pills */}
-                      <div className="pt-2 flex flex-wrap gap-2 text-[11px]">
-                        <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl">
-                          <span className="text-slate-500 font-medium">Title:</span>
-                          {(settings.metaTitle || "").length >= 50 && (settings.metaTitle || "").length <= 60 ? (
-                            <span className="font-bold text-emerald-700 flex items-center gap-0.5">
-                              <Check className="w-3 h-3" /> {(settings.metaTitle || "").length} chars
-                            </span>
-                          ) : (settings.metaTitle || "").length > 60 ? (
-                            <span className="font-bold text-rose-600 flex items-center gap-0.5">
-                              <X className="w-3 h-3" /> {(settings.metaTitle || "").length} chars (Max 60)
-                            </span>
-                          ) : (
-                            <span className="font-bold text-amber-600 flex items-center gap-0.5">
-                              {(settings.metaTitle || "").length} chars
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl">
-                          <span className="text-slate-500 font-medium">Description:</span>
-                          {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
-                            <span className="font-bold text-emerald-700 flex items-center gap-0.5">
-                              <Check className="w-3 h-3" /> {(settings.metaDescription || "").length} chars (Optimal)
-                            </span>
-                          ) : (settings.metaDescription || "").length > 160 ? (
-                            <span className="font-bold text-rose-600 flex items-center gap-0.5">
-                              <X className="w-3 h-3" /> {(settings.metaDescription || "").length} chars (Too long)
-                            </span>
-                          ) : (
-                            <span className="font-bold text-amber-600 flex items-center gap-0.5">
-                              {(settings.metaDescription || "").length} chars (Short)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Social Share / OpenGraph Mockup Card */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-[#D49E17]" />
-                          <span>Social Share / OpenGraph Card Preview</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
-                          1200 × 630 Card
-                        </span>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 text-white shadow-sm">
-                        <div className="h-32 bg-slate-800 relative overflow-hidden">
-                          <img
-                            src={settings.ogImage || "/images/hero-bg.webp"}
-                            alt="Social Preview"
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          <span className="absolute bottom-2 left-2 text-[10px] font-mono bg-black/70 px-2 py-0.5 rounded text-amber-300">
-                            saffroncity.org
-                          </span>
-                        </div>
-                        <div className="p-3 bg-slate-950 space-y-1">
-                          <div className="font-bold text-xs text-white line-clamp-1">
-                            {settings.ogTitle || settings.metaTitle}
-                          </div>
-                          <div className="text-[11px] text-slate-400 line-clamp-1">
-                            {settings.ogDescription || settings.metaDescription}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Core Global Metadata Form */}
-                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                      <div>
-                        <h3 className="font-bold text-slate-900 font-heading text-base">
-                          Site-Wide Metadata &amp; Search Engine Indexing
-                        </h3>
-                        <p className="text-xs text-slate-500">
-                          Default title tag, description, canonical domain, and indexing controls.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs">
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="font-bold text-slate-700 flex items-center gap-1.5">
-                            <span>Default Meta Title</span>
-                          </label>
-                          {(settings.metaTitle || "").length >= 50 && (settings.metaTitle || "").length <= 60 ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              <Check className="w-3 h-3 text-emerald-600" /> {(settings.metaTitle || "").length} characters
-                            </span>
-                          ) : (settings.metaTitle || "").length > 60 ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                              <X className="w-3 h-3 text-rose-600" /> {(settings.metaTitle || "").length} characters
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                              {(settings.metaTitle || "").length} characters (Optimal 50-60)
-                            </span>
-                          )}
-                        </div>
-                        <input
-                          type="text"
-                          value={settings.metaTitle}
-                          onChange={(e) => updateSettingField("metaTitle", e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-xs text-slate-900 focus:border-[#D49E17] outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="font-bold text-slate-700 flex items-center gap-1.5">
-                            <span>Default Meta Description</span>
-                          </label>
-                          <div className="flex items-center gap-2">
-                            {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                <Check className="w-3 h-3 text-emerald-600" /> {(settings.metaDescription || "").length} characters
-                              </span>
-                            ) : (settings.metaDescription || "").length > 160 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                                <X className="w-3 h-3 text-rose-600" /> {(settings.metaDescription || "").length} characters
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                                {(settings.metaDescription || "").length} characters (Optimal 120-160)
-                              </span>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                updateSettingField(
-                                  "metaDescription",
-                                  "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments."
-                                )
-                              }
-                              className="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full transition flex items-center gap-1 cursor-pointer"
-                              title="Set to 154-character recommended text"
-                            >
-                              <Sparkles className="w-3 h-3 text-amber-600" />
-                              <span>Auto-Fix (154 Chars)</span>
-                            </button>
-                          </div>
-                        </div>
-                        <textarea
-                          rows={3}
-                          value={settings.metaDescription}
-                          onChange={(e) => updateSettingField("metaDescription", e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed text-xs text-slate-900 focus:border-[#D49E17] outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="font-bold text-slate-700 block mb-1">
-                          Primary Focus SEO Keywords (Comma-separated)
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={settings.metaKeywords}
-                          onChange={(e) => updateSettingField("metaKeywords", e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-[#D49E17] outline-none"
-                          placeholder="Saffron City, RDA approved plots, GT Road Rawat, 5 Marla plots..."
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Canonical Base URL</label>
-                          <input
-                            type="text"
-                            value={settings.canonicalUrl}
-                            onChange={(e) => updateSettingField("canonicalUrl", e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono"
-                            placeholder="https://saffroncity.org"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">
-                            Google Search Console Verification Tag / Code
-                          </label>
-                          <input
-                            type="text"
-                            value={settings.googleSiteVerification}
-                            onChange={(e) => updateSettingField("googleSiteVerification", e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono"
-                            placeholder="google-site-verification=abc123xyz"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Default Indexing Rules */}
-                      <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-bold text-slate-900 block text-xs">Default Indexing Directive</span>
-                            <span className="text-[10px] text-slate-500">Allow search engine bots to index pages by default</span>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={settings.defaultRobotsIndex ?? true}
-                              onChange={(e) => updateSettingField("defaultRobotsIndex", e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                          </label>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-bold text-slate-900 block text-xs">Default Follow Directive</span>
-                            <span className="text-[10px] text-slate-500">Allow search engine bots to follow links on pages</span>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={settings.defaultRobotsFollow ?? true}
-                              onChange={(e) => updateSettingField("defaultRobotsFollow", e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Social / OpenGraph & Twitter/X Cards Settings */}
-                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                      <div>
-                        <h3 className="font-bold text-slate-900 font-heading text-base">
-                          Social Media Sharing &amp; Twitter/X Cards
-                        </h3>
-                        <p className="text-xs text-slate-500">
-                          Configure OpenGraph (Facebook/WhatsApp/LinkedIn) and Twitter cards metadata.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">OpenGraph (OG) Title</label>
-                          <input
-                            type="text"
-                            value={settings.ogTitle}
-                            onChange={(e) => updateSettingField("ogTitle", e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">OpenGraph (OG) Description</label>
-                          <input
-                            type="text"
-                            value={settings.ogDescription}
-                            onChange={(e) => updateSettingField("ogDescription", e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Card Type</label>
-                          <select
-                            value={settings.twitterCard || "summary_large_image"}
-                            onChange={(e) => updateSettingField("twitterCard", e.target.value as "summary" | "summary_large_image")}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
-                          >
-                            <option value="summary_large_image">summary_large_image (Large Hero Card)</option>
-                            <option value="summary">summary (Standard Square Card)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Site Handle</label>
-                          <input
-                            type="text"
-                            value={settings.twitterSite || "@SaffronCityPk"}
-                            onChange={(e) => updateSettingField("twitterSite", e.target.value)}
-                            placeholder="@SaffronCityPk"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Creator Handle</label>
-                          <input
-                            type="text"
-                            value={settings.twitterCreator || "@SaffronCityPk"}
-                            onChange={(e) => updateSettingField("twitterCreator", e.target.value)}
-                            placeholder="@SaffronCityPk"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                      </div>
-
-                      <FileUploadField
-                        label="Social Share & OpenGraph Image (1200×630)"
-                        currentValue={settings.ogImage}
-                        onUploadSuccess={(url) => updateSettingField("ogImage", url)}
-                        helperText="Displays automatically when sharing links on Facebook, WhatsApp, Twitter, and LinkedIn."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Organization Schema & Analytics Scripts */}
-                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                      <div>
-                        <h3 className="font-bold text-slate-900 font-heading text-base">
-                          Structured Data (Organization Schema) &amp; Analytics
-                        </h3>
-                        <p className="text-xs text-slate-500">
-                          JSON-LD business schema parameters and tracking container IDs.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Organization Legal Name</label>
-                          <input
-                            type="text"
-                            value={settings.orgLegalName || ""}
-                            onChange={(e) => updateSettingField("orgLegalName", e.target.value)}
-                            placeholder="Saffron City Developers (SKB Group)"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Price Range</label>
-                          <input
-                            type="text"
-                            value={settings.orgPriceRange || ""}
-                            onChange={(e) => updateSettingField("orgPriceRange", e.target.value)}
-                            placeholder="PKR 4,500,000 - 35,000,000"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Country Code</label>
-                          <input
-                            type="text"
-                            value={settings.orgAddressCountry || "PK"}
-                            onChange={(e) => updateSettingField("orgAddressCountry", e.target.value)}
-                            placeholder="PK"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 uppercase font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Street Address</label>
-                          <input
-                            type="text"
-                            value={settings.orgStreetAddress || ""}
-                            onChange={(e) => updateSettingField("orgStreetAddress", e.target.value)}
-                            placeholder="Main GT Road, Near T-Chowk, Rawat"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">City / Locality</label>
-                          <input
-                            type="text"
-                            value={settings.orgAddressLocality || ""}
-                            onChange={(e) => updateSettingField("orgAddressLocality", e.target.value)}
-                            placeholder="Islamabad / Rawalpindi"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">State / Province &amp; Postal Code</label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <input
-                              type="text"
-                              value={settings.orgAddressRegion || ""}
-                              onChange={(e) => updateSettingField("orgAddressRegion", e.target.value)}
-                              placeholder="Punjab"
-                              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                            />
-                            <input
-                              type="text"
-                              value={settings.orgPostalCode || ""}
-                              onChange={(e) => updateSettingField("orgPostalCode", e.target.value)}
-                              placeholder="46000"
-                              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Geo Latitude</label>
-                          <input
-                            type="text"
-                            value={settings.orgGeoLat || ""}
-                            onChange={(e) => updateSettingField("orgGeoLat", e.target.value)}
-                            placeholder="33.5186"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Geo Longitude</label>
-                          <input
-                            type="text"
-                            value={settings.orgGeoLng || ""}
-                            onChange={(e) => updateSettingField("orgGeoLng", e.target.value)}
-                            placeholder="73.1932"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Opening Time</label>
-                          <input
-                            type="text"
-                            value={settings.orgOpeningHoursOpens || "09:00"}
-                            onChange={(e) => updateSettingField("orgOpeningHoursOpens", e.target.value)}
-                            placeholder="09:00"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Closing Time</label>
-                          <input
-                            type="text"
-                            value={settings.orgOpeningHoursCloses || "19:00"}
-                            onChange={(e) => updateSettingField("orgOpeningHoursCloses", e.target.value)}
-                            placeholder="19:00"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="font-bold text-slate-700 block mb-1">Operating Days (comma separated)</label>
-                        <input
-                          type="text"
-                          value={settings.orgOpeningDays || "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"}
-                          onChange={(e) => updateSettingField("orgOpeningDays", e.target.value)}
-                          placeholder="Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                        />
-                      </div>
-
-                      {/* Social Profile Links for SameAs Schema */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-amber-50/30 border border-amber-200">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Facebook Page URL</label>
-                          <input
-                            type="text"
-                            value={settings.facebookUrl || ""}
-                            onChange={(e) => updateSettingField("facebookUrl", e.target.value)}
-                            placeholder="https://facebook.com/saffroncityofficial"
-                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Instagram Profile URL</label>
-                          <input
-                            type="text"
-                            value={settings.instagramUrl || ""}
-                            onChange={(e) => updateSettingField("instagramUrl", e.target.value)}
-                            placeholder="https://instagram.com/saffroncityofficial"
-                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">YouTube Channel URL</label>
-                          <input
-                            type="text"
-                            value={settings.youtubeUrl || ""}
-                            onChange={(e) => updateSettingField("youtubeUrl", e.target.value)}
-                            placeholder="https://youtube.com/@saffroncityofficial"
-                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">LinkedIn Company URL</label>
-                          <input
-                            type="text"
-                            value={settings.linkedinUrl || ""}
-                            onChange={(e) => updateSettingField("linkedinUrl", e.target.value)}
-                            placeholder="https://linkedin.com/company/saffron-city"
-                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                          />
-                        </div>
-                        <div className="sm:col-span-2">
-                          <label className="font-bold text-slate-700 block mb-1">Twitter / X Profile URL</label>
-                          <input
-                            type="text"
-                            value={settings.twitterUrl || ""}
-                            onChange={(e) => updateSettingField("twitterUrl", e.target.value)}
-                            placeholder="https://twitter.com/SaffronCityPk"
-                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Analytics Integration IDs */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Google Analytics (GA4) Measurement ID</label>
-                          <input
-                            type="text"
-                            value={settings.googleAnalyticsId || ""}
-                            onChange={(e) => updateSettingField("googleAnalyticsId", e.target.value)}
-                            placeholder="e.g. G-XXXXXXXXXX"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                        <div>
-                          <label className="font-bold text-slate-700 block mb-1">Google Tag Manager (GTM) Container ID</label>
-                          <input
-                            type="text"
-                            value={settings.googleTagManagerId || ""}
-                            onChange={(e) => updateSettingField("googleTagManagerId", e.target.value)}
-                            placeholder="e.g. GTM-XXXXXXX"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="font-bold text-slate-700 block mb-1">Custom Head Script / Verification Tags</label>
-                        <textarea
-                          rows={2}
-                          value={settings.customHeadScript || ""}
-                          onChange={(e) => updateSettingField("customHeadScript", e.target.value)}
-                          placeholder="<!-- Custom meta or verification tags to inject in <head> -->"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs"
-                        />
-                      </div>
-
-                      <div className="flex justify-end pt-2">
-                        <button
-                          type="button"
-                          onClick={() => handleSaveSettings()}
-                          disabled={savingSettings}
-                          className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
-                        >
-                          <Save className="w-4 h-4" />
-                          <span>Save Global SEO Configuration</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ----------------------------------------------------
-                  SUB-TAB 2: PAGE-BY-PAGE SEO MANAGER
+                  SUB-TAB 1: PAGE-LEVEL SEO & META OVERRIDES (Image 3)
               ---------------------------------------------------- */}
               {seoSubTab === "pages" && (
                 <div className="space-y-6">
-                  {/* Page Selector Bar */}
-                  <div className="bg-white border border-amber-200/80 rounded-3xl p-5 shadow-sm space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                      <div>
-                        <h3 className="font-bold text-slate-900 font-heading text-base">
-                          Page-Level Technical SEO Editor
-                        </h3>
-                        <p className="text-xs text-slate-500">
-                          Select any route to independently customize titles, meta descriptions, canonical URLs, robots directives, and schema markup.
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={fetchPageSeo}
-                          disabled={loadingPageSeo}
-                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
-                          title="Refresh page list"
-                        >
-                          <RefreshCw className={`w-4 h-4 ${loadingPageSeo ? "animate-spin" : ""}`} />
-                        </button>
-                      </div>
+                  {/* Select Page / Post Card */}
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-5 shadow-sm space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Search className="w-3.5 h-3.5 text-[#800020]" />
+                        <span>SELECT PAGE / POST SEO TO CONFIGURE</span>
+                      </label>
+                      {pageSeoSuccessMsg && (
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>{pageSeoSuccessMsg}</span>
+                        </span>
+                      )}
                     </div>
 
-                    {/* Page Quick Tabs Selector */}
-                    <div className="flex flex-wrap gap-2">
-                      {pageSeoList.map((p) => (
-                        <button
-                          key={p.path}
-                          type="button"
-                          onClick={() => handleSelectPageSeo(p.path)}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                            selectedPagePath === p.path
-                              ? "bg-slate-900 text-amber-400 border border-amber-400/40 shadow-sm"
-                              : "bg-slate-50 hover:bg-amber-50 border border-slate-200 text-slate-700"
-                          }`}
-                        >
-                          <span className="font-mono text-[11px] text-amber-500">{p.path}</span>
-                          <span className="text-slate-400">&bull;</span>
-                          <span>{p.pageName}</span>
-                          {!p.robotsIndex && (
-                            <span className="text-[9px] font-bold bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded">
-                              noindex
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
+                    <select
+                      value={selectedPagePath}
+                      onChange={(e) => handleSelectPageSeo(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 focus:border-[#800020] focus:bg-white outline-none cursor-pointer shadow-sm"
+                    >
+                      <optgroup label="Website Landing Pages">
+                        <option value="/">Homepage (/)</option>
+                        <option value="/about-us">About Us (/about-us)</option>
+                        <option value="/master-plan">Master Plan (/master-plan)</option>
+                        <option value="/payment-plan">Payment Plans (/payment-plan)</option>
+                        <option value="/noc-status">NOC Status (/noc-status)</option>
+                        <option value="/location">Location Map (/location)</option>
+                        <option value="/sectors/sector-a">Sector A Executive (/sectors/sector-a)</option>
+                        <option value="/sectors/sector-b">Sector B Residential (/sectors/sector-b)</option>
+                        <option value="/plots/residential">Residential Plots (/plots/residential)</option>
+                        <option value="/plots/commercial">Commercial Plots (/plots/commercial)</option>
+                        <option value="/blogs">Blogs &amp; Insights Hub (/blogs)</option>
+                        <option value="/contact">Contact &amp; Booking (/contact)</option>
+                        <option value="/privacy-policy">Privacy Policy (/privacy-policy)</option>
+                      </optgroup>
+
+                      {blogsList.length > 0 && (
+                        <optgroup label="Blog Posts &amp; News Articles">
+                          {blogsList.map((blog) => (
+                            <option key={blog.id} value={`/blogs/${blog.slug}`}>
+                              Blog: {blog.title} (/blogs/{blog.slug})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
                   </div>
 
-                  {/* Selected Page Editor Form */}
+                  {/* 2-Column Responsive Layout (Left Form 65%, Right Previews 35%) */}
                   {selectedPageSeo && (
-                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-900 font-mono font-bold text-xs">
-                            {selectedPageSeo.path}
-                          </span>
-                          <h4 className="font-bold text-slate-900 text-sm">
-                            Editing SEO: {selectedPageSeo.pageName}
-                          </h4>
-                        </div>
-                        {pageSeoSuccessMsg && (
-                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" />
-                            <span>{pageSeoSuccessMsg}</span>
-                          </span>
-                        )}
-                      </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                      {/* Left Column: Form Cards */}
+                      <div className="lg:col-span-7 space-y-6">
+                        {/* 1. On-Page / Search Meta Overrides */}
+                        <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                          <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
+                            <h3 className="font-bold text-slate-900 font-heading text-sm flex items-center gap-1.5">
+                              <span>1. On-Page / Search Meta Overrides ({selectedPageSeo.pageName})</span>
+                            </h3>
+                            <span className="text-[11px] font-mono text-slate-400">
+                              {selectedPageSeo.path}
+                            </span>
+                          </div>
 
-                      {/* Live SERP Preview for this specific page */}
-                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            Google Search Result Simulation
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
-                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <Check className="w-3 h-3 text-emerald-600" /> SEO Pass
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <X className="w-3 h-3 text-rose-600" /> Needs Review
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
-                            <span className="text-slate-700 font-medium">https://saffroncity.org</span>
-                            <span className="text-slate-400">{selectedPageSeo.path}</span>
-                          </div>
-                          <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
-                            {selectedPageSeo.metaTitle || "Default Site Title"}
-                          </div>
-                          <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
-                            {selectedPageSeo.metaDescription || "Default description for this route..."}
-                          </div>
-                        </div>
-
-                        {/* Page-level SERP Audit Status Pills */}
-                        <div className="pt-1 flex flex-wrap gap-2 text-[11px]">
-                          <div className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-xl">
-                            <span className="text-slate-500 font-medium">Title:</span>
-                            {(selectedPageSeo.metaTitle || "").length >= 50 && (selectedPageSeo.metaTitle || "").length <= 60 ? (
-                              <span className="font-bold text-emerald-700 flex items-center gap-0.5">
-                                <Check className="w-3 h-3" /> {(selectedPageSeo.metaTitle || "").length} chars
-                              </span>
-                            ) : (selectedPageSeo.metaTitle || "").length > 60 ? (
-                              <span className="font-bold text-rose-600 flex items-center gap-0.5">
-                                <X className="w-3 h-3" /> {(selectedPageSeo.metaTitle || "").length} chars (Max 60)
-                              </span>
-                            ) : (
-                              <span className="font-bold text-amber-600 flex items-center gap-0.5">
-                                {(selectedPageSeo.metaTitle || "").length} chars
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-xl">
-                            <span className="text-slate-500 font-medium">Description:</span>
-                            {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
-                              <span className="font-bold text-emerald-700 flex items-center gap-0.5">
-                                <Check className="w-3 h-3" /> {(selectedPageSeo.metaDescription || "").length} chars (Optimal)
-                              </span>
-                            ) : (selectedPageSeo.metaDescription || "").length > 160 ? (
-                              <span className="font-bold text-rose-600 flex items-center gap-0.5">
-                                <X className="w-3 h-3" /> {(selectedPageSeo.metaDescription || "").length} chars (Too long)
-                              </span>
-                            ) : (
-                              <span className="font-bold text-amber-600 flex items-center gap-0.5">
-                                {(selectedPageSeo.metaDescription || "").length} chars (Short)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4 text-xs">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">Page Display Name</label>
-                            <input
-                              type="text"
-                              value={selectedPageSeo.pageName}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, pageName: e.target.value })
-                              }
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
-                            />
-                          </div>
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">
-                              Independent Display H1 Heading
-                            </label>
-                            <input
-                              type="text"
-                              value={selectedPageSeo.h1Heading || ""}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, h1Heading: e.target.value })
-                              }
-                              placeholder="Hero H1 heading for this page"
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="font-bold text-slate-700 flex items-center gap-1.5">
-                              <span>SEO / Meta Title Tag *</span>
-                            </label>
-                            {(selectedPageSeo.metaTitle || "").length >= 50 && (selectedPageSeo.metaTitle || "").length <= 60 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                <Check className="w-3 h-3 text-emerald-600" /> {(selectedPageSeo.metaTitle || "").length} characters
-                              </span>
-                            ) : (selectedPageSeo.metaTitle || "").length > 60 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                                <X className="w-3 h-3 text-rose-600" /> {(selectedPageSeo.metaTitle || "").length} characters
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                                {(selectedPageSeo.metaTitle || "").length} characters (Optimal 50-60)
-                              </span>
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            required
-                            value={selectedPageSeo.metaTitle}
-                            onChange={(e) =>
-                              setSelectedPageSeo({ ...selectedPageSeo, metaTitle: e.target.value })
-                            }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-xs text-slate-900 focus:border-[#D49E17] outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="font-bold text-slate-700 flex items-center gap-1.5">
-                              <span>Meta Description *</span>
-                            </label>
-                            <div className="flex items-center gap-2">
-                              {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  <Check className="w-3 h-3 text-emerald-600" /> {(selectedPageSeo.metaDescription || "").length} characters
+                          <div className="space-y-4 text-xs">
+                            {/* Page Meta Title */}
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="font-bold text-slate-700">
+                                  Page Meta Title (&lt;title&gt;) *
+                                </label>
+                                <span className={`text-[11px] font-mono font-bold ${
+                                  (selectedPageSeo.metaTitle || "").length >= 50 && (selectedPageSeo.metaTitle || "").length <= 60
+                                    ? "text-emerald-600"
+                                    : (selectedPageSeo.metaTitle || "").length > 60
+                                    ? "text-rose-600"
+                                    : "text-amber-600"
+                                }`}>
+                                  {(selectedPageSeo.metaTitle || "").length} / 60 Chars Recommendation
                                 </span>
-                              ) : (selectedPageSeo.metaDescription || "").length > 160 ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                                  <X className="w-3 h-3 text-rose-600" /> {(selectedPageSeo.metaDescription || "").length} characters
+                              </div>
+                              <input
+                                type="text"
+                                required
+                                value={selectedPageSeo.metaTitle}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, metaTitle: e.target.value })
+                                }
+                                placeholder="Page title for search engines..."
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:border-[#800020] focus:bg-white outline-none"
+                              />
+                            </div>
+
+                            {/* Primary Focus Keyword */}
+                            <div>
+                              <label className="font-bold text-slate-700 block mb-1">
+                                Primary Focus Keyword (SEO)
+                              </label>
+                              <input
+                                type="text"
+                                value={selectedPageSeo.focusKeyword || ""}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, focusKeyword: e.target.value })
+                                }
+                                placeholder="e.g. Saffron City Islamabad Plots on Installment"
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:border-[#800020] focus:bg-white outline-none"
+                              />
+                            </div>
+
+                            {/* Meta Description */}
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="font-bold text-slate-700">
+                                  Meta Description / Search Result Snippet *
+                                </label>
+                                <span className={`text-[11px] font-mono font-bold ${
+                                  (selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160
+                                    ? "text-emerald-600"
+                                    : (selectedPageSeo.metaDescription || "").length > 160
+                                    ? "text-rose-600"
+                                    : "text-amber-600"
+                                }`}>
+                                  {(selectedPageSeo.metaDescription || "").length} / 150-160 chars recommendation
                                 </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                                  {(selectedPageSeo.metaDescription || "").length} characters (Optimal 120-160)
-                                </span>
-                              )}
-                              {selectedPageSeo.path === "/" && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
+                              </div>
+                              <textarea
+                                rows={3}
+                                required
+                                value={selectedPageSeo.metaDescription}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, metaDescription: e.target.value })
+                                }
+                                placeholder="Concise summary for Google search result snippets..."
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs leading-relaxed text-slate-900 focus:border-[#800020] focus:bg-white outline-none"
+                              />
+                            </div>
+
+                            {/* Primary H1 Header & Secondary Keywords */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="font-bold text-slate-700 block mb-1">
+                                  Primary H1 Header (Top Heading)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={selectedPageSeo.h1Heading || ""}
+                                  onChange={(e) =>
+                                    setSelectedPageSeo({ ...selectedPageSeo, h1Heading: e.target.value })
+                                  }
+                                  placeholder="Hero H1 heading for this route"
+                                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <label className="font-bold text-slate-700 block mb-1">
+                                  Secondary Keywords
+                                </label>
+                                <input
+                                  type="text"
+                                  value={selectedPageSeo.secondaryKeywords || ""}
+                                  onChange={(e) =>
+                                    setSelectedPageSeo({ ...selectedPageSeo, secondaryKeywords: e.target.value })
+                                  }
+                                  placeholder="e.g. RDA approved plots, GT Road Rawat"
+                                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Canonical URL */}
+                            <div>
+                              <label className="font-bold text-slate-700 block mb-1">
+                                Canonical URL (Auto-fallback)
+                              </label>
+                              <input
+                                type="text"
+                                value={selectedPageSeo.canonicalUrl || ""}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({ ...selectedPageSeo, canonicalUrl: e.target.value })
+                                }
+                                placeholder={`https://saffroncity.org${selectedPageSeo.path === "/" ? "" : selectedPageSeo.path}`}
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-800"
+                              />
+                            </div>
+
+                            {/* Robots Index & Follow Radios */}
+                            <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="font-bold text-slate-800 block mb-1.5 text-xs">
+                                  Robots Indexing (Robots Meta Tag)
+                                </label>
+                                <div className="flex items-center gap-4">
+                                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
+                                    <input
+                                      type="radio"
+                                      name={`robotsIndex_${selectedPageSeo.path}`}
+                                      checked={selectedPageSeo.robotsIndex === true}
+                                      onChange={() =>
+                                        setSelectedPageSeo({ ...selectedPageSeo, robotsIndex: true })
+                                      }
+                                      className="accent-[#800020] w-4 h-4 cursor-pointer"
+                                    />
+                                    <span>Index (index)</span>
+                                  </label>
+                                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
+                                    <input
+                                      type="radio"
+                                      name={`robotsIndex_${selectedPageSeo.path}`}
+                                      checked={selectedPageSeo.robotsIndex === false}
+                                      onChange={() =>
+                                        setSelectedPageSeo({ ...selectedPageSeo, robotsIndex: false })
+                                      }
+                                      className="accent-[#800020] w-4 h-4 cursor-pointer"
+                                    />
+                                    <span className="text-rose-700">Noindex (noindex)</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="font-bold text-slate-800 block mb-1.5 text-xs">
+                                  Robots Link Follow (Link Crawling)
+                                </label>
+                                <div className="flex items-center gap-4">
+                                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
+                                    <input
+                                      type="radio"
+                                      name={`robotsFollow_${selectedPageSeo.path}`}
+                                      checked={selectedPageSeo.robotsFollow === true}
+                                      onChange={() =>
+                                        setSelectedPageSeo({ ...selectedPageSeo, robotsFollow: true })
+                                      }
+                                      className="accent-[#800020] w-4 h-4 cursor-pointer"
+                                    />
+                                    <span>Follow (follow)</span>
+                                  </label>
+                                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
+                                    <input
+                                      type="radio"
+                                      name={`robotsFollow_${selectedPageSeo.path}`}
+                                      checked={selectedPageSeo.robotsFollow === false}
+                                      onChange={() =>
+                                        setSelectedPageSeo({ ...selectedPageSeo, robotsFollow: false })
+                                      }
+                                      className="accent-[#800020] w-4 h-4 cursor-pointer"
+                                    />
+                                    <span className="text-amber-700">Nofollow (nofollow)</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Social Media & OpenGraph Cards */}
+                        <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                          <div className="pb-3 border-b border-slate-100">
+                            <h3 className="font-bold text-slate-900 font-heading text-sm">
+                              2. Social Media &amp; OpenGraph Cards (WhatsApp, Facebook &amp; LinkedIn)
+                            </h3>
+                          </div>
+
+                          <div className="space-y-3.5 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="font-bold text-slate-700 block mb-1">
+                                  OG / Facebook Sharing Title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={selectedPageSeo.ogTitle || selectedPageSeo.metaTitle}
+                                  onChange={(e) =>
                                     setSelectedPageSeo({
                                       ...selectedPageSeo,
-                                      metaDescription:
-                                        "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments.",
+                                      ogTitle: e.target.value,
+                                      twitterTitle: e.target.value,
                                     })
                                   }
-                                  className="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full transition flex items-center gap-1 cursor-pointer"
-                                  title="Set to 154-character recommended text"
+                                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <label className="font-bold text-slate-700 block mb-1">
+                                  OG Description
+                                </label>
+                                <input
+                                  type="text"
+                                  value={selectedPageSeo.ogDescription || selectedPageSeo.metaDescription}
+                                  onChange={(e) =>
+                                    setSelectedPageSeo({
+                                      ...selectedPageSeo,
+                                      ogDescription: e.target.value,
+                                      twitterDescription: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* OG Banner Image with Gallery & Upload */}
+                            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                              <div className="flex items-center justify-between">
+                                <label className="font-bold text-slate-800 text-xs">
+                                  Social Share Banner Image (OG Image)
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGalleryTarget("pageOg");
+                                    setShowMediaGallery(true);
+                                  }}
+                                  className="px-3 py-1 rounded-lg bg-[#800020] text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer"
                                 >
-                                  <Sparkles className="w-3 h-3 text-amber-600" />
-                                  <span>Auto-Fix (154 Chars)</span>
+                                  <ImageIcon className="w-3 h-3" />
+                                  <span>Choose from Gallery</span>
                                 </button>
-                              )}
-                            </div>
-                          </div>
-                          <textarea
-                            rows={3}
-                            required
-                            value={selectedPageSeo.metaDescription}
-                            onChange={(e) =>
-                              setSelectedPageSeo({ ...selectedPageSeo, metaDescription: e.target.value })
-                            }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed text-xs text-slate-900 focus:border-[#D49E17] outline-none"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">Primary / Focus Keyword</label>
-                            <input
-                              type="text"
-                              value={selectedPageSeo.focusKeyword || ""}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, focusKeyword: e.target.value })
-                              }
-                              placeholder="e.g. Saffron City NOC Status"
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                            />
-                          </div>
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">Secondary Target Keywords</label>
-                            <input
-                              type="text"
-                              value={selectedPageSeo.secondaryKeywords || ""}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, secondaryKeywords: e.target.value })
-                              }
-                              placeholder="e.g. RDA approved plots, legal society Rawat"
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">Canonical URL Override</label>
-                            <input
-                              type="text"
-                              value={selectedPageSeo.canonicalUrl || ""}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, canonicalUrl: e.target.value })
-                              }
-                              placeholder={`https://saffroncity.org${selectedPageSeo.path}`}
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono"
-                            />
-                          </div>
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">Schema Markup Type</label>
-                            <select
-                              value={selectedPageSeo.schemaType || "ItemPage"}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, schemaType: e.target.value as any })
-                              }
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
-                            >
-                              <option value="WebSite">WebSite (Home Page)</option>
-                              <option value="RealEstateListing">RealEstateListing (Sectors &amp; Plots)</option>
-                              <option value="AboutPage">AboutPage (About Company)</option>
-                              <option value="ContactPage">ContactPage (Contact &amp; Booking)</option>
-                              <option value="FAQPage">FAQPage (Payment Plans / NOC)</option>
-                              <option value="ItemPage">ItemPage (General Landing)</option>
-                              <option value="Custom">Custom JSON-LD</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Robots Directives Toggle Box */}
-                        <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <span className="font-bold text-slate-900 block text-xs">Robots Index Directive</span>
-                              <span className="text-[10px] text-slate-500">
-                                {selectedPageSeo.robotsIndex ? "Index (Search engines can index this page)" : "NoIndex (Hide from Google search)"}
-                              </span>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
+                              </div>
                               <input
-                                type="checkbox"
-                                checked={selectedPageSeo.robotsIndex ?? true}
+                                type="text"
+                                value={selectedPageSeo.ogImage || "/images/hero-bg.webp"}
                                 onChange={(e) =>
-                                  setSelectedPageSeo({ ...selectedPageSeo, robotsIndex: e.target.checked })
+                                  setSelectedPageSeo({
+                                    ...selectedPageSeo,
+                                    ogImage: e.target.value,
+                                    twitterImage: e.target.value,
+                                  })
                                 }
-                                className="sr-only peer"
+                                placeholder="/images/hero-bg.webp"
+                                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono"
                               />
-                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                            </label>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <span className="font-bold text-slate-900 block text-xs">Robots Follow Directive</span>
-                              <span className="text-[10px] text-slate-500">
-                                {selectedPageSeo.robotsFollow ? "Follow links on page" : "NoFollow (Don't crawl links)"}
-                              </span>
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={selectedPageSeo.robotsFollow ?? true}
-                                onChange={(e) =>
-                                  setSelectedPageSeo({ ...selectedPageSeo, robotsFollow: e.target.checked })
-                                }
-                                className="sr-only peer"
-                              />
-                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                            </label>
                           </div>
                         </div>
 
-                        {/* Custom JSON-LD if Custom is selected */}
-                        {selectedPageSeo.schemaType === "Custom" && (
-                          <div>
-                            <label className="font-bold text-slate-700 block mb-1">
-                              Custom JSON-LD Structured Data (Paste raw JSON)
-                            </label>
-                            <textarea
-                              rows={4}
-                              value={selectedPageSeo.customJsonLd || ""}
-                              onChange={(e) =>
-                                setSelectedPageSeo({ ...selectedPageSeo, customJsonLd: e.target.value })
-                              }
-                              placeholder='{ "@context": "https://schema.org", "@type": "Product", "name": "Saffron City" }'
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs"
-                            />
+                        {/* 3. JSON-LD Structured Data / Rich Schema Markup */}
+                        <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                          <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
+                            <h3 className="font-bold text-slate-900 font-heading text-sm">
+                              3. JSON-LD Structured Data / Rich Schema Markup
+                            </h3>
                           </div>
-                        )}
 
-                        <div className="flex justify-end pt-2">
+                          <div className="space-y-3 text-xs">
+                            <div>
+                              <label className="font-bold text-slate-700 block mb-1">
+                                Schema Markup Type
+                              </label>
+                              <select
+                                value={selectedPageSeo.schemaType || "ItemPage"}
+                                onChange={(e) =>
+                                  setSelectedPageSeo({
+                                    ...selectedPageSeo,
+                                    schemaType: e.target.value as any,
+                                  })
+                                }
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none cursor-pointer"
+                              >
+                                <option value="WebSite">WebSite (Home Page Schema)</option>
+                                <option value="RealEstateListing">RealEstateListing (Sectors &amp; Plots)</option>
+                                <option value="AboutPage">AboutPage (Corporate Profile &amp; Legacy)</option>
+                                <option value="ContactPage">ContactPage (Sales &amp; Booking Office)</option>
+                                <option value="FAQPage">FAQPage (NOC &amp; Payment FAQs)</option>
+                                <option value="ItemPage">ItemPage (Marketing Page)</option>
+                                <option value="Custom">Custom JSON-LD</option>
+                              </select>
+                            </div>
+
+                            {/* Syntax-Highlighted Schema Code Preview */}
+                            <div className="rounded-2xl bg-slate-950 p-4 border border-slate-800 text-amber-300 font-mono text-[11px] overflow-x-auto shadow-inner max-h-48 scrollbar-thin">
+                              <pre>
+                                {JSON.stringify(
+                                  {
+                                    "@context": "https://schema.org",
+                                    "@type": selectedPageSeo.schemaType || "WebPage",
+                                    name: selectedPageSeo.metaTitle,
+                                    description: selectedPageSeo.metaDescription,
+                                    url: `https://saffroncity.org${selectedPageSeo.path === "/" ? "" : selectedPageSeo.path}`,
+                                    publisher: {
+                                      "@type": "Organization",
+                                      name: settings?.siteName || "Saffron City Islamabad",
+                                    },
+                                  },
+                                  null,
+                                  2
+                                )}
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="pt-2 flex justify-end">
                           <button
                             type="button"
                             onClick={handleSavePageSeo}
                             disabled={savingPageSeo}
-                            className="px-6 py-3 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-2"
+                            className="px-6 py-3 rounded-2xl bg-[#800020] hover:bg-[#6b1424] text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             <Save className="w-4 h-4" />
-                            <span>{savingPageSeo ? "Saving Page SEO..." : `Save SEO for ${selectedPageSeo.path}`}</span>
+                            <span>{savingPageSeo ? "Saving Meta..." : "Save Page SEO Meta Now"}</span>
                           </button>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Live Search & Social Previews (Image 3) */}
+                      <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-24">
+                        {/* 1. Google Search Result Live Snippet */}
+                        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                              <Search className="w-3.5 h-3.5 text-blue-600" />
+                              <span>Google Search Result Live Snippet</span>
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
+                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <Check className="w-3 h-3 text-emerald-600" /> SEO Pass
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <X className="w-3 h-3 text-rose-600" /> Needs Review
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 font-sans space-y-1">
+                            <div className="flex items-center gap-2 text-[11px] text-[#202124]">
+                              <div className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] font-bold">
+                                S
+                              </div>
+                              <span className="text-slate-700 font-medium">saffroncity.org</span>
+                              <span className="text-slate-400">&rsaquo; {selectedPagePath.replace(/^\//, "") || "home"}</span>
+                            </div>
+                            <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-2 leading-snug">
+                              {selectedPageSeo.metaTitle || "Saffron City Islamabad | Official Portal"}
+                            </div>
+                            <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                              {selectedPageSeo.metaDescription || "Official RDA approved master planned society on Main GT Road Rawat Islamabad."}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Social / Facebook Card Preview */}
+                        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5 text-[#800020]" />
+                              <span>Social / Facebook Card (Standard OG) Preview</span>
+                            </span>
+                          </div>
+
+                          <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 text-white shadow-sm">
+                            <div className="h-32 bg-slate-800 relative overflow-hidden">
+                              <img
+                                src={selectedPageSeo.ogImage || "/images/hero-bg.webp"}
+                                alt="OG Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-3 bg-slate-900 space-y-1">
+                              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-mono block">
+                                SAFFRONCITY.ORG
+                              </span>
+                              <h5 className="font-bold text-xs text-white line-clamp-1">
+                                {selectedPageSeo.ogTitle || selectedPageSeo.metaTitle || "Saffron City Islamabad"}
+                              </h5>
+                              <p className="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
+                                {selectedPageSeo.ogDescription || selectedPageSeo.metaDescription || "Explore RDA Approved Plots in Saffron City."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3. Twitter / X Large Image Card Preview */}
+                        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-[#800020]" />
+                              <span>Twitter / X Large Image Card Preview</span>
+                            </span>
+                          </div>
+
+                          <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                            <div className="h-32 bg-slate-800 relative overflow-hidden">
+                              <img
+                                src={selectedPageSeo.twitterImage || selectedPageSeo.ogImage || "/images/hero-bg.webp"}
+                                alt="Twitter Card Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-3 space-y-1">
+                              <span className="text-[10px] text-slate-400 font-mono block">
+                                saffroncity.org
+                              </span>
+                              <h5 className="font-bold text-xs text-slate-900 line-clamp-1">
+                                {selectedPageSeo.twitterTitle || selectedPageSeo.metaTitle || "Saffron City Islamabad"}
+                              </h5>
+                              <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                                {selectedPageSeo.twitterDescription || selectedPageSeo.metaDescription || "Official RDA Approved Luxury Residential Community."}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3745,7 +3571,143 @@ export default function AdminDashboardPage() {
               )}
 
               {/* ----------------------------------------------------
-                  SUB-TAB 3: 301 REDIRECT MANAGER
+                  SUB-TAB 2: CANONICAL & SITEMAP
+              ---------------------------------------------------- */}
+              {seoSubTab === "canonical_sitemap" && (
+                <div className="space-y-6">
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Canonical Domain &amp; XML Sitemap Index
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Configure search engine crawl URLs and inspect auto-generated dynamic sitemap feeds.
+                        </p>
+                      </div>
+                      <a
+                        href="/sitemap.xml"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#800020] border border-amber-300 font-bold text-xs flex items-center gap-1.5 transition"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Open Live Sitemap.xml</span>
+                      </a>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">
+                          Canonical Base URL Root
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.canonicalUrl || "https://saffroncity.org"}
+                          onChange={(e) => updateSettingField("canonicalUrl", e.target.value)}
+                          placeholder="https://saffroncity.org"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <h4 className="font-bold text-slate-800 text-xs">Dynamic Sitemap Index Status</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="p-3 rounded-xl bg-white border border-slate-200">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase block">Core Pages</span>
+                            <strong className="text-base font-bold text-slate-900">{pageSeoList.length || 13} URLs</strong>
+                          </div>
+                          <div className="p-3 rounded-xl bg-white border border-slate-200">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase block">Blog Articles</span>
+                            <strong className="text-base font-bold text-emerald-700">{blogsList.filter((b) => b.isPublished).length} URLs</strong>
+                          </div>
+                          <div className="p-3 rounded-xl bg-white border border-slate-200">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase block">Last Updated</span>
+                            <strong className="text-base font-bold text-slate-900">Real-Time</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveSettings()}
+                          disabled={savingSettings}
+                          className="px-6 py-2.5 rounded-xl bg-[#800020] text-white font-bold text-xs shadow-md transition cursor-pointer"
+                        >
+                          Save Canonical Settings
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 3: ROBOTS.TXT & CRAWLERS
+              ---------------------------------------------------- */}
+              {seoSubTab === "robots_indexing" && (
+                <div className="space-y-6">
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base">
+                          Robots.txt &amp; Search Engine Crawler Directives
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Control how Googlebot, Bingbot, and other crawlers index your application.
+                        </p>
+                      </div>
+                      <a
+                        href="/robots.txt"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#800020] border border-amber-300 font-bold text-xs flex items-center gap-1.5 transition"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>View Live robots.txt</span>
+                      </a>
+                    </div>
+
+                    {/* Crawler Status Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+                        <span className="text-[10px] font-bold text-emerald-700 uppercase block">Googlebot</span>
+                        <strong className="text-xs font-bold text-slate-900">Allowed (Full Access)</strong>
+                      </div>
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+                        <span className="text-[10px] font-bold text-emerald-700 uppercase block">Bingbot</span>
+                        <strong className="text-xs font-bold text-slate-900">Allowed</strong>
+                      </div>
+                      <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
+                        <span className="text-[10px] font-bold text-amber-700 uppercase block">Admin / Dashboard</span>
+                        <strong className="text-xs font-bold text-rose-700">Disallowed (Protected)</strong>
+                      </div>
+                      <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200">
+                        <span className="text-[10px] font-bold text-indigo-700 uppercase block">API Endpoints</span>
+                        <strong className="text-xs font-bold text-rose-700">Disallowed</strong>
+                      </div>
+                    </div>
+
+                    {/* Raw Robots.txt Preview */}
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1 text-xs">
+                        Active robots.txt Directives
+                      </label>
+                      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-emerald-400 font-mono text-xs space-y-1">
+                        <p>User-agent: *</p>
+                        <p>Allow: /</p>
+                        <p>Disallow: /dashboard</p>
+                        <p>Disallow: /api/</p>
+                        <p className="pt-2 text-amber-300">Sitemap: https://saffroncity.org/sitemap.xml</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 4: 301/302 REDIRECT MANAGER
               ---------------------------------------------------- */}
               {seoSubTab === "redirects" && (
                 <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
@@ -3761,7 +3723,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={handleOpenAddRedirect}
-                      className="px-4 py-2.5 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                      className="px-4 py-2.5 rounded-2xl bg-[#800020] hover:bg-[#6b1424] text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add 301 Redirect Rule</span>
@@ -3845,121 +3807,6 @@ export default function AdminDashboardPage() {
                         )}
                       </tbody>
                     </table>
-                  </div>
-                </div>
-              )}
-
-              {/* ----------------------------------------------------
-                  SUB-TAB 4: TECHNICAL SEO HEALTH & SITEMAP
-              ---------------------------------------------------- */}
-              {seoSubTab === "health" && (
-                <div className="space-y-6">
-                  {/* Live Endpoint Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                      <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
-                          <Globe className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 text-sm">Dynamic XML Sitemap</h4>
-                          <span className="text-[11px] text-emerald-600 font-semibold">Auto-Generated &amp; Live</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Next.js dynamic feed indexing all core pages and active blog posts, updating whenever new content is published.
-                      </p>
-                      <a
-                        href="/sitemap.xml"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition"
-                      >
-                        <span>Open /sitemap.xml</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-
-                    <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                      <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
-                          <ShieldCheck className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 text-sm">Dynamic Robots.txt</h4>
-                          <span className="text-[11px] text-emerald-600 font-semibold">Crawl Rules Configured</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Directs Googlebot and other web spiders, protecting admin dashboards and API routes while indexing public pages.
-                      </p>
-                      <a
-                        href="/robots.txt"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition"
-                      >
-                        <span>Open /robots.txt</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Technical SEO Audit Checklist */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Technical SEO Implementation Health Audit</span>
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">SSR HTML Rendered Metadata</strong>
-                          <span className="text-slate-600 text-[11px]">Titles and meta tags are output in server HTML source.</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">Self-Referencing Canonical URLs</strong>
-                          <span className="text-slate-600 text-[11px]">Prevents duplicate content issues on all domain routes.</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">OpenGraph &amp; Twitter/X Cards</strong>
-                          <span className="text-slate-600 text-[11px]">Rich social preview cards rendered across all pages.</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">JSON-LD Structured Data Schema</strong>
-                          <span className="text-slate-600 text-[11px]">Organization, Articles, and Breadcrumbs schemas outputted.</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">Edge 301 Redirect Middleware</strong>
-                          <span className="text-slate-600 text-[11px]">Instant 301 redirects to protect link equity and SEO value.</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="text-slate-900 block font-bold">Automatic Slug-Change 301 Redirects</strong>
-                          <span className="text-slate-600 text-[11px]">Editing blog slugs automatically registers a 301 rule.</span>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
@@ -4771,400 +4618,514 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* 4. Create / Edit Blog Post Modal with Full Technical SEO Suite */}
+      {/* 4. Create / Edit Blog Post Modal with Unified Media, FAQs & SEO Suite */}
       {showBlogModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 text-slate-900 shadow-2xl relative border border-amber-300 max-h-[90vh] overflow-y-auto">
-            <button
-              type="button"
-              onClick={() => setShowBlogModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#D49E17] border border-amber-200 flex items-center justify-center font-bold">
-                <BookOpen className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-4xl w-full text-slate-900 shadow-2xl relative border border-amber-300 max-h-[92vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-amber-400/30 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#D49E17]/20 border border-[#D49E17]/40 text-[#D49E17] flex items-center justify-center font-bold">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold font-serif text-white">
+                    {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
+                  </h3>
+                  <p className="text-[11px] text-slate-300">
+                    Saffron City Official Editorial &amp; SEO Publisher
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowBlogModal(false)}
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition cursor-pointer flex items-center gap-1 text-xs font-semibold"
+              >
+                <span>Close</span>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSaveBlog} className="p-6 overflow-y-auto space-y-6 text-xs flex-1">
+              {/* 1. Blog Title */}
               <div>
-                <h3 className="text-lg font-bold font-serif text-slate-900">
-                  {editingBlog ? "Edit Blog Article & SEO" : "Create New Blog Article"}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Manage content body, SERP search rankings, and social OpenGraph cards
-                </p>
+                <label className="font-bold text-slate-800 block mb-1 text-xs">
+                  Blog Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={blogForm.title}
+                  onChange={(e) => {
+                    const newTitle = e.target.value;
+                    const autoSlug = !editingBlog
+                      ? newTitle
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, "-")
+                          .replace(/(^-|-$)/g, "")
+                      : blogForm.slug;
+                    setBlogForm({
+                      ...blogForm,
+                      title: newTitle,
+                      slug: autoSlug,
+                      seoTitle: blogForm.seoTitle || newTitle,
+                      h1Heading: blogForm.h1Heading || newTitle,
+                    });
+                  }}
+                  placeholder="e.g. Faisal Hills 2026 Approval & NOC Updates"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:border-[#D49E17] focus:bg-white outline-none"
+                />
               </div>
-            </div>
 
-            {/* Modal Internal Tabs: Content vs SEO */}
-            <div className="flex items-center gap-2 mb-4 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setBlogModalTab("content")}
-                className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  blogModalTab === "content" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Article Content</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBlogModalTab("seo")}
-                className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  blogModalTab === "seo" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Globe className="w-3.5 h-3.5 text-[#D49E17]" />
-                <span>SEO &amp; Social Metadata</span>
-              </button>
-            </div>
+              {/* 2. Category, Author, Role & Read Time */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">Category</label>
+                  <select
+                    value={blogForm.category}
+                    onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none cursor-pointer"
+                  >
+                    <option value="Market Update">Market Update</option>
+                    <option value="Development Update">Development Update</option>
+                    <option value="Legal & Investment">Legal &amp; Investment</option>
+                    <option value="Master Plan">Master Plan</option>
+                    <option value="News & Updates">News &amp; Updates</option>
+                    <option value="General">General</option>
+                    <option value="Project Announcements">Project Announcements</option>
+                  </select>
+                </div>
 
-            <form onSubmit={handleSaveBlog} className="space-y-4 text-xs">
-              {/* TAB 1: ARTICLE CONTENT */}
-              {blogModalTab === "content" && (
-                <div className="space-y-4">
-                  {/* Title */}
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">Author Name</label>
+                  <input
+                    type="text"
+                    value={blogForm.author}
+                    onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
+                    placeholder="e.g. Saffron City Official"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">
+                    Author Role <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={blogForm.authorRole}
+                    onChange={(e) => setBlogForm({ ...blogForm, authorRole: e.target.value })}
+                    placeholder="e.g. Property Specialist"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* 3. Author Bio & Read Time */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">
+                    Author Biography <span className="text-[10px] text-slate-400 font-normal">(Optional - leave empty to hide bio box)</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={blogForm.authorBio}
+                    onChange={(e) => setBlogForm({ ...blogForm, authorBio: e.target.value })}
+                    placeholder="Short author bio description for the end of the article..."
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none leading-relaxed"
+                  />
+                </div>
+
+                <div className="space-y-3">
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Article Title *</label>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">Read Time</label>
                     <input
                       type="text"
-                      required
-                      value={blogForm.title}
-                      onChange={(e) => {
-                        const newTitle = e.target.value;
-                        const autoSlug = !editingBlog
-                          ? newTitle
-                              .toLowerCase()
-                              .replace(/[^a-z0-9]+/g, "-")
-                              .replace(/(^-|-$)/g, "")
-                          : blogForm.slug;
-                        setBlogForm({
-                          ...blogForm,
-                          title: newTitle,
-                          slug: autoSlug,
-                          seoTitle: blogForm.seoTitle || newTitle,
-                          h1Heading: blogForm.h1Heading || newTitle,
-                        });
+                      value={blogForm.readTime}
+                      onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
+                      placeholder="4 min read"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={blogForm.showProjectSnapshot}
+                      onChange={(e) => setBlogForm({ ...blogForm, showProjectSnapshot: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#D49E17] accent-[#D49E17]"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-800">
+                      Show Verified Project Snapshot table box
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* 4. Article Cover Image */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                    <ImageIcon className="w-3.5 h-3.5 text-[#D49E17]" />
+                    <span>Article Cover Image</span>
+                  </label>
+                  {blogForm.image && (
+                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md">
+                      Cover Active
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGalleryTarget("blogCover");
+                      setShowMediaGallery(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Choose from Gallery</span>
+                  </button>
+
+                  <label className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          const res = await fetch("/api/upload", { method: "POST", body: formData });
+                          const data = await res.json();
+                          if (res.ok && data.success) {
+                            setBlogForm((prev) => ({
+                              ...prev,
+                              image: data.url,
+                              ogImage: data.url,
+                              twitterImage: data.url,
+                            }));
+                          } else {
+                            alert(data.message || "Upload failed");
+                          }
+                        } catch (err: any) {
+                          alert("Error uploading image");
+                        }
                       }}
-                      placeholder="e.g. Rawalpindi Ring Road Interchange — Transformative Value for Saffron City"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:border-[#D49E17] focus:bg-white outline-none"
                     />
-                  </div>
+                  </label>
+                </div>
 
-                  {/* URL Slug */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="font-bold text-slate-700 block">URL Path Slug *</label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const genSlug = blogForm.title
-                            .toLowerCase()
-                            .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/(^-|-$)/g, "");
-                          setBlogForm({ ...blogForm, slug: genSlug });
-                        }}
-                        className="text-[10px] font-bold text-[#D49E17] hover:underline"
+                <input
+                  type="text"
+                  value={blogForm.image}
+                  onChange={(e) =>
+                    setBlogForm({
+                      ...blogForm,
+                      image: e.target.value,
+                      ogImage: e.target.value,
+                      twitterImage: e.target.value,
+                    })
+                  }
+                  placeholder="Or paste direct cover image URL (e.g. /images/... or https://...)"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:border-[#D49E17] outline-none"
+                />
+
+                {/* Preview Thumbnail */}
+                {blogForm.image && (
+                  <div className="relative w-full h-36 rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
+                    <img
+                      src={blogForm.image}
+                      alt={blogForm.imageAlt || blogForm.title || "Cover Preview"}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-white font-mono text-[10px]">
+                      {blogForm.image}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Summary (Short Excerpt) */}
+              <div>
+                <label className="font-bold text-slate-800 block mb-1 text-xs">
+                  Summary (Short Excerpt)
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={blogForm.excerpt}
+                  onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
+                  placeholder="Brief descriptive summary of blog for listing cards..."
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none leading-relaxed"
+                />
+              </div>
+
+              {/* 6. Article Content with Rich WYSIWYG MS-Word Style Editor */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                    <FileText className="w-3.5 h-3.5 text-[#D49E17]" />
+                    <span>Article Content (WYSIWYG Word-Style Editor) *</span>
+                  </label>
+                  <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                    Format visually (Headings, Bold, Lists, Media) without typing HTML
+                  </span>
+                </div>
+
+                <RichTextEditor
+                  value={blogForm.content}
+                  onChange={(html) => setBlogForm((prev) => ({ ...prev, content: html }))}
+                  placeholder="Start writing your article here... Type headings, paragraphs, bullet points, or insert photos directly."
+                  onOpenMediaGallery={() => {
+                    setGalleryTarget("blogContent");
+                    setShowMediaGallery(true);
+                  }}
+                  insertedImageUrl={insertedEditorImage?.url || null}
+                  insertedImageAlt={insertedEditorImage?.alt}
+                  onImageInserted={() => setInsertedEditorImage(null)}
+                />
+              </div>
+
+              {/* 7. Frequently Asked Questions (FAQ) Section */}
+              <div className="pt-2 space-y-3">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                  <h4 className="font-serif font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    <HelpCircle className="w-4 h-4 text-[#D49E17]" />
+                    <span>Frequently Asked Questions (FAQ)</span>
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleAddFaq}
+                    className="px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-slate-800 font-bold text-xs transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#D49E17]" />
+                    <span>Add FAQ</span>
+                  </button>
+                </div>
+
+                {blogForm.faqs.length === 0 ? (
+                  <p className="text-[11px] text-slate-500 italic py-2">
+                    No FAQs added yet for this article. Click &apos;Add FAQ&apos; to add one.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {blogForm.faqs.map((faq, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 relative"
                       >
-                        Auto-generate from Title
-                      </button>
-                    </div>
-                    <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-[#D49E17]">
-                      <span className="px-3 py-2 text-[11px] text-slate-400 bg-slate-100/70 border-r border-slate-200 font-mono">
-                        /blogs/
-                      </span>
-                      <input
-                        type="text"
-                        required
-                        value={blogForm.slug}
-                        onChange={(e) => setBlogForm({ ...blogForm, slug: e.target.value })}
-                        placeholder="my-article-url-slug"
-                        className="w-full px-3 py-2 bg-transparent text-xs font-mono text-slate-800 outline-none"
-                      />
-                    </div>
-                    {editingBlog && editingBlog.slug !== blogForm.slug && (
-                      <p className="text-[10px] text-amber-700 font-semibold mt-1">
-                        ⚠️ Changing this slug will automatically generate a 301 permanent redirect from /blogs/{editingBlog.slug} to /blogs/{blogForm.slug}.
-                      </p>
-                    )}
+                        <div className="flex items-center justify-between">
+                          <label className="font-bold text-slate-700 text-[11px]">
+                            Question {idx + 1}
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFaq(idx)}
+                            className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={faq.question}
+                          onChange={(e) => handleUpdateFaq(idx, "question", e.target.value)}
+                          placeholder="e.g. Can I book this plot from abroad?"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-[#D49E17] outline-none"
+                        />
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1 text-[11px]">
+                            Answer {idx + 1}
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={faq.answer}
+                            onChange={(e) => handleUpdateFaq(idx, "answer", e.target.value)}
+                            placeholder="e.g. Yes, the process is fully remote..."
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:border-[#D49E17] outline-none leading-relaxed"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                )}
+              </div>
 
-                  {/* Category, Author, ReadTime in Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Category</label>
-                      <input
-                        type="text"
-                        list="category-suggestions"
-                        value={blogForm.category}
-                        onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
-                        placeholder="e.g. Market Insights"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
-                      />
-                      <datalist id="category-suggestions">
-                        <option value="Market Insights" />
-                        <option value="Development Update" />
-                        <option value="Legal & Investment" />
-                        <option value="Master Plan" />
-                        <option value="News & Updates" />
-                      </datalist>
-                    </div>
+              {/* 8. 🔍 SEO Optimization & Focus Keyword Section */}
+              <div className="pt-3 space-y-4 border-t border-slate-100">
+                <div className="flex items-center gap-1.5 text-slate-900">
+                  <Search className="w-4 h-4 text-[#D49E17]" />
+                  <h4 className="font-serif font-bold text-sm">
+                    SEO Optimization &amp; Focus Keyword
+                  </h4>
+                </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Author Name</label>
-                      <input
-                        type="text"
-                        value={blogForm.author}
-                        onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
-                        placeholder="Saffron City Official"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
-                      />
-                    </div>
+                {/* Primary Focus Keyword */}
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">
+                    Primary Focus Keyword *
+                  </label>
+                  <input
+                    type="text"
+                    value={blogForm.focusKeyword}
+                    onChange={(e) => setBlogForm({ ...blogForm, focusKeyword: e.target.value })}
+                    placeholder="e.g. Faisal Hills Plot Prices 2026 or Block A Plots"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold focus:border-[#D49E17] focus:bg-white outline-none"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Estimated Read Time</label>
-                      <input
-                        type="text"
-                        value={blogForm.readTime}
-                        onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
-                        placeholder="4 min read"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Featured Image */}
+                {/* H1 Heading & Image Alt Text */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <FileUploadField
-                      label="Featured Banner Image"
-                      currentValue={blogForm.image}
-                      onUploadSuccess={(url) => setBlogForm({ ...blogForm, image: url })}
-                      helperText="Recommended size 1200×630. Appears on blog cards, headers, and social share previews."
-                    />
-                  </div>
-
-                  {/* Excerpt */}
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Executive Excerpt / Summary (Displayed on Cards &amp; Google Snippets)
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      H1 Heading (On-Page Header)
                     </label>
-                    <textarea
-                      rows={2}
-                      required
-                      value={blogForm.excerpt}
-                      onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
-                      placeholder="A concise 2-line summary highlighting the key takeaway..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none leading-relaxed"
+                    <input
+                      type="text"
+                      value={blogForm.h1Heading}
+                      onChange={(e) => setBlogForm({ ...blogForm, h1Heading: e.target.value })}
+                      placeholder="Primary heading inside the blog article"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none"
                     />
                   </div>
-
-                  {/* Full Content */}
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="font-bold text-slate-700 block">Full Article Content *</label>
-                      <span className="text-[10px] text-slate-400">
-                        Separate paragraphs with blank lines. Standalone short lines render as sub-headings.
-                      </span>
-                    </div>
-                    <textarea
-                      rows={8}
-                      required
-                      value={blogForm.content}
-                      onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                      placeholder="Write the complete article content here..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono focus:border-[#D49E17] outline-none leading-relaxed"
-                    />
-                  </div>
-
-                  {/* Publish Toggle Switch */}
-                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-slate-900 block text-xs">Publish Article Live</span>
-                      <span className="text-[10px] text-slate-500">
-                        When enabled, this article is visible on the public website, homepage, and sitemap.xml.
-                      </span>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={blogForm.isPublished}
-                        onChange={(e) => setBlogForm({ ...blogForm, isPublished: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Image Alt Text (SEO)
                     </label>
+                    <input
+                      type="text"
+                      value={blogForm.imageAlt}
+                      onChange={(e) => setBlogForm({ ...blogForm, imageAlt: e.target.value })}
+                      placeholder="Descriptive alt text for Google Image SEO"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none"
+                    />
                   </div>
                 </div>
-              )}
 
-              {/* TAB 2: SEO & SOCIAL METADATA */}
-              {blogModalTab === "seo" && (
-                <div className="space-y-4">
-                  {/* Google SERP Preview for this Blog */}
-                  <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                      Google Search Result Snippet Preview
-                    </span>
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
-                      <span className="text-slate-700 font-medium">https://saffroncity.org</span>
-                      <span className="text-slate-400">&rsaquo; blogs &rsaquo; {blogForm.slug || "slug"}</span>
-                    </div>
-                    <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
-                      {blogForm.seoTitle || blogForm.title || "Blog Article Title"}
-                    </div>
-                    <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
-                      {blogForm.metaDescription || blogForm.excerpt || "Article summary snippet appearing on Google search..."}
-                    </div>
-                  </div>
-
-                  {/* SEO Title & Description */}
+                {/* Meta Title & Secondary Keywords */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="font-bold text-slate-700">SEO / Meta Title Tag</label>
-                      <span className={`text-[11px] font-mono ${blogForm.seoTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                        {blogForm.seoTitle.length}/65 chars
-                      </span>
-                    </div>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Meta Title (&lt;title&gt;)
+                    </label>
                     <input
                       type="text"
                       value={blogForm.seoTitle}
                       onChange={(e) => setBlogForm({ ...blogForm, seoTitle: e.target.value })}
-                      placeholder="Leave blank to use Article Title"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none"
+                      placeholder="Title for search engines (e.g. Faisal Hills 2026 Updates)"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none"
                     />
                   </div>
-
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="font-bold text-slate-700">Meta Description Tag</label>
-                      <span className={`text-[11px] font-mono ${blogForm.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                        {blogForm.metaDescription.length}/160 chars
-                      </span>
-                    </div>
-                    <textarea
-                      rows={2}
-                      value={blogForm.metaDescription}
-                      onChange={(e) => setBlogForm({ ...blogForm, metaDescription: e.target.value })}
-                      placeholder="Leave blank to use Excerpt"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] outline-none leading-relaxed"
-                    />
-                  </div>
-
-                  {/* Target Keywords & Image Alt */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Focus Keyword</label>
-                      <input
-                        type="text"
-                        value={blogForm.focusKeyword}
-                        onChange={(e) => setBlogForm({ ...blogForm, focusKeyword: e.target.value })}
-                        placeholder="e.g. Ring Road Saffron City"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Secondary Target Keywords</label>
-                      <input
-                        type="text"
-                        value={blogForm.secondaryKeywords}
-                        onChange={(e) => setBlogForm({ ...blogForm, secondaryKeywords: e.target.value })}
-                        placeholder="e.g. Rawalpindi property investment, RDA NOC"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Featured Image Alt Text</label>
-                      <input
-                        type="text"
-                        value={blogForm.imageAlt}
-                        onChange={(e) => setBlogForm({ ...blogForm, imageAlt: e.target.value })}
-                        placeholder="Descriptive alt text for Google Image SEO"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Canonical URL Override</label>
-                      <input
-                        type="text"
-                        value={blogForm.canonicalUrl}
-                        onChange={(e) => setBlogForm({ ...blogForm, canonicalUrl: e.target.value })}
-                        placeholder={`https://saffroncity.org/blogs/${blogForm.slug || "slug"}`}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Robots Directives */}
-                  <div className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-slate-900 block text-xs">Robots Index Directive</span>
-                        <span className="text-[10px] text-slate-500">Allow search bots to index this post</span>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={blogForm.robotsIndex}
-                          onChange={(e) => setBlogForm({ ...blogForm, robotsIndex: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-slate-900 block text-xs">Robots Follow Directive</span>
-                        <span className="text-[10px] text-slate-500">Allow search bots to crawl outbound links</span>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={blogForm.robotsFollow}
-                          onChange={(e) => setBlogForm({ ...blogForm, robotsFollow: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D49E17]"></div>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Custom JSON-LD schema */}
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Custom JSON-LD Structured Data Schema (Optional)
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Secondary Keywords
                     </label>
-                    <textarea
-                      rows={3}
-                      value={blogForm.customSchema}
-                      onChange={(e) => setBlogForm({ ...blogForm, customSchema: e.target.value })}
-                      placeholder='{ "@context": "https://schema.org", "@type": "NewsArticle", ... }'
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono"
+                    <input
+                      type="text"
+                      value={blogForm.secondaryKeywords}
+                      onChange={(e) => setBlogForm({ ...blogForm, secondaryKeywords: e.target.value })}
+                      placeholder="e.g. Investment schedule, 5marla plots..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none"
                     />
                   </div>
                 </div>
-              )}
+
+                {/* Meta Description */}
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">
+                    Meta Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={blogForm.metaDescription}
+                    onChange={(e) => setBlogForm({ ...blogForm, metaDescription: e.target.value })}
+                    placeholder="Summary description for Google search result snippets (150-160 chars)"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:border-[#D49E17] focus:bg-white outline-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Custom Canonical URL & Robots Indexing */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1 text-xs">
+                      Custom Canonical URL (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={blogForm.canonicalUrl}
+                      onChange={(e) => setBlogForm({ ...blogForm, canonicalUrl: e.target.value })}
+                      placeholder="Leave empty for auto-generated canonical URL"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono focus:border-[#D49E17] focus:bg-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-2 text-xs">
+                      Robots Indexing
+                    </label>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                        <input
+                          type="radio"
+                          name="robotsIndex"
+                          checked={blogForm.robotsIndex === true}
+                          onChange={() => setBlogForm({ ...blogForm, robotsIndex: true })}
+                          className="accent-[#D49E17] w-4 h-4 cursor-pointer"
+                        />
+                        <span>Index</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                        <input
+                          type="radio"
+                          name="robotsIndex"
+                          checked={blogForm.robotsIndex === false}
+                          onChange={() => setBlogForm({ ...blogForm, robotsIndex: false })}
+                          className="accent-[#D49E17] w-4 h-4 cursor-pointer"
+                        />
+                        <span className="text-slate-500">Noindex</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Publish immediately checkbox */}
+                <div className="pt-2">
+                  <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-800">
+                    <input
+                      type="checkbox"
+                      checked={blogForm.isPublished}
+                      onChange={(e) => setBlogForm({ ...blogForm, isPublished: e.target.checked })}
+                      className="w-4 h-4 rounded accent-[#D49E17] cursor-pointer"
+                    />
+                    <span>Publish immediately (make visible on site)</span>
+                  </label>
+                </div>
+              </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setShowBlogModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-[#D49E17] hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>{editingBlog ? "Update Article & SEO" : "Publish Article"}</span>
+                  <Plus className="w-4 h-4" />
+                  <span>{editingBlog ? "Save Changes" : "+ Create Post"}</span>
                 </button>
               </div>
             </form>
@@ -5281,7 +5242,15 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Media Gallery Picker Modal */}
+      <MediaGalleryModal
+        isOpen={showMediaGallery}
+        onClose={() => setShowMediaGallery(false)}
+        onSelect={handleSelectMediaFromGallery}
+      />
     </div>
   );
 }
+
  

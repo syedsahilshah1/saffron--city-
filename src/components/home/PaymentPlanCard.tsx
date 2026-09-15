@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Download, Eye, EyeOff, FileText, MessageCircle } from "lucide-react";
 import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
@@ -90,11 +91,15 @@ export default function PaymentPlanCard({
         }`}
       >
         <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group my-2">
-          <img
+          <Image
             src={imageSrc}
             alt={imageAlt}
             title={imageAlt || title}
+            width={800}
+            height={1000}
             className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>

@@ -93,6 +93,7 @@ async function initAndSyncMySQL() {
     await alterTableSafe("sitesetting", "`amenitiesJson` JSON NULL");
     await alterTableSafe("sitesetting", "`landmarksJson` JSON NULL");
     await alterTableSafe("sitesetting", "`paymentTiersJson` JSON NULL");
+    await alterTableSafe("blogs", "`faqs` JSON NULL");
 
     await connection.query(`
       CREATE TABLE IF NOT EXISTS \`pageseo\` (

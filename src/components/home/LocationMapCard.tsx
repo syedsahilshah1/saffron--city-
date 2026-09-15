@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Layers, Globe, ExternalLink, Download } from "lucide-react";
 import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
@@ -52,11 +53,15 @@ export default function LocationMapCard() {
         {/* Map Display Body */}
         {mode === "official" ? (
           <div className="relative w-full h-full flex items-center justify-center bg-white p-2">
-            <img
+            <Image
               src="/images/imgi_87_LOCATION.webp"
               alt="Saffron City Official Location Map"
               title="Saffron City Official Location Map"
-              className="w-full h-full object-contain rounded-2xl"
+              fill
+              sizes="(max-width: 1024px) 100vw, 600px"
+              className="object-contain p-2 rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         ) : (

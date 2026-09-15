@@ -198,9 +198,9 @@ export default function SectorsAccordion({ sectorA, sectorB, commercial }: Secto
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-serif font-bold text-white">
+                    <p className="text-xl font-serif font-bold text-white">
                       {block.name}
-                    </h3>
+                    </p>
                     <p className="text-xs text-slate-200 mt-1 line-clamp-1">
                       {block.tagline}
                     </p>

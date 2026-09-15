@@ -136,7 +136,7 @@ export default function BlogsListingClient({ initialBlogs }: BlogsListingClientP
                   <img
                     src={
                       blog.image && blog.image.trim().length > 5
-                        ? blog.image.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp")
+                        ? blog.image
                         : "/images/hero-bg.webp"
                     }
                     alt={blog.title}

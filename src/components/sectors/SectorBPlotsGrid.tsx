@@ -157,15 +157,7 @@ export default function SectorBPlotsGrid({ initialPlots = [] }: SectorBPlotsGrid
       };
     });
 
-    const dynamicCategories = new Set(
-      sectorBPlots.map((p) => (p.category || "").toLowerCase().trim())
-    );
-
-    const missingDefaults = DEFAULT_SECTOR_B_PLOTS.filter(
-      (def) => !dynamicCategories.has(def.size.toLowerCase().trim())
-    );
-
-    return [...dynamicCards, ...missingDefaults];
+    return dynamicCards;
   }, [plotsList]);
 
   return (

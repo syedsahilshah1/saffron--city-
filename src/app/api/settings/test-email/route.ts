@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendTestSmtpEmail } from "@/lib/mailer";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "settings");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const { targetEmail, customSettings } = body;

@@ -247,6 +247,10 @@ export default function MasterPlanViewer({
               src={masterPlanImg}
               alt="Saffron City Official Master Plan Layout"
               title="Saffron City Official Master Plan Layout"
+              width={1200}
+              height={1600}
+              loading="lazy"
+              decoding="async"
               className="w-auto h-auto max-w-full max-h-full object-contain rounded-2xl shadow-md"
               style={{
                 imageRendering: "auto",

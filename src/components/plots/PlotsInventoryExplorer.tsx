@@ -351,11 +351,7 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
   // Filter & Search Logic
   const allInventory = useMemo(() => {
     if (dynamicPlots.length > 0) {
-      const existingPlotNumbers = new Set(dynamicPlots.map((d) => d.plotNumber.toLowerCase()));
-      const filteredExisting = COMPLETE_PLOTS_INVENTORY.filter(
-        (item) => !existingPlotNumbers.has(item.plotNumber.toLowerCase())
-      );
-      return [...dynamicPlots, ...filteredExisting];
+      return dynamicPlots;
     }
     return COMPLETE_PLOTS_INVENTORY;
   }, [dynamicPlots]);

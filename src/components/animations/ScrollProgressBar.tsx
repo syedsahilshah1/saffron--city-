@@ -11,10 +11,10 @@ export default function ScrollProgressBar() {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const totalHeight =
-            document.documentElement.scrollHeight - window.innerHeight;
+          const doc = document.documentElement;
+          const totalHeight = doc.scrollHeight - window.innerHeight;
           if (totalHeight > 0) {
-            const currentScroll = window.scrollY;
+            const currentScroll = window.scrollY || doc.scrollTop;
             const progress = Math.min(
               100,
               Math.max(0, (currentScroll / totalHeight) * 100)
@@ -28,7 +28,6 @@ export default function ScrollProgressBar() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);

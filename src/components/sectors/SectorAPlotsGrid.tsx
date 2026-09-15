@@ -165,16 +165,7 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
       };
     });
 
-    // Check which default categories are not present in dynamic to keep as fallback
-    const dynamicCategories = new Set(
-      sectorAPlots.map((p) => (p.category || "").toLowerCase().trim())
-    );
-
-    const missingDefaults = DEFAULT_SECTOR_A_PLOTS.filter(
-      (def) => !dynamicCategories.has(def.size.toLowerCase().trim())
-    );
-
-    return [...dynamicCards, ...missingDefaults];
+    return dynamicCards;
   }, [plotsList]);
 
   return (

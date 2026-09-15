@@ -35,6 +35,11 @@ export const ALL_PERMISSIONS: PermissionDefinition[] = [
   { id: "users", label: "User & Team Access", desc: "Manage staff accounts, assign granular permissions & lockout" },
 ];
 
+export interface BlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface StoredBlog {
   id: string;
   slug: string;
@@ -48,6 +53,11 @@ export interface StoredBlog {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // Author & Display Options
+  authorRole?: string;
+  authorBio?: string;
+  showProjectSnapshot?: boolean;
 
   // Comprehensive SEO & Social Metadata
   seoTitle?: string;
@@ -66,6 +76,7 @@ export interface StoredBlog {
   twitterDescription?: string;
   twitterImage?: string;
   customSchema?: string;
+  faqs?: BlogFAQ[];
 }
 
 export interface StoredPageSeo {
@@ -138,13 +149,13 @@ export interface StoredInquiry {
 export interface StoredPlot {
   id: string;
   plotNumber: string;
-  sector: "Sector A" | "Sector B" | "Commercial Block";
-  category: "5 Marla" | "10 Marla" | "1 Kanal" | "4 Marla" | "8 Marla";
-  type: "Residential" | "Commercial";
+  sector: string;
+  category: string;
+  type: "Residential" | "Commercial" | string;
   totalPrice: number;
   downPayment: number;
   monthlyInst: number;
-  status: "Available" | "Reserved" | "Booked";
+  status: "Available" | "Reserved" | "Booked" | string;
   features: string;
   image?: string;
 }

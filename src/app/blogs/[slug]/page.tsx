@@ -17,7 +17,7 @@ import {
   ExternalLink,
   ChevronRight,
   HelpCircle,
-  Award,
+  Award,  
   Layers,
   MapPin,
   Compass,
@@ -26,7 +26,7 @@ import { db } from "@/lib/db";
 import { SITE_CONFIG } from "@/data/saffron-data";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 
-import { ArticleSchema, BreadcrumbSchema, CustomJsonLd } from "@/components/seo/JsonLd";
+import { ArticleSchema, BreadcrumbSchema, CustomJsonLd, FaqSchema } from "@/components/seo/JsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -148,19 +148,19 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
           { name: blog.title, url: `/blogs/${blog.slug}` },
         ]}
       />
+      <FaqSchema faqs={blog.faqs || []} />
       <CustomJsonLd jsonString={blog.customSchema} />
 
       {/* 1. Header Banner / Hero Section matching luxury site aesthetic */}
       <section className="relative w-full pt-32 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-slate-950 text-white border-b border-amber-900/30">
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
             src={blog.image || "/images/about/about-hero-banner.webp"}
             alt={blog.imageAlt || blog.title}
             title={blog.imageAlt || blog.title}
-            className="w-full h-full object-cover opacity-25 scale-105"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/70" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D49E17_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
@@ -205,7 +205,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>
-                {new Date(blog.createdAt).toLocaleDateString("en-US", {
+                {new Date().toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -256,91 +256,157 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
             </div>
 
             {/* Article Body Content */}
-            <div className="prose prose-slate max-w-none text-sm sm:text-base text-slate-800 leading-relaxed space-y-5">
-              {paragraphs.map((p, idx) => {
-                // If line looks like a sub-heading (short and doesn't end with period or starts with Step/Phase)
-                const isHeading =
-                  (p.length < 80 && !p.endsWith(".") && !p.endsWith(",")) ||
-                  p.startsWith("Step ") ||
-                  p.startsWith("Phase ") ||
-                  p.startsWith("Overview") ||
-                  p.startsWith("Why ");
+            {/<[a-z][\s\S]*>/i.test(blog.content) ? (
+              <div
+                className="prose prose-slate max-w-none text-sm sm:text-base text-slate-800 leading-relaxed space-y-4 [&>h1]:font-serif [&>h1]:font-black [&>h1]:text-2xl sm:[&>h1]:text-3xl [&>h1]:text-slate-950 [&>h1]:pt-6 [&>h1]:pb-2 [&>h1]:border-b [&>h1]:border-amber-200 [&>h2]:font-serif [&>h2]:font-bold [&>h2]:text-xl sm:[&>h2]:text-2xl [&>h2]:text-slate-950 [&>h2]:pt-4 [&>h2]:pb-1 [&>h2]:border-b [&>h2]:border-amber-100 [&>h3]:font-serif [&>h3]:font-bold [&>h3]:text-lg [&>h3]:text-slate-900 [&>p]:leading-relaxed [&>blockquote]:border-l-4 [&>blockquote]:border-amber-500 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:bg-amber-50/50 [&>blockquote]:p-3 [&>blockquote]:rounded-r-xl [&>ul]:list-disc [&>ul]:pl-6 [&>ol]:list-decimal [&>ol]:pl-6 [&>img]:rounded-2xl [&>img]:shadow-md [&_a]:text-[#800020] [&_a]:underline [&_a]:font-bold hover:[&_a]:text-amber-700 [&_a]:cursor-pointer [&_figure]:my-4"
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+              />
+            ) : (
+              <div className="prose prose-slate max-w-none text-sm sm:text-base text-slate-800 leading-relaxed space-y-5">
+                {paragraphs.map((p, idx) => {
+                  if (p.startsWith("# ")) {
+                    return (
+                      <h1 key={idx} className="font-serif font-black text-2xl sm:text-3xl text-slate-950 pt-6 pb-2 border-b border-amber-200">
+                        {p.replace("# ", "")}
+                      </h1>
+                    );
+                  }
+                  if (p.startsWith("## ")) {
+                    return (
+                      <h2 key={idx} className="font-serif font-bold text-xl sm:text-2xl text-slate-950 pt-4 pb-1 border-b border-amber-100 flex items-center gap-2.5">
+                        <span className="w-2 h-6 bg-[#D49E17] rounded-full inline-block shrink-0" />
+                        <span>{p.replace("## ", "")}</span>
+                      </h2>
+                    );
+                  }
+                  if (p.startsWith("### ")) {
+                    return (
+                      <h3 key={idx} className="font-serif font-bold text-lg text-slate-900 pt-3 pb-1">
+                        {p.replace("### ", "")}
+                      </h3>
+                    );
+                  }
+                  const isHeading =
+                    (p.length < 80 && !p.endsWith(".") && !p.endsWith(",")) ||
+                    p.startsWith("Step ") ||
+                    p.startsWith("Phase ") ||
+                    p.startsWith("Overview") ||
+                    p.startsWith("Why ");
 
-                if (isHeading) {
+                  if (isHeading) {
+                    return (
+                      <h2
+                        key={idx}
+                        className="font-serif font-bold text-xl sm:text-2xl text-slate-950 pt-4 pb-1 border-b border-amber-100 flex items-center gap-2.5"
+                      >
+                        <span className="w-2 h-6 bg-[#D49E17] rounded-full inline-block shrink-0" />
+                        <span>{p}</span>
+                      </h2>
+                    );
+                  }
+
                   return (
-                    <h2
-                      key={idx}
-                      className="font-serif font-bold text-xl sm:text-2xl text-slate-950 pt-4 pb-1 border-b border-amber-100 flex items-center gap-2.5"
-                    >
-                      <span className="w-2 h-6 bg-[#D49E17] rounded-full inline-block shrink-0" />
-                      <span>{p}</span>
-                    </h2>
+                    <p key={idx} className="text-slate-700 leading-relaxed text-justify sm:text-left">
+                      {p}
+                    </p>
                   );
-                }
+                })}
+              </div>
+            )}
 
-                return (
-                  <p key={idx} className="text-slate-700 leading-relaxed text-justify sm:text-left">
-                    {p}
-                  </p>
-                );
-              })}
-            </div>
+            {/* FAQs Accordion if any are set on this blog post */}
+            {blog.faqs && blog.faqs.length > 0 && (
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/60 to-rose-50/40 border border-amber-200/90 space-y-4">
+                <div className="flex items-center gap-2 text-slate-900 pb-2 border-b border-amber-200/60">
+                  <HelpCircle className="w-5 h-5 text-[#800020]" />
+                  <h3 className="font-serif font-bold text-lg sm:text-xl">
+                    Frequently Asked Questions (FAQ)
+                  </h3>
+                </div>
+                <div className="space-y-3 pt-1">
+                  {blog.faqs.map((faq, fIdx) => (
+                    <div
+                      key={fIdx}
+                      className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-2"
+                    >
+                      <h4 className="font-bold text-slate-900 text-sm flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-amber-100 text-[#800020] text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                          Q{fIdx + 1}
+                        </span>
+                        <span>{faq.question}</span>
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pl-7">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Actionable Project Highlights Table / Badges */}
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-600" />
-                <span>Saffron City Verified Project Snapshot</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <div>
-                    <span className="text-slate-500 block text-[10px]">Legal Clearance</span>
-                    <strong className="text-slate-900">RDA NOC Approved (15,000 Kanal)</strong>
+            {/* Actionable Project Highlights Table / Badges (Optional) */}
+            {Boolean(blog.showProjectSnapshot) && (
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Award className="w-4 h-4 text-amber-600" />
+                  <span>Saffron City Verified Project Snapshot</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Legal Clearance</span>
+                      <strong className="text-slate-900">RDA NOC Approved (15,000 Kanal)</strong>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-                  <MapPin className="w-4 h-4 text-amber-600 shrink-0" />
-                  <div>
-                    <span className="text-slate-500 block text-[10px]">Prime Location</span>
-                    <strong className="text-slate-900">Main GT Road Rawat / Islamabad</strong>
+                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                    <MapPin className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Prime Location</span>
+                      <strong className="text-slate-900">Main GT Road Rawat / Islamabad</strong>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-                  <Building2 className="w-4 h-4 text-amber-600 shrink-0" />
-                  <div>
-                    <span className="text-slate-500 block text-[10px]">Plot Categories</span>
-                    <strong className="text-slate-900">5M, 10M, 1 Kanal &amp; Commercial Plazas</strong>
+                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                    <Building2 className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Plot Categories</span>
+                      <strong className="text-slate-900">5M, 10M, 1 Kanal &amp; Commercial Plazas</strong>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-                  <Layers className="w-4 h-4 text-amber-600 shrink-0" />
-                  <div>
-                    <span className="text-slate-500 block text-[10px]">Payment Ease</span>
-                    <strong className="text-slate-900">10% Down Payment &bull; 30 Installments</strong>
+                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                    <Layers className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Payment Ease</span>
+                      <strong className="text-slate-900">10% Down Payment &bull; 30 Installments</strong>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Author Profile Footer */}
-            <div className="p-6 rounded-2xl bg-[#fbf8f3] border border-amber-200/80 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-              <div className="w-14 h-14 rounded-2xl bg-[#D49E17] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
-                {blog.author.charAt(0)}
-              </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="font-bold text-slate-900 text-sm">{blog.author}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
-                    Official Advisory Desk
-                  </span>
+            {/* Author Profile Footer (Optional - only displayed if author provides bio or role) */}
+            {(blog.authorBio || blog.authorRole) && (
+              <div className="p-6 rounded-2xl bg-[#fbf8f3] border border-amber-200/80 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-[#D49E17] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
+                  {blog.author ? blog.author.charAt(0) : "A"}
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Senior Real Estate &amp; Regulatory Specialist covering RDA master planned developments, property ownership laws, and overseas Pakistani investment security.
-                </p>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <span className="font-bold text-slate-900 text-sm">{blog.author}</span>
+                    {blog.authorRole && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
+                        {blog.authorRole}
+                      </span>
+                    )}
+                  </div>
+                  {blog.authorBio && (
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {blog.authorBio}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Social Share & Direct Connect */}
             <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">

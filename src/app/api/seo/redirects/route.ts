@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const redirects = await db.getRedirects();
     return NextResponse.json({ success: true, count: redirects.length, data: redirects });
@@ -17,6 +21,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const { sourcePath, destinationUrl, statusCode, isActive } = body;
@@ -36,8 +43,8 @@ export async function POST(req: NextRequest) {
     }
 
     const newRedirect = await db.createRedirect({
-      sourcePath,
-      destinationUrl,
+      sourcePath: String(sourcePath).trim().slice(0, 300),
+      destinationUrl: String(destinationUrl).trim().slice(0, 500),
       statusCode: statusCode === 302 ? 302 : 301,
       isActive: isActive !== undefined ? isActive : true,
     });
@@ -56,6 +63,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const { id, ...updates } = body;
@@ -90,6 +100,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAdminAuth(req, "seo");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

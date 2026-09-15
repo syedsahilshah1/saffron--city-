@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SITE_CONFIG } from "@/data/saffron-data";
 import { Phone, Mail, MapPin, ExternalLink, ShieldCheck, Clock, Award, Building2 } from "lucide-react";
 import { StoredSettings } from "@/lib/types";
@@ -43,11 +44,15 @@ export default function Footer() {
               className="flex items-center gap-3"
               aria-label="Saffron City Islamabad Official Homepage"
             >
-              <img
+              <Image
                 src="/images/saffron-city-logo.webp"
                 alt="Saffron City Islamabad Official Logo"
                 title="Saffron City Islamabad Official Logo"
-                className="h-20 sm:h-24 w-auto object-contain drop-shadow-sm"
+                width={180}
+                height={60}
+                loading="lazy"
+                decoding="async"
+                className="h-16 sm:h-20 w-auto object-contain drop-shadow-sm"
               />
               <span className="sr-only">Saffron City Islamabad</span>
             </Link>
@@ -62,9 +67,9 @@ export default function Footer() {
 
           {/* Col 2: Navigation Links */}
           <div className="space-y-3">
-            <h4 className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
+            <p className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
               Quick Links
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/" className="hover:text-[#D49E17] transition-colors">Home</Link>
@@ -92,9 +97,9 @@ export default function Footer() {
 
           {/* Col 3: Sectors & Plots */}
           <div className="space-y-3">
-            <h4 className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
+            <p className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
               Plots & Sectors
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/plot-for-sale" className="hover:text-[#D49E17] transition-colors">All Plots For Sale</Link>
@@ -116,9 +121,9 @@ export default function Footer() {
 
           {/* Col 4: Official Verification & Contact */}
           <div className="space-y-3">
-            <h4 className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
+            <p className="text-slate-900 text-sm font-bold font-heading uppercase tracking-wider">
               Contact & Verify
-            </h4>
+            </p>
             <div className="space-y-2.5 text-xs text-slate-600">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#D49E17] shrink-0 mt-0.5" />

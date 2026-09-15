@@ -191,12 +191,7 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
 
   const displayedPlots = useMemo<PlotCardItem[]>(() => {
     if (plotsData && plotsData.length > 0) {
-      const dynamicItems = plotsData.map(mapStoredPlotToCard);
-      const dynamicNumbers = new Set(dynamicItems.map((d) => d.plotNumber.toLowerCase()));
-      const filteredDefaults = DEFAULT_PLOTS_INVENTORY.filter(
-        (def) => !dynamicNumbers.has(def.plotNumber.toLowerCase())
-      );
-      return [...dynamicItems, ...filteredDefaults];
+      return plotsData.map(mapStoredPlotToCard);
     }
     return DEFAULT_PLOTS_INVENTORY;
   }, [plotsData]);

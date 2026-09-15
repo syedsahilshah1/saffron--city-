@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import React, { useEffect, useRef, useState } from "react";
 
 interface GsapSplitRevealProps {
   leftContent: React.ReactNode;
@@ -22,71 +20,54 @@ export default function GsapSplitReveal({
   delay = 0,
 }: GsapSplitRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    gsap.registerPlugin(ScrollTrigger);
+    const el = containerRef.current;
+    if (!el) return;
 
-    const ctx = gsap.context(() => {
-      if (leftRef.current && rightRef.current) {
-        gsap.fromTo(
-          leftRef.current,
-          {
-            x: -60,
-            opacity: 0,
-            force3D: true,
-          },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.95,
-            delay,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      setIsVisible(true);
+      return;
+    }
 
-        gsap.fromTo(
-          rightRef.current,
-          {
-            x: 60,
-            opacity: 0,
-            force3D: true,
-          },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.95,
-            delay: delay + 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px 50px 0px",
       }
-    }, containerRef); 
+    );
 
-    return () => ctx.revert();
-  }, [delay]);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
       ref={containerRef}
       className={`grid grid-cols-1 lg:grid-cols-2 items-center ${className ? className : "gap-8"}`}
     >
-      <div ref={leftRef} className={`w-full ${leftClassName}`}>
+      <div
+        className={`w-full transition-all duration-700 ease-out ${leftClassName} ${
+          isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+        }`}
+        style={{ transitionDelay: `${delay}ms` }}
+      >
         {leftContent}
       </div>
-      <div ref={rightRef} className={`w-full ${rightClassName}`}>
+      <div
+        className={`w-full transition-all duration-700 ease-out ${rightClassName} ${
+          isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+        }`}
+        style={{ transitionDelay: `${delay + 100}ms` }}
+      >
         {rightContent}
       </div>
     </div>

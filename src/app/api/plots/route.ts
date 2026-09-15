@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  // Enforce Authentication
+  const auth = await requireAdminAuth(req, "plots");
+  if (!auth.authenticated) return auth.errorResponse!;
+
   try {
     const body = await req.json();
     const {
@@ -40,16 +45,16 @@ export async function POST(req: NextRequest) {
     }
 
     const newPlot = await db.createPlot({
-      plotNumber,
-      sector,
-      category,
+      plotNumber: String(plotNumber).trim().slice(0, 100),
+      sector: String(sector).trim().slice(0, 100),
+      category: String(category).trim().slice(0, 100),
       type: type || (category.includes("Commercial") ? "Commercial" : "Residential"),
-      totalPrice: Number(totalPrice),
-      downPayment: Number(downPayment || totalPrice * 0.1),
-      monthlyInst: Number(monthlyInst || (totalPrice * 0.3) / 30),
+      totalPrice: Number(totalPrice) || 0,
+      downPayment: Number(downPayment || totalPrice * 0.1) || 0,
+      monthlyInst: Number(monthlyInst || (totalPrice * 0.3) / 30) || 0,
       status: status || "Available",
-      features: features || "Standard Plot",
-      image: image || "",
+      features: features ? String(features).slice(0, 500) : "Standard Plot",
+      image: image ? String(image).slice(0, 500) : "/images/sectors/sector-a-luxury.webp",
     });
 
     return NextResponse.json(

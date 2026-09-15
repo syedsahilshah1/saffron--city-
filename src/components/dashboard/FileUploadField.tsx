@@ -37,8 +37,15 @@ export default function FileUploadField({
       const formData = new FormData();
       formData.append("file", file);
 
+      const token = typeof window !== "undefined" ? localStorage.getItem("saffron_session_token") : "";
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch("/api/upload", {
         method: "POST",
+        headers,
         body: formData,
       });
 
