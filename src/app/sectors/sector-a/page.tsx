@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { 
-  Award, 
-  Zap, 
-  ShieldCheck, 
-  CheckCircle2, 
-  ArrowRight, 
+import {
+  Award,
+  Zap,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
   MessageCircle,
   Building2,
   Trees,
@@ -31,6 +31,7 @@ import ScrollReveal from "@/components/animations/ScrollReveal";
 import WordReveal from "@/components/animations/WordReveal";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
+import SectorAPlotsGrid from "@/components/sectors/SectorAPlotsGrid";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 import { getPageMetadata } from "@/lib/seo";
 import { db } from "@/lib/db";
@@ -77,54 +78,6 @@ const SECTOR_A_AMENITIES = [
     desc: "Dedicated RO water filtration facilities supplying pure drinking water to all Sector A residents.",
     icon: Droplets,
     image: "/images/facilities/water-filtration.webp"
-  }
-];
-
-const SECTOR_A_PLOTS_FOR_SALE = [
-  {
-    size: "5 Marla",
-    category: "Executive Residential",
-    dimensions: "25' × 45' (1,125 Sq. Ft.)",
-    totalPrice: "PKR 45,00,000",
-    booking: "PKR 4,50,000 (10%)",
-    allocation: "PKR 4,50,000 (10%)",
-    monthly: "PKR 45,000 / month (×30)",
-    biAnnual: "PKR 2,25,000 (×6)",
-    possession: "PKR 9,00,000 (20%)",
-    image: "/images/sectors/sector-a-luxury.webp",
-    tag: "Most Demanded",
-    description: "Ideal executive home plot with 100% underground electrification, minimum 40ft wide carpeted street, and instant access to Sector A parks.",
-    whatsappText: "Hi, I want to book a 5 Marla Executive Plot in Saffron City Sector A (Block B)."
-  },
-  {
-    size: "10 Marla",
-    category: "Executive Residential",
-    dimensions: "35' × 65' (2,275 Sq. Ft.)",
-    totalPrice: "PKR 82,50,000",
-    booking: "PKR 8,25,000 (10%)",
-    allocation: "PKR 8,25,000 (10%)",
-    monthly: "PKR 82,500 / month (×30)",
-    biAnnual: "PKR 4,12,500 (×6)",
-    possession: "PKR 16,50,000 (20%)",
-    image: "/images/sectors/sector-b-residential.webp",
-    tag: "Spacious Villa Plot",
-    description: "Premium size designed for spacious multi-storey family villas with large front lawn, dual-car parking porch, and wide boulevard facing options.",
-    whatsappText: "Hi, I want to book a 10 Marla Executive Plot in Saffron City Sector A (Block B)."
-  },
-  {
-    size: "1 Kanal",
-    category: "Luxury Boulevard Estate",
-    dimensions: "50' × 90' (4,500 Sq. Ft.)",
-    totalPrice: "PKR 1,55,00,000",
-    booking: "PKR 15,50,000 (10%)",
-    allocation: "PKR 15,50,000 (10%)",
-    monthly: "PKR 1,55,000 / month (×30)",
-    biAnnual: "PKR 7,75,000 (×6)",
-    possession: "PKR 31,00,000 (20%)",
-    image: "/images/about/about-hero-banner.webp",
-    tag: "Flagship Luxury Estate",
-    description: "Elite mansion plots directly facing the wide Central Boulevard with immediate walking distance to the Grand Jamia Mosque.",
-    whatsappText: "Hi, I want to book a 1 Kanal Luxury Estate Plot in Saffron City Sector A (Block B)."
   }
 ];
 
@@ -224,42 +177,13 @@ const SECTOR_A_FAQS = [
 
 export default async function SectorAPage() {
   const allPlots = await db.getPlots();
-  const dynamicSectorAPlots = allPlots.filter(
-    (p) =>
-      p.sector?.toLowerCase().includes("sector a") ||
-      p.sector?.toLowerCase().includes("block b")
-  );
-
-  const mergedSectorAPlots = dynamicSectorAPlots.length > 0
-    ? [
-        ...dynamicSectorAPlots.map((p) => ({
-          size: `${p.category || "Plot"} (${p.plotNumber})`,
-          category: p.type || "Executive Residential",
-          dimensions: p.category?.includes("5 Marla") ? "25' × 45' (1,125 Sq. Ft.)" : p.category?.includes("10 Marla") ? "35' × 65' (2,275 Sq. Ft.)" : "50' × 90' (4,500 Sq. Ft.)",
-          totalPrice: `PKR ${(Number(p.totalPrice) || 0).toLocaleString()}`,
-          booking: `PKR ${(Number(p.downPayment || p.totalPrice * 0.1)).toLocaleString()} (10%)`,
-          allocation: `PKR ${(Number(p.totalPrice * 0.1)).toLocaleString()} (10%)`,
-          monthly: `PKR ${(Number(p.monthlyInst || (p.totalPrice * 0.3) / 30)).toLocaleString()} / month (×30)`,
-          biAnnual: `PKR ${(Math.round((p.totalPrice * 0.4) / 6)).toLocaleString()} (×6)`,
-          possession: `PKR ${(Number(p.totalPrice * 0.2)).toLocaleString()} (20%)`,
-          image: p.image && p.image.length > 3 ? p.image : "/images/sectors/sector-a-luxury.webp",
-          tag: p.status === "Available" ? "Open for Booking" : p.status || "Verified Plot",
-          description: p.features || `Authentic plot ${p.plotNumber} in Sector A (Block B) with direct road connectivity and 100% underground utilities.`,
-          whatsappText: `Hi, I want to book Plot ${p.plotNumber} (${p.category || "Plot"}) in Saffron City Sector A (Block B).`,
-        })),
-        ...SECTOR_A_PLOTS_FOR_SALE.filter(
-          (base) => !dynamicSectorAPlots.some((d) => d.category?.toLowerCase() === base.size.toLowerCase())
-        ),
-      ]
-    : SECTOR_A_PLOTS_FOR_SALE;
-
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
-    "Hi, I want to inquire about Sector A (Block B) executive plots in Saffron City Islamabad."
+    "Hi, I want to inquire about Sector A executive plots and schedule a site visit in Saffron City Islamabad."
   )}`;
 
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
-      
+
       {/* 1. Hero Banner Section */}
       <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
@@ -281,12 +205,6 @@ export default async function SectorAPage() {
             className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
           />
 
-          <ScrollReveal animation="fade-up" delay={100}>
-            <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Featuring 100% underground utilities, wide carpeted avenues, direct Grand Mosque access, and transparent 3-year installment plans.
-            </p>
-          </ScrollReveal>
-
           <ScrollReveal animation="fade-up" delay={150} className="flex flex-wrap justify-center gap-4 pt-4">
             <a
               href="#plots-for-sale"
@@ -301,15 +219,6 @@ export default async function SectorAPage() {
               <MapPin className="w-4 h-4 text-[#D49E17]" />
               <span>Location &amp; Map</span>
             </a>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Inquire on WhatsApp</span>
-            </a>
           </ScrollReveal>
         </div>
       </section>
@@ -322,11 +231,6 @@ export default async function SectorAPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left: Text Content */}
             <ScrollReveal animation="fade-right" className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[#D49E17] text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Sector A Executive Enclave</span>
-              </div>
-              
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-slate-900 tracking-tight leading-tight">
                 Sector A Overview: Premier Front-Gate Living
               </h2>
@@ -334,23 +238,6 @@ export default async function SectorAPage() {
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-light">
                 Sector A is the premier front-gate residential enclave of Saffron City Islamabad. Master-planned with 100% underground electrification, wide carpeted roadways, and strict architectural standards, it offers executive living right off Main GT Road.
               </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-1">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                    <Zap className="w-4 h-4 text-[#D49E17]" />
-                    <span>Underground Utilities</span>
-                  </div>
-                  <p className="text-xs text-slate-600">Zero overhead wires for clean skylines and continuous reliable power.</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-1">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                    <Compass className="w-4 h-4 text-emerald-600" />
-                    <span>GT Road Gateway</span>
-                  </div>
-                  <p className="text-xs text-slate-600">Direct front access on the N-5 Highway with zero rural bypasses.</p>
-                </div>
-              </div>
 
               <div className="pt-2 flex flex-wrap gap-4">
                 <a
@@ -360,15 +247,6 @@ export default async function SectorAPage() {
                   <span>Explore Available Plots</span>
                   <ArrowRight className="w-4 h-4" />
                 </a>
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Inquire on WhatsApp</span>
-                </a>
               </div>
             </ScrollReveal>
 
@@ -376,7 +254,7 @@ export default async function SectorAPage() {
             <ScrollReveal animation="fade-left" className="lg:col-span-5">
               <div className="relative w-full h-80 sm:h-[420px] rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-200 group">
                 <img
-                  src="/images/sectors/sector-a-luxury.webp"
+                  src="/images/sectors/sector-a-overview.webp"
                   alt="Saffron City Sector A Executive Enclave"
                   title="Saffron City Sector A Executive Enclave"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -567,98 +445,7 @@ export default async function SectorAPage() {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {mergedSectorAPlots.map((plot, idx) => {
-              const isLeft = idx === 0;
-              const isRight = idx === 2;
-              return (
-                <ScrollReveal
-                  key={`${plot.size}-${idx}`}
-                  animation={isLeft ? "fade-right" : isRight ? "fade-left" : "fade-up"}
-                  delay={idx * 100}
-                >
-                  <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
-                    <div>
-                      <Link href="/plot-for-sale" className="block relative h-56 w-full overflow-hidden bg-slate-100 cursor-pointer">
-                        <img
-                          src={plot.image}
-                          alt={`${plot.size} Sector A Plot`}
-                          title={`${plot.size} Sector A Plot`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                        <div className="absolute top-3 right-3">
-                          <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D49E17] border border-[#D49E17]/40 text-[11px] font-bold shadow">
-                            {plot.tag}
-                          </span>
-                        </div>
-                        <div className="absolute bottom-3 left-3 right-3 text-white">
-                          <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">
-                            {plot.category}
-                          </span>
-                          <h3 className="text-2xl font-black text-white drop-shadow-sm">
-                            {plot.size}
-                          </h3>
-                        </div>
-                      </Link>
-
-                      <div className="p-6 space-y-4">
-                        <div className="space-y-1">
-                          <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                          <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
-                        </div>
-
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          {plot.description}
-                        </p>
-
-                        <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-700">
-                          <div className="flex justify-between py-1.5 px-2.5 rounded-lg bg-amber-50/60">
-                            <span className="text-slate-600">Booking (10%):</span>
-                            <strong className="text-slate-900">{plot.booking}</strong>
-                          </div>
-                          <div className="flex justify-between py-1.5 px-2.5">
-                            <span className="text-slate-600">Allocation (10%):</span>
-                            <strong className="text-slate-900">{plot.allocation}</strong>
-                          </div>
-                          <div className="flex justify-between py-1.5 px-2.5 font-mono">
-                            <span className="text-slate-600">Monthly Installment:</span>
-                            <strong className="text-slate-900">{plot.monthly}</strong>
-                          </div>
-                          <div className="flex justify-between py-1.5 px-2.5 font-mono">
-                            <span className="text-slate-600">Bi-Annual (×6):</span>
-                            <strong className="text-slate-900">{plot.biAnnual}</strong>
-                          </div>
-                          <div className="flex justify-between py-1.5 px-2.5">
-                            <span className="text-slate-600">On Possession (20%):</span>
-                            <strong className="text-emerald-700 font-bold">{plot.possession}</strong>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 pt-0 space-y-2">
-                      <a
-                        href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(plot.whatsappText)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-2 shadow transition-all"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        <span>Book on WhatsApp</span>
-                      </a>
-                      <Link
-                        href="/payment-plan"
-                        className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center block transition-colors"
-                      >
-                        View Full Payment Plan
-                      </Link>
-                    </div>
-                  </div>
-                </ScrollReveal>
-              );
-            })}
-          </div>
+          <SectorAPlotsGrid initialPlots={allPlots} />
         </section>
 
         {/* 6. Master Map / Demarcation Callout Section */}
@@ -713,8 +500,8 @@ export default async function SectorAPage() {
             {SECTOR_A_INVESTOR_REASONS.map((item, index) => {
               const isLeft = index % 2 === 0;
               return (
-                <ScrollReveal 
-                  key={item.title} 
+                <ScrollReveal
+                  key={item.title}
                   animation={isLeft ? "fade-right" : "fade-left"}
                   delay={index * 80}
                 >

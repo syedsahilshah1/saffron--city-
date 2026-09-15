@@ -657,12 +657,12 @@ export const db = {
           downPayment: Number(p.downPayment) || 0,
           monthlyInst: Number(p.monthlyInst) || 0,
         }));
+        backendCache.set("plots_all", result, 60);
       }
     } catch (err: any) {
       console.error("[MySQL getPlots Error]:", err?.message);
     }
 
-    backendCache.set("plots_all", result, 60);
     return result;
   },
 

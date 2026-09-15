@@ -2,10 +2,13 @@ import mysql, { Pool } from "mysql2/promise";
 import fs from "fs";
 import path from "path";
 
-let pool: Pool | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __mysqlPool: Pool | undefined;
+}
 
 export function getMySQLPool(): Pool {
-  if (pool) return pool;
+  if (globalThis.__mysqlPool) return globalThis.__mysqlPool;
 
   const host = process.env.MYSQL_HOST || "127.0.0.1";
   const port = Number(process.env.MYSQL_PORT) || 3306;
@@ -13,22 +16,25 @@ export function getMySQLPool(): Pool {
   const password = process.env.MYSQL_PASSWORD || "";
   const database = process.env.MYSQL_DATABASE || "saffron_city";
 
-  pool = mysql.createPool({
+  const poolInstance = mysql.createPool({
     host,
     port,
     user,
     password,
     database,
     waitForConnections: true,
-    connectionLimit: 15,
+    connectionLimit: 10,
+    maxIdle: 2,
+    idleTimeout: 30000,
     queueLimit: 0,
-    connectTimeout: 1500,
+    connectTimeout: 5000,
     multipleStatements: true,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
   });
 
-  return pool;
+  globalThis.__mysqlPool = poolInstance;
+  return poolInstance;
 }
 
 export async function query<T = any>(sql: string, params: any[] = []): Promise<T> {
