@@ -279,13 +279,23 @@ function formatPlotToInventoryItem(p: StoredPlot): PlotInventoryItem {
     else if (p.category.includes("8 Marla")) dimensions = "40' × 45' (1,800 Sq. Ft.)";
   }
 
-  const downPayment = p.downPayment || p.totalPrice * 0.1;
-  const monthly = p.monthlyInst || (p.totalPrice * 0.3) / 30;
-  const possession = p.totalPrice * 0.2;
+  const rawPrice = Number(p.totalPrice) || 0;
+  const totalPrice = rawPrice > 0 && rawPrice <= 500 ? rawPrice * 100000 : rawPrice;
+
+  const rawDown = Number(p.downPayment) || 0;
+  const downPayment = rawDown > 0 && rawDown <= 50 ? rawDown * 100000 : (rawDown > 0 ? rawDown : totalPrice * 0.1);
+
+  const rawMonthly = Number(p.monthlyInst) || 0;
+  const monthly = rawMonthly > 0 && rawMonthly <= 5 ? rawMonthly * 100000 : (rawMonthly > 0 ? rawMonthly : (totalPrice * 0.3) / 30);
+  const possession = totalPrice * 0.2;
 
   let defaultImage = "/images/sectors/sector-a-luxury.webp";
-  if (sectorLower.includes("sector b")) defaultImage = "/images/sectors/sector-b-residential.webp";
-  if (isComm) defaultImage = "/images/sectors/commercial-plaza.webp";
+  if (p.category?.includes("10 Marla")) defaultImage = "/images/sectors/sector-b-residential.webp";
+  else if (p.category?.includes("1 Kanal")) defaultImage = "/images/sectors/sector-a-overview.webp";
+  else if (sectorLower.includes("sector b")) defaultImage = "/images/sectors/sector-b-residential.webp";
+  else if (isComm || p.category?.includes("Commercial") || p.category?.includes("4 Marla") || p.category?.includes("8 Marla")) {
+    defaultImage = "/images/sectors/commercial-plaza.webp";
+  }
 
   return {
     id: p.id,
@@ -296,15 +306,15 @@ function formatPlotToInventoryItem(p: StoredPlot): PlotInventoryItem {
     sizeScale: (p.category || "5 Marla") as any,
     tag: p.status === "Available" ? "Open for Booking" : p.status || "Verified",
     dimensions,
-    totalPriceNumeric: Number(p.totalPrice) || 0,
-    totalPriceFormatted: `PKR ${(Number(p.totalPrice) || 0).toLocaleString()}`,
-    downPaymentNumeric: Number(downPayment) || 0,
-    downPaymentFormatted: `PKR ${(Number(downPayment) || 0).toLocaleString()} (10%)`,
-    monthlyNumeric: Number(monthly) || 0,
-    monthlyFormatted: `PKR ${(Number(monthly) || 0).toLocaleString()} / mo`,
-    possessionNumeric: Number(possession) || 0,
-    possessionFormatted: `PKR ${(Number(possession) || 0).toLocaleString()} (20%)`,
-    biAnnualFormatted: `PKR ${Math.round((p.totalPrice * 0.4) / 6).toLocaleString()} (×6)`,
+    totalPriceNumeric: totalPrice,
+    totalPriceFormatted: `PKR ${totalPrice.toLocaleString()}`,
+    downPaymentNumeric: downPayment,
+    downPaymentFormatted: `PKR ${Math.round(downPayment).toLocaleString()} (10%)`,
+    monthlyNumeric: monthly,
+    monthlyFormatted: `PKR ${Math.round(monthly).toLocaleString()} / mo`,
+    possessionNumeric: possession,
+    possessionFormatted: `PKR ${Math.round(possession).toLocaleString()} (20%)`,
+    biAnnualFormatted: `PKR ${Math.round((totalPrice * 0.4) / 6).toLocaleString()} (×6)`,
     image: p.image && p.image.trim().length > 3 ? p.image : defaultImage,
     features: p.features ? [p.features] : ["100% Underground Utilities", "RDA Approved Layout", "30-Month Installment Plan"],
     href,

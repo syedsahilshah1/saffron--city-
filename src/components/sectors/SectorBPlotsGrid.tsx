@@ -2,65 +2,65 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { MessageCircle, CheckCircle2, Building2, Sparkles, ArrowRight } from "lucide-react";
+import { MessageCircle, CheckCircle2 } from "lucide-react";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import { StoredPlot } from "@/lib/types";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
-export const DEFAULT_SECTOR_A_PLOTS = [
+export const DEFAULT_SECTOR_B_PLOTS = [
   {
-    id: "sec-a-5m-default",
-    plotNumber: "#A-101",
+    id: "sec-b-5m-default",
+    plotNumber: "#B-101",
     size: "5 Marla",
-    category: "Executive Residential",
+    category: "Family Residential",
     dimensions: "25' × 45' (1,125 Sq. Ft.)",
-    totalPrice: "PKR 4,500,000",
-    rawPrice: 4500000,
-    booking: "PKR 450,000 (10%)",
-    allocation: "PKR 450,000 (10%)",
-    monthly: "PKR 45,000 / month (×30)",
-    biAnnual: "PKR 225,000 (×6)",
-    possession: "PKR 900,000 (20%)",
-    image: "/images/sectors/sector-a-luxury.webp",
-    tag: "Most Demanded",
-    description: "Ideal executive home plot with 100% underground electrification, minimum 40ft wide carpeted street, and instant access to Sector A parks.",
-    whatsappText: "Hi, I want to book a 5 Marla Executive Plot in Saffron City Sector A."
-  },
-  {
-    id: "sec-a-10m-default",
-    plotNumber: "#A-102",
-    size: "10 Marla",
-    category: "Executive Residential",
-    dimensions: "35' × 65' (2,275 Sq. Ft.)",
-    totalPrice: "PKR 8,250,000",
-    rawPrice: 8250000,
-    booking: "PKR 825,000 (10%)",
-    allocation: "PKR 825,000 (10%)",
-    monthly: "PKR 82,500 / month (×30)",
-    biAnnual: "PKR 412,500 (×6)",
-    possession: "PKR 1,650,000 (20%)",
+    totalPrice: "PKR 4,000,000",
+    rawPrice: 4000000,
+    booking: "PKR 400,000 (10%)",
+    allocation: "PKR 400,000 (10%)",
+    monthly: "PKR 40,000 / month (×30)",
+    biAnnual: "PKR 200,000 (×6)",
+    possession: "PKR 800,000 (20%)",
     image: "/images/sectors/sector-b-residential.webp",
-    tag: "Spacious Villa Plot",
-    description: "Premium size designed for spacious multi-storey family villas with large front lawn, dual-car parking porch, and wide boulevard facing options.",
-    whatsappText: "Hi, I want to book a 10 Marla Executive Plot in Saffron City Sector A."
+    tag: "Family Favorite",
+    description: "Ideal family plot near central green parks, wide carpeted streets, and 100% underground utilities in Sector B.",
+    whatsappText: "Hi, I want to book a 5 Marla Family Plot in Saffron City Sector B."
   },
   {
-    id: "sec-a-1k-default",
-    plotNumber: "#A-105",
+    id: "sec-b-10m-default",
+    plotNumber: "#B-102",
+    size: "10 Marla",
+    category: "Family Residential",
+    dimensions: "35' × 65' (2,275 Sq. Ft.)",
+    totalPrice: "PKR 7,500,000",
+    rawPrice: 7500000,
+    booking: "PKR 750,000 (10%)",
+    allocation: "PKR 750,000 (10%)",
+    monthly: "PKR 75,000 / month (×30)",
+    biAnnual: "PKR 375,000 (×6)",
+    possession: "PKR 1,500,000 (20%)",
+    image: "/images/sectors/green-community-park.webp",
+    tag: "Spacious Garden Plot",
+    description: "Spacious layout with generous front lawn space, wide paved roads, and walking distance to sector mosque and school.",
+    whatsappText: "Hi, I want to book a 10 Marla Family Plot in Saffron City Sector B."
+  },
+  {
+    id: "sec-b-1k-default",
+    plotNumber: "#B-105",
     size: "1 Kanal",
-    category: "Luxury Boulevard Estate",
+    category: "Executive Park Facing",
     dimensions: "50' × 90' (4,500 Sq. Ft.)",
-    totalPrice: "PKR 15,500,000",
-    rawPrice: 15500000,
-    booking: "PKR 1,550,000 (10%)",
-    allocation: "PKR 1,550,000 (10%)",
-    monthly: "PKR 155,000 / month (×30)",
-    biAnnual: "PKR 775,000 (×6)",
-    possession: "PKR 3,100,000 (20%)",
-    image: "/images/sectors/sector-a-overview.webp",
-    tag: "Flagship Luxury Estate",
-    description: "Elite mansion plots directly facing the wide Central Boulevard with immediate walking distance to the Grand Jamia Mosque.",
-    whatsappText: "Hi, I want to book a 1 Kanal Luxury Estate Plot in Saffron City Sector A."
+    totalPrice: "PKR 14,000,000",
+    rawPrice: 14000000,
+    booking: "PKR 1,400,000 (10%)",
+    allocation: "PKR 1,400,000 (10%)",
+    monthly: "PKR 140,000 / month (×30)",
+    biAnnual: "PKR 700,000 (×6)",
+    possession: "PKR 2,800,000 (20%)",
+    image: "/images/about/about-hero-banner.webp",
+    tag: "Park Facing Estate",
+    description: "Exclusive luxury plot with serene park views, perimeter security, and high investment appreciation in Sector B.",
+    whatsappText: "Hi, I want to book a 1 Kanal Park Facing Plot in Saffron City Sector B."
   }
 ];
 
@@ -69,13 +69,13 @@ function getImageForPlot(category: string = "", customImage?: string): string {
     return customImage;
   }
   const cat = category.toLowerCase();
-  if (cat.includes("5 marla")) return "/images/sectors/sector-a-luxury.webp";
-  if (cat.includes("10 marla")) return "/images/sectors/sector-b-residential.webp";
-  if (cat.includes("1 kanal")) return "/images/sectors/sector-a-overview.webp";
+  if (cat.includes("5 marla")) return "/images/sectors/sector-b-residential.webp";
+  if (cat.includes("10 marla")) return "/images/sectors/green-community-park.webp";
+  if (cat.includes("1 kanal")) return "/images/about/about-hero-banner.webp";
   if (cat.includes("commercial") || cat.includes("4 marla") || cat.includes("8 marla")) {
     return "/images/sectors/commercial-plaza.webp";
   }
-  return "/images/sectors/sector-a-overview.webp";
+  return "/images/sectors/sector-b-residential.webp";
 }
 
 function formatPriceDisplay(val: number): string {
@@ -84,14 +84,13 @@ function formatPriceDisplay(val: number): string {
   return `PKR ${num.toLocaleString()}`;
 }
 
-interface SectorAPlotsGridProps {
+interface SectorBPlotsGridProps {
   initialPlots?: StoredPlot[];
 }
 
-export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGridProps) {
+export default function SectorBPlotsGrid({ initialPlots = [] }: SectorBPlotsGridProps) {
   const [plotsList, setPlotsList] = useState<StoredPlot[]>(initialPlots);
 
-  // Live client-side fetch to guarantee instant updates when plots are added/modified in dashboard
   useEffect(() => {
     fetch("/api/plots")
       .then((res) => res.json())
@@ -104,23 +103,16 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
   }, []);
 
   const displayedPlots = useMemo(() => {
-    const sectorAPlots = plotsList.filter((p) => {
+    const sectorBPlots = plotsList.filter((p) => {
       const s = (p.sector || "").toLowerCase();
-      return (
-        s.includes("sector a") ||
-        s.includes("sector-a") ||
-        s.includes("block a") ||
-        s.includes("block-a") ||
-        s.includes("block b") ||
-        s.includes("block-b")
-      );
+      return s.includes("sector b") || s.includes("sector-b");
     });
 
-    if (sectorAPlots.length === 0) {
-      return DEFAULT_SECTOR_A_PLOTS;
+    if (sectorBPlots.length === 0) {
+      return DEFAULT_SECTOR_B_PLOTS;
     }
 
-    const dynamicCards = sectorAPlots.map((p) => {
+    const dynamicCards = sectorBPlots.map((p) => {
       const priceNum = Number(p.totalPrice) || 0;
       const normalizedPrice = priceNum > 0 && priceNum <= 500 ? priceNum * 100000 : priceNum;
 
@@ -146,7 +138,7 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
         id: p.id,
         plotNumber: plotNumFormatted,
         size: plotTitle,
-        category: p.type || "Executive Residential",
+        category: p.type || "Family Residential",
         dimensions,
         totalPrice: formatPriceDisplay(priceNum),
         rawPrice: normalizedPrice,
@@ -156,21 +148,20 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
         biAnnual: `PKR ${Math.round(biAnnualNum).toLocaleString()} (×6)`,
         possession: `PKR ${Math.round(possessionNum).toLocaleString()} (20%)`,
         image: getImageForPlot(p.category, p.image),
-        tag: p.status === "Available" ? "Open for Booking" : p.status || "Verified Plot",
+        tag: p.status === "Available" ? "Open for Booking" : p.status || "Family Choice",
         description:
           p.features && p.features.trim().length > 3
             ? p.features
-            : `Authentic plot ${plotNumFormatted} in Sector A with direct road connectivity, zero overhead wires, and 100% underground utilities.`,
-        whatsappText: `Hi, I want to book Plot ${plotNumFormatted} (${p.category || "Plot"}) in Saffron City Sector A.`,
+            : `Authentic plot ${plotNumFormatted} in Sector B with park view, wide carpeted road, and 100% underground utilities.`,
+        whatsappText: `Hi, I want to book Plot ${plotNumFormatted} (${p.category || "Plot"}) in Saffron City Sector B.`,
       };
     });
 
-    // Check which default categories are not present in dynamic to keep as fallback
     const dynamicCategories = new Set(
-      sectorAPlots.map((p) => (p.category || "").toLowerCase().trim())
+      sectorBPlots.map((p) => (p.category || "").toLowerCase().trim())
     );
 
-    const missingDefaults = DEFAULT_SECTOR_A_PLOTS.filter(
+    const missingDefaults = DEFAULT_SECTOR_B_PLOTS.filter(
       (def) => !dynamicCategories.has(def.size.toLowerCase().trim())
     );
 
@@ -188,23 +179,23 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
             animation={isLeft ? "fade-right" : isRight ? "fade-left" : "fade-up"}
             delay={(idx % 3) * 100}
           >
-            <div className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+            <div className="rounded-3xl bg-white border border-emerald-200 hover:border-emerald-500 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
               <div>
                 <Link href="/plot-for-sale" className="block relative h-56 w-full overflow-hidden bg-slate-100 cursor-pointer">
                   <img
                     src={plot.image}
-                    alt={`${plot.size} Sector A Plot`}
-                    title={`${plot.size} Sector A Plot`}
+                    alt={`${plot.size} Sector B Plot`}
+                    title={`${plot.size} Sector B Plot`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                   <div className="absolute top-3 right-3">
-                    <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[#D49E17] border border-[#D49E17]/40 text-[11px] font-bold shadow">
+                    <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 text-[11px] font-bold shadow">
                       {plot.tag}
                     </span>
                   </div>
                   <div className="absolute bottom-3 left-3 right-3 text-white">
-                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">
+                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">
                       {plot.category}
                     </span>
                     <h3 className="text-2xl font-black text-white drop-shadow-sm">
@@ -216,7 +207,7 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
                 <div className="p-6 space-y-4">
                   <div className="space-y-1">
                     <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                    <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
+                    <p className="text-2xl font-black text-emerald-700">{plot.totalPrice}</p>
                   </div>
 
                   <p className="text-xs text-slate-600 leading-relaxed min-h-[36px]">
@@ -224,7 +215,7 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
                   </p>
 
                   <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-700">
-                    <div className="flex justify-between py-1.5 px-2.5 rounded-lg bg-amber-50/60">
+                    <div className="flex justify-between py-1.5 px-2.5 rounded-lg bg-emerald-50/60">
                       <span className="text-slate-600">Booking (10%):</span>
                       <strong className="text-slate-900">{plot.booking}</strong>
                     </div>
@@ -260,7 +251,7 @@ export default function SectorAPlotsGrid({ initialPlots = [] }: SectorAPlotsGrid
                 </a>
                 <Link
                   href="/payment-plan"
-                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-950 font-bold text-xs text-center block transition-all"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-950 font-bold text-xs text-center block transition-all"
                 >
                   View Full Payment Plan
                 </Link>

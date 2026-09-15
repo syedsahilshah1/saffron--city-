@@ -110,7 +110,8 @@ const DEFAULT_PLOTS_INVENTORY: PlotCardItem[] = [
   },
 ];
 
-function formatPriceString(price: number): string {
+function formatPriceString(rawPrice: number): string {
+  const price = rawPrice > 0 && rawPrice <= 500 ? rawPrice * 100000 : rawPrice;
   if (price >= 10000000) {
     const crore = price / 10000000;
     return `PKR ${crore % 1 === 0 ? crore.toFixed(0) : crore.toFixed(2)} Crore`;
@@ -145,8 +146,12 @@ function mapStoredPlotToCard(p: StoredPlot): PlotCardItem {
   }
 
   let defaultImage = "/images/sectors/sector-a-luxury.webp";
-  if (sectorLower.includes("sector b")) defaultImage = "/images/sectors/sector-b-residential.webp";
-  if (isComm) defaultImage = "/images/sectors/commercial-plaza.webp";
+  if (p.category?.includes("10 Marla")) defaultImage = "/images/sectors/sector-b-residential.webp";
+  else if (p.category?.includes("1 Kanal")) defaultImage = "/images/sectors/sector-a-overview.webp";
+  else if (sectorLower.includes("sector b")) defaultImage = "/images/sectors/sector-b-residential.webp";
+  else if (isComm || p.category?.includes("Commercial") || p.category?.includes("4 Marla") || p.category?.includes("8 Marla")) {
+    defaultImage = "/images/sectors/commercial-plaza.webp";
+  }
 
   return {
     id: p.id,
