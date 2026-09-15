@@ -252,7 +252,7 @@ export default async function SectorBPage() {
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
       
       {/* 1. Hero Banner Section */}
-      <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
+      <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
             src="/images/sectors/sector-b-residential.webp"

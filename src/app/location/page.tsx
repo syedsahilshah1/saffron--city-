@@ -73,10 +73,10 @@ export default function LocationPage() {
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
       
       {/* Hero Banner Section with Background Image */}
-      <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
+      <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/landmark_dha_islamabad.webp"
+            src="/images/location/location-hero-banner.webp"
             alt="Saffron City Prime Location GT Road Rawat"
             title="Saffron City Prime Location GT Road Rawat"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
@@ -106,15 +106,6 @@ export default function LocationPage() {
             >
               <Compass className="w-4 h-4 text-[#D49E17]" />
               <span>Nearby Landmarks</span>
-            </a>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Book Site Visit on WhatsApp</span>
             </a>
           </ScrollReveal>
         </div>

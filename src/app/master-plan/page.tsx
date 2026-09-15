@@ -320,7 +320,7 @@ export default function MasterPlanPage() {
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
                     <span>Nearest access to Grand Mosque and Central Commercial Hub</span>
-                  </li>
+                  </li> 
                 </ul>
               </div>
 

@@ -71,7 +71,7 @@ export default function PaymentPlanPage() {
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
       
       {/* Hero Banner Section with Background Image */}
-      <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
+      <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         {/* Background Hero Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -91,12 +91,6 @@ export default function PaymentPlanPage() {
             as="h1"
             className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
           />
-
-          <ScrollReveal animation="fade-up" delay={100}>
-            <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Transparent, RDA-approved payment structure for Sector A, Sector B residential plots, and Main GT Road commercial blocks. Book with just 10% down payment.
-            </p>
-          </ScrollReveal>
 
           {/* Quick Metrics Counter Grid */}
           <ScrollReveal animation="fade-up" delay={150}>
@@ -209,7 +203,7 @@ export default function PaymentPlanPage() {
                     <span className="font-bold text-[#D49E17]">Total PKR 1.55 Crore (Monthly: 1.55 Lac)</span>
                   </div>
                 </div>
-              </div>
+              </div>  
             </ScrollReveal>
 
             {/* Commercial Flyer Card: Animates in from RIGHT */}
