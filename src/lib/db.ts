@@ -1,6 +1,4 @@
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
 import {
   StoredUser,
   StoredInquiry,
@@ -17,7 +15,7 @@ import {
   StoredPageSeo,
   StoredRedirect,
 } from "./types";
-import { getMySQLPool, query } from "./mysql";
+import { getMySQLPool } from "./mysql";
 
 export * from "./types";
 
@@ -102,20 +100,6 @@ class MemoryCacheManager {
 export const backendCache = new MemoryCacheManager();
 
 // -------------------------------------------------------------
-// Helper to read local JSON store when MySQL is offline
-// -------------------------------------------------------------
-function getLocalStoreFallback(): any {
-  try {
-    const storePath = path.join(process.cwd(), "data", "cms_store.json");
-    if (fs.existsSync(storePath)) {
-      const content = fs.readFileSync(storePath, "utf-8");
-      return JSON.parse(content);
-    }
-  } catch {}
-  return null;
-}
-
-// -------------------------------------------------------------
 // Helper to verify database user password (supports direct string & PBKDF2 hashed)
 // -------------------------------------------------------------
 function verifyUserPasswordInDb(inputPassword: string, storedHash: string, storedSalt?: string): boolean {
@@ -137,7 +121,7 @@ function verifyUserPasswordInDb(inputPassword: string, storedHash: string, store
 }
 
 // -------------------------------------------------------------
-// Safe query helper with table name fallback & offline resilience
+// Safe query helper with table name fallback
 // -------------------------------------------------------------
 async function safeQuery<T = any>(primarySql: string, fallbackSql: string, params: any[] = []): Promise<T> {
   const pool = getMySQLPool();
@@ -155,12 +139,12 @@ async function safeQuery<T = any>(primarySql: string, fallbackSql: string, param
 }
 
 // -------------------------------------------------------------
-// Direct MySQL Database API (Mapped to live saffron_city tables with fallback)
+// Direct MySQL Database API (Online Database Only)
 // -------------------------------------------------------------
 
 export const db = {
   // -------------------------
-  // 1. User Authentication (MySQL Database with fallback)
+  // 1. User Authentication (Strict MySQL Database)
   // -------------------------
   authenticateUser: async (
     identifierInput: string,
@@ -277,48 +261,18 @@ export const db = {
           token,
         };
       }
+
+      return {
+        success: false,
+        message: "Invalid administrator credentials. Account not found or password incorrect.",
+      };
     } catch (err: any) {
-      console.warn("[MySQL Auth Notice]: MySQL connection inactive, evaluating fallback store.");
+      console.error("[MySQL Auth Error]:", err?.message || err);
+      return {
+        success: false,
+        message: "Database connection failure. Please ensure MySQL database is running.",
+      };
     }
-
-    // Fallback store authentication
-    const store = getLocalStoreFallback();
-    if (store && Array.isArray(store.users)) {
-      const match = store.users.find(
-        (u: any) => u.email.toLowerCase() === identifier || u.id === identifier
-      );
-
-      if (match) {
-        const isPasswordValid = verifyUserPasswordInDb(
-          passwordInput,
-          match.passwordHash || match.password,
-          match.salt
-        );
-
-        if (isPasswordValid) {
-          const token = generateUserSessionToken(match.id, match.email);
-          return {
-            success: true,
-            user: {
-              id: match.id,
-              email: match.email,
-              name: match.name,
-              role: match.role,
-              permissions: match.permissions || [],
-              isActive: Boolean(match.isActive),
-              lastLoginAt: new Date().toISOString(),
-              createdAt: match.createdAt,
-            },
-            token,
-          };
-        }
-      }
-    }
-
-    return {
-      success: false,
-      message: "Invalid administrator credentials. Account not found or password incorrect.",
-    };
   },
 
   getUserById: async (id: string): Promise<SafeUser | null> => {
@@ -341,25 +295,9 @@ export const db = {
           createdAt: u.createdAt,
         };
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    if (store && Array.isArray(store.users)) {
-      const u = store.users.find((x: any) => x.id === id);
-      if (u) {
-        return {
-          id: u.id,
-          email: u.email,
-          name: u.name,
-          role: u.role,
-          permissions: u.permissions || [],
-          isActive: Boolean(u.isActive),
-          lastLoginAt: u.lastLoginAt,
-          createdAt: u.createdAt,
-        };
-      }
+    } catch (err: any) {
+      console.error("[MySQL getUserById Error]:", err?.message);
     }
-
     return null;
   },
 
@@ -381,22 +319,9 @@ export const db = {
           createdAt: u.createdAt,
         }));
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    if (store && Array.isArray(store.users)) {
-      return store.users.map((u: any) => ({
-        id: u.id,
-        email: u.email,
-        name: u.name,
-        role: u.role,
-        permissions: u.permissions || [],
-        isActive: Boolean(u.isActive),
-        lastLoginAt: u.lastLoginAt,
-        createdAt: u.createdAt,
-      }));
+    } catch (err: any) {
+      console.error("[MySQL getUsers Error]:", err?.message);
     }
-
     return [];
   },
 
@@ -417,17 +342,20 @@ export const db = {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [id, data.email.toLowerCase().trim(), data.name, passwordHash, salt, data.role, permissionsJson, data.isActive ? 1 : 0]
       );
-    } catch {}
 
-    return {
-      id,
-      email: data.email,
-      name: data.name,
-      role: data.role,
-      permissions: data.permissions,
-      isActive: data.isActive,
-      createdAt: new Date().toISOString(),
-    };
+      return {
+        id,
+        email: data.email,
+        name: data.name,
+        role: data.role,
+        permissions: data.permissions,
+        isActive: data.isActive,
+        createdAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      console.error("[MySQL createUser Error]:", err?.message);
+      return null;
+    }
   },
 
   updateUser: async (id: string, updates: Partial<StoredUser> & { password?: string }): Promise<SafeUser | null> => {
@@ -488,8 +416,9 @@ export const db = {
           createdAt: u.createdAt,
         };
       }
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL updateUser Error]:", err?.message);
+    }
     return null;
   },
 
@@ -535,9 +464,10 @@ export const db = {
         );
         return { success: true, token: otp, message: "Reset code generated." };
       }
-    } catch {}
-
-    return { success: false, message: "No account found with this email." };
+    } catch (err: any) {
+      console.error("[MySQL createPasswordResetRequest Error]:", err?.message);
+    }
+    return { success: false, message: "No account found with this email or database offline." };
   },
 
   resetPasswordWithToken: async (token: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
@@ -565,13 +495,14 @@ export const db = {
         );
         return { success: true, message: "Password updated successfully." };
       }
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL resetPasswordWithToken Error]:", err?.message);
+    }
     return { success: false, message: "Invalid or expired reset token." };
   },
 
   // -------------------------
-  // 2. Dashboard Stats (Direct MySQL with fallback)
+  // 2. Dashboard Stats (Strict MySQL Database)
   // -------------------------
   getStats: async (): Promise<any> => {
     try {
@@ -589,46 +520,30 @@ export const db = {
       );
 
       return {
-        totalLeads: inqRows[0]?.total || 0,
-        unreadLeads: inqRows[0]?.unread || 0,
-        totalPlots: plotRows[0]?.total || 0,
-        availablePlots: plotRows[0]?.available || 0,
-        bookedPlots: plotRows[0]?.booked || 0,
-        totalInventoryValue: plotRows[0]?.totalValuation || 0,
-        totalBlogs: blogRows[0]?.total || 0,
+        totalLeads: Number(inqRows[0]?.total) || 0,
+        unreadLeads: Number(inqRows[0]?.unread) || 0,
+        totalPlots: Number(plotRows[0]?.total) || 0,
+        availablePlots: Number(plotRows[0]?.available) || 0,
+        bookedPlots: Number(plotRows[0]?.booked) || 0,
+        totalInventoryValue: Number(plotRows[0]?.totalValuation) || 0,
+        totalBlogs: Number(blogRows[0]?.total) || 0,
       };
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    if (store) {
-      const inquiries = store.inquiries || [];
-      const plots = store.plots || [];
-      const blogs = store.blogs || [];
-
+    } catch (err: any) {
+      console.error("[MySQL getStats Error]:", err?.message);
       return {
-        totalLeads: inquiries.length,
-        unreadLeads: inquiries.filter((i: any) => i.status === "New").length,
-        totalPlots: plots.length,
-        availablePlots: plots.filter((p: any) => p.status === "Available").length,
-        bookedPlots: plots.filter((p: any) => p.status === "Booked" || p.status === "Reserved").length,
-        totalInventoryValue: plots.reduce((acc: number, p: any) => acc + (Number(p.totalPrice) || 0), 0),
-        totalBlogs: blogs.length,
+        totalLeads: 0,
+        unreadLeads: 0,
+        totalPlots: 0,
+        availablePlots: 0,
+        bookedPlots: 0,
+        totalInventoryValue: 0,
+        totalBlogs: 0,
       };
     }
-
-    return {
-      totalLeads: 0,
-      unreadLeads: 0,
-      totalPlots: 0,
-      availablePlots: 0,
-      bookedPlots: 0,
-      totalInventoryValue: 0,
-      totalBlogs: 0,
-    };
   },
 
   // -------------------------
-  // 3. Inquiries / Leads (Direct MySQL with fallback)
+  // 3. Inquiries / Leads (Strict MySQL Database)
   // -------------------------
   getInquiries: async (): Promise<StoredInquiry[]> => {
     try {
@@ -637,10 +552,10 @@ export const db = {
         "SELECT * FROM `leadinquiry` ORDER BY `createdAt` DESC"
       );
       if (rows && Array.isArray(rows)) return rows;
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    return store?.inquiries || [];
+    } catch (err: any) {
+      console.error("[MySQL getInquiries Error]:", err?.message);
+    }
+    return [];
   },
 
   createInquiry: async (inquiry: Omit<StoredInquiry, "id" | "createdAt" | "updatedAt">): Promise<StoredInquiry> => {
@@ -664,7 +579,9 @@ export const db = {
           inquiry.notes || null,
         ]
       );
-    } catch {}
+    } catch (err: any) {
+      console.error("[MySQL createInquiry Error]:", err?.message);
+    }
 
     return {
       ...inquiry,
@@ -701,8 +618,9 @@ export const db = {
         [id]
       );
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL updateInquiry Error]:", err?.message);
+    }
     return null;
   },
 
@@ -720,7 +638,7 @@ export const db = {
   },
 
   // -------------------------
-  // 4. Plots Inventory (Direct MySQL with fallback)
+  // 4. Plots Inventory (Strict MySQL Database)
   // -------------------------
   getPlots: async (): Promise<StoredPlot[]> => {
     const cached = backendCache.get<StoredPlot[]>("plots_all");
@@ -729,10 +647,10 @@ export const db = {
     let result: StoredPlot[] = [];
     try {
       const rows: any = await safeQuery(
-        "SELECT * FROM `plots` ORDER BY `createdAt` ASC",
-        "SELECT * FROM `plotinventory` ORDER BY `createdAt` ASC"
+        "SELECT * FROM `plots` ORDER BY `createdAt` DESC, `id` DESC",
+        "SELECT * FROM `plotinventory` ORDER BY `createdAt` DESC, `id` DESC"
       );
-      if (rows && Array.isArray(rows) && rows.length > 0) {
+      if (rows && Array.isArray(rows)) {
         result = rows.map((p: any) => ({
           ...p,
           totalPrice: Number(p.totalPrice) || 0,
@@ -740,16 +658,8 @@ export const db = {
           monthlyInst: Number(p.monthlyInst) || 0,
         }));
       }
-    } catch {}
-
-    if (!result.length) {
-      const store = getLocalStoreFallback();
-      result = (store?.plots || []).map((p: any) => ({
-        ...p,
-        totalPrice: Number(p.totalPrice) || 0,
-        downPayment: Number(p.downPayment) || 0,
-        monthlyInst: Number(p.monthlyInst) || 0,
-      }));
+    } catch (err: any) {
+      console.error("[MySQL getPlots Error]:", err?.message);
     }
 
     backendCache.set("plots_all", result, 60);
@@ -779,7 +689,9 @@ export const db = {
           plot.image || "/images/sectors/sector-a-luxury.webp",
         ]
       );
-    } catch {}
+    } catch (err: any) {
+      console.error("[MySQL createPlot Error]:", err?.message);
+    }
 
     return { ...plot, id };
   },
@@ -812,8 +724,9 @@ export const db = {
         [id]
       );
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL updatePlot Error]:", err?.message);
+    }
     return null;
   },
 
@@ -832,12 +745,27 @@ export const db = {
   },
 
   // -------------------------
-  // 5. Blogs CMS (Direct MySQL with fallback)
+  // 5. Blogs CMS (Strict MySQL Database)
   // -------------------------
   getBlogs: async (publishedOnly: boolean = false): Promise<StoredBlog[]> => {
     const cacheKey = `blogs_all_${publishedOnly}`;
     const cached = backendCache.get<StoredBlog[]>(cacheKey);
     if (cached) return cached;
+
+    const normalizeBlogImage = (img?: string, idx: number = 0): string => {
+      if (!img || img === ".webp" || img === ".jpg" || img === ".png" || img.trim().length <= 5) {
+        const fallbacks = [
+          "/images/hero-bg.webp",
+          "/images/sectors/sector-a-luxury.webp",
+          "/images/facilities/gated-security.webp",
+          "/images/landmark_t_chowk.webp",
+          "/images/sectors/commercial-plaza.webp",
+          "/images/about/about-hero-banner.webp",
+        ];
+        return fallbacks[idx % fallbacks.length];
+      }
+      return img.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp");
+    };
 
     let result: StoredBlog[] = [];
     try {
@@ -846,25 +774,18 @@ export const db = {
         ? "SELECT * FROM `blogs` WHERE `isPublished` = 1 ORDER BY `createdAt` DESC"
         : "SELECT * FROM `blogs` ORDER BY `createdAt` DESC";
       const [rows]: any = await pool.query(sql);
-      if (rows && Array.isArray(rows) && rows.length > 0) {
-        result = rows.map((b: any) => ({
+      if (rows && Array.isArray(rows)) {
+        result = rows.map((b: any, index: number) => ({
           ...b,
+          image: normalizeBlogImage(b.image || b.coverImage, index),
+          coverImage: normalizeBlogImage(b.coverImage || b.image, index),
           isPublished: Boolean(b.isPublished),
           robotsIndex: Boolean(b.robotsIndex),
           robotsFollow: Boolean(b.robotsFollow),
         }));
       }
-    } catch {}
-
-    if (!result.length) {
-      const store = getLocalStoreFallback();
-      const blogs: StoredBlog[] = (store?.blogs || []).map((b: any) => ({
-        ...b,
-        isPublished: Boolean(b.isPublished),
-        robotsIndex: Boolean(b.robotsIndex),
-        robotsFollow: Boolean(b.robotsFollow),
-      }));
-      result = publishedOnly ? blogs.filter((b) => b.isPublished) : blogs;
+    } catch (err: any) {
+      console.error("[MySQL getBlogs Error]:", err?.message);
     }
 
     backendCache.set(cacheKey, result, 60);
@@ -876,6 +797,21 @@ export const db = {
     const cached = backendCache.get<StoredBlog>(cacheKey);
     if (cached) return cached;
 
+    const normalizeBlogImage = (img?: string, idx: number = 0): string => {
+      if (!img || img === ".webp" || img === ".jpg" || img === ".png" || img.trim().length <= 5) {
+        const fallbacks = [
+          "/images/hero-bg.webp",
+          "/images/sectors/sector-a-luxury.webp",
+          "/images/facilities/gated-security.webp",
+          "/images/landmark_t_chowk.webp",
+          "/images/sectors/commercial-plaza.webp",
+          "/images/about/about-hero-banner.webp",
+        ];
+        return fallbacks[idx % fallbacks.length];
+      }
+      return img.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp");
+    };
+
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `blogs` WHERE `slug` = ? LIMIT 1", [slug]);
@@ -883,6 +819,8 @@ export const db = {
         const b = rows[0];
         const res = {
           ...b,
+          image: normalizeBlogImage(b.image || b.coverImage, 0),
+          coverImage: normalizeBlogImage(b.coverImage || b.image, 0),
           isPublished: Boolean(b.isPublished),
           robotsIndex: Boolean(b.robotsIndex),
           robotsFollow: Boolean(b.robotsFollow),
@@ -890,19 +828,8 @@ export const db = {
         backendCache.set(cacheKey, res, 60);
         return res;
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    const b = (store?.blogs || []).find((x: any) => x.slug === slug);
-    if (b) {
-      const res = {
-        ...b,
-        isPublished: Boolean(b.isPublished),
-        robotsIndex: Boolean(b.robotsIndex),
-        robotsFollow: Boolean(b.robotsFollow),
-      };
-      backendCache.set(cacheKey, res, 60);
-      return res;
+    } catch (err: any) {
+      console.error("[MySQL getBlogBySlug Error]:", err?.message);
     }
 
     return null;
@@ -938,7 +865,9 @@ export const db = {
           blog.h1Heading || null,
         ]
       );
-    } catch {}
+    } catch (err: any) {
+      console.error("[MySQL createBlog Error]:", err?.message);
+    }
 
     return {
       ...blog,
@@ -971,8 +900,9 @@ export const db = {
       }
 
       return (await db.getBlogBySlug(updates.slug || id)) || null;
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL updateBlog Error]:", err?.message);
+    }
     return null;
   },
 
@@ -990,7 +920,7 @@ export const db = {
   },
 
   // -------------------------
-  // 6. Settings & CMS Content (Direct MySQL with fallback)
+  // 6. Settings & CMS Content (Strict MySQL Database)
   // -------------------------
   getSettings: async (): Promise<StoredSettings> => {
     const cached = backendCache.get<StoredSettings>("site_settings");
@@ -1036,38 +966,28 @@ export const db = {
           paymentTiers,
         };
 
+        // Auto-normalize image extensions (.jpg/.png -> .webp)
+        if (settings.heroBgImage && settings.heroBgImage.endsWith(".jpg")) {
+          settings.heroBgImage = settings.heroBgImage.replace(".jpg", ".webp");
+        }
+        if (!settings.heroBgImage || settings.heroBgImage === "") {
+          settings.heroBgImage = "/images/hero-bg.webp";
+        }
+        if (settings.chairmanPortrait && (settings.chairmanPortrait.endsWith(".png") || settings.chairmanPortrait.endsWith(".jpg"))) {
+          settings.chairmanPortrait = "/images/chairman_portrait_hd.webp";
+        }
+        if (!settings.chairmanPortrait || settings.chairmanPortrait === "") {
+          settings.chairmanPortrait = "/images/chairman_portrait_hd.webp";
+        }
+        if (settings.ogImage && settings.ogImage.endsWith(".jpg")) {
+          settings.ogImage = settings.ogImage.replace(".jpg", ".webp");
+        }
+
         backendCache.set("site_settings", settings, 60);
         return settings;
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    if (store && store.settings) {
-      const s = store.settings;
-      const settings: StoredSettings = {
-        siteName: s.siteName || "Saffron City Islamabad",
-        contactPhone: s.contactPhone || "0333 1113551",
-        secondaryPhone: s.secondaryPhone || "",
-        whatsappPhone: s.whatsappPhone || "923331113551",
-        officialEmail: s.officialEmail || "info@saffroncity.org",
-        officeAddress: s.officeAddress || "Main GT Road, Near T-Chowk, Rawat, Islamabad / Rawalpindi",
-        googleMapsUrl: s.googleMapsUrl || "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
-        rdaNocStatus: s.rdaNocStatus || "RDA Approved (Full 15,000 Kanal)",
-        rdaVerificationUrl: s.rdaVerificationUrl || "https://punjab.gov.pk",
-        announcement: s.announcement || "10% Pre-Launch Discount Active on 5 & 10 Marla Plots in Sector B",
-        activePreLaunchDiscount: s.activePreLaunchDiscount !== undefined ? Boolean(s.activePreLaunchDiscount) : true,
-        smtpEnabled: s.smtpEnabled !== undefined ? Boolean(s.smtpEnabled) : true,
-        smtpHost: s.smtpHost || "smtp.hostinger.com",
-        smtpPort: s.smtpPort || 465,
-        smtpSecure: s.smtpSecure !== undefined ? Boolean(s.smtpSecure) : true,
-        smtpUser: s.smtpUser || "info@saffroncity.org",
-        smtpPass: s.smtpPass || "",
-        smtpFromEmail: s.smtpFromEmail || "info@saffroncity.org",
-        leadNotificationEmail: s.leadNotificationEmail || "info@saffroncity.org",
-        ...s,
-      };
-      backendCache.set("site_settings", settings, 60);
-      return settings;
+    } catch (err: any) {
+      console.error("[MySQL getSettings Error]:", err?.message);
     }
 
     const defaultFallback: StoredSettings = {
@@ -1090,6 +1010,8 @@ export const db = {
       smtpPass: "",
       smtpFromEmail: "info@saffroncity.org",
       leadNotificationEmail: "info@saffroncity.org",
+      heroBgImage: "/images/hero-bg.webp",
+      chairmanPortrait: "/images/chairman_portrait_hd.webp",
     } as StoredSettings;
 
     backendCache.set("site_settings", defaultFallback, 60);
@@ -1102,10 +1024,54 @@ export const db = {
       const current = await db.getSettings();
       const merged: StoredSettings = { ...current, ...updates };
 
+      const metaKeys = [
+        "metaTitle", "metaDescription", "metaKeywords", "canonicalUrl",
+        "googleSiteVerification", "defaultRobotsIndex", "defaultRobotsFollow",
+        "ogTitle", "ogDescription", "ogImage", "twitterCard", "twitterSite",
+        "twitterCreator", "twitterTitle", "twitterDescription", "twitterImage",
+        "orgName", "orgLogo", "orgLegalName", "orgPriceRange", "orgStreetAddress",
+        "orgAddressLocality", "orgAddressRegion", "orgPostalCode", "orgAddressCountry",
+        "orgGeoLat", "orgGeoLng", "orgOpeningHoursOpens", "orgOpeningHoursCloses",
+        "facebookUrl", "instagramUrl", "youtubeUrl", "linkedinUrl", "twitterUrl",
+        "googleAnalyticsId", "googleTagManagerId", "customHeadScript"
+      ];
+      const metaData: Record<string, any> = {};
+      for (const key of metaKeys) {
+        if (merged[key as keyof StoredSettings] !== undefined) {
+          metaData[key] = merged[key as keyof StoredSettings];
+        }
+      }
+
+      const heroKeys = [
+        "heroTitle", "heroHighlightedWord", "heroSubtitle", "heroBgImage", "heroButtonText",
+        "masterPlanImage", "masterPlanFullImage", "masterPlanPdf", "masterPlanDescription",
+        "sectorATitle", "sectorATagline", "sectorAPlots", "sectorAPrice", "sectorAImage",
+        "sectorBTitle", "sectorBTagline", "sectorBPlots", "sectorBPrice", "sectorBImage",
+        "residentialPaymentPlanImage", "commercialPaymentPlanImage", "officialPaymentPlanPdf"
+      ];
+      const heroData: Record<string, any> = {};
+      for (const key of heroKeys) {
+        if (merged[key as keyof StoredSettings] !== undefined) {
+          heroData[key] = merged[key as keyof StoredSettings];
+        }
+      }
+
+      const chairmanKeys = [
+        "chairmanHeadingTop", "chairmanHeadingSub", "chairmanHeadingMain", "chairmanName",
+        "chairmanTitle", "chairmanBioShort", "chairmanBioFull", "chairmanCtaText",
+        "chairmanCtaLink", "chairmanPortrait"
+      ];
+      const chairmanData: Record<string, any> = {};
+      for (const key of chairmanKeys) {
+        if (merged[key as keyof StoredSettings] !== undefined) {
+          chairmanData[key] = merged[key as keyof StoredSettings];
+        }
+      }
+
       await pool.query(
         `INSERT INTO \`sitesetting\` (
-          \`id\`, \`siteName\`, \`contactPhone\`, \`secondaryPhone\`, \`whatsappPhone\`, \`officialEmail\`, \`officeAddress\`, \`rdaNocStatus\`, \`announcement\`, \`activePreLaunchDiscount\`, \`smtpEnabled\`, \`smtpHost\`, \`smtpPort\`, \`smtpSecure\`, \`smtpUser\`, \`smtpPass\`, \`smtpFromEmail\`, \`leadNotificationEmail\`
-        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          \`id\`, \`siteName\`, \`contactPhone\`, \`secondaryPhone\`, \`whatsappPhone\`, \`officialEmail\`, \`officeAddress\`, \`googleMapsUrl\`, \`rdaNocStatus\`, \`rdaVerificationUrl\`, \`announcement\`, \`activePreLaunchDiscount\`, \`smtpEnabled\`, \`smtpHost\`, \`smtpPort\`, \`smtpSecure\`, \`smtpUser\`, \`smtpPass\`, \`smtpFromEmail\`, \`leadNotificationEmail\`, \`metaSettingsJson\`, \`heroSettingsJson\`, \`chairmanSettingsJson\`, \`amenitiesJson\`, \`landmarksJson\`, \`paymentTiersJson\`
+        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           \`siteName\` = VALUES(\`siteName\`),
           \`contactPhone\` = VALUES(\`contactPhone\`),
@@ -1113,7 +1079,9 @@ export const db = {
           \`whatsappPhone\` = VALUES(\`whatsappPhone\`),
           \`officialEmail\` = VALUES(\`officialEmail\`),
           \`officeAddress\` = VALUES(\`officeAddress\`),
+          \`googleMapsUrl\` = VALUES(\`googleMapsUrl\`),
           \`rdaNocStatus\` = VALUES(\`rdaNocStatus\`),
+          \`rdaVerificationUrl\` = VALUES(\`rdaVerificationUrl\`),
           \`announcement\` = VALUES(\`announcement\`),
           \`activePreLaunchDiscount\` = VALUES(\`activePreLaunchDiscount\`),
           \`smtpEnabled\` = VALUES(\`smtpEnabled\`),
@@ -1123,7 +1091,13 @@ export const db = {
           \`smtpUser\` = VALUES(\`smtpUser\`),
           \`smtpPass\` = VALUES(\`smtpPass\`),
           \`smtpFromEmail\` = VALUES(\`smtpFromEmail\`),
-          \`leadNotificationEmail\` = VALUES(\`leadNotificationEmail\`);`,
+          \`leadNotificationEmail\` = VALUES(\`leadNotificationEmail\`),
+          \`metaSettingsJson\` = VALUES(\`metaSettingsJson\`),
+          \`heroSettingsJson\` = VALUES(\`heroSettingsJson\`),
+          \`chairmanSettingsJson\` = VALUES(\`chairmanSettingsJson\`),
+          \`amenitiesJson\` = VALUES(\`amenitiesJson\`),
+          \`landmarksJson\` = VALUES(\`landmarksJson\`),
+          \`paymentTiersJson\` = VALUES(\`paymentTiersJson\`);`,
         [
           merged.siteName,
           merged.contactPhone,
@@ -1131,7 +1105,9 @@ export const db = {
           merged.whatsappPhone,
           merged.officialEmail,
           merged.officeAddress,
+          merged.googleMapsUrl || "https://maps.google.com/?q=Saffron+City+Rawat+Islamabad",
           merged.rdaNocStatus,
+          merged.rdaVerificationUrl || "https://punjab.gov.pk",
           merged.announcement || null,
           merged.activePreLaunchDiscount ? 1 : 0,
           merged.smtpEnabled ? 1 : 0,
@@ -1142,39 +1118,42 @@ export const db = {
           merged.smtpPass || null,
           merged.smtpFromEmail || null,
           merged.leadNotificationEmail || null,
+          JSON.stringify(metaData),
+          JSON.stringify(heroData),
+          JSON.stringify(chairmanData),
+          JSON.stringify(merged.amenities || []),
+          JSON.stringify(merged.landmarks || []),
+          JSON.stringify(merged.paymentTiers || []),
         ]
       );
 
       backendCache.delete("site_settings");
       return merged;
-    } catch {
+    } catch (err: any) {
+      console.error("[MySQL updateSettings Error]:", err?.message);
       backendCache.delete("site_settings");
       return updates as StoredSettings;
     }
   },
 
   // -------------------------
-  // 7. Page SEO (Direct MySQL with fallback)
+  // 7. Page SEO (Strict MySQL Database)
   // -------------------------
   getPageSeoList: async (): Promise<StoredPageSeo[]> => {
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `pageseo` ORDER BY `path` ASC");
-      if (rows && Array.isArray(rows) && rows.length > 0) {
+      if (rows && Array.isArray(rows)) {
         return rows.map((r: any) => ({
           ...r,
           robotsIndex: Boolean(r.robotsIndex),
           robotsFollow: Boolean(r.robotsFollow),
         }));
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    return (store?.pageSeo || []).map((r: any) => ({
-      ...r,
-      robotsIndex: Boolean(r.robotsIndex),
-      robotsFollow: Boolean(r.robotsFollow),
-    }));
+    } catch (err: any) {
+      console.error("[MySQL getPageSeoList Error]:", err?.message);
+    }
+    return [];
   },
 
   getPageSeoByPath: async (path: string): Promise<StoredPageSeo | null> => {
@@ -1195,18 +1174,8 @@ export const db = {
         backendCache.set(cacheKey, res, 60);
         return res;
       }
-    } catch {}
-
-    const store = getLocalStoreFallback();
-    const r = (store?.pageSeo || []).find((x: any) => x.path === path);
-    if (r) {
-      const res = {
-        ...r,
-        robotsIndex: Boolean(r.robotsIndex),
-        robotsFollow: Boolean(r.robotsFollow),
-      };
-      backendCache.set(cacheKey, res, 60);
-      return res;
+    } catch (err: any) {
+      console.error("[MySQL getPageSeoByPath Error]:", err?.message);
     }
 
     return null;
@@ -1216,6 +1185,7 @@ export const db = {
     backendCache.delete(`pageseo_path_${data.path}`);
     backendCache.delete("pageseo_all");
     const id = data.id || `seo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+
     try {
       const pool = getMySQLPool();
       await pool.query(
@@ -1263,11 +1233,11 @@ export const db = {
           data.customJsonLd || null,
         ]
       );
+    } catch (err: any) {
+      console.error("[MySQL upsertPageSeo Error]:", err?.message);
+    }
 
-      return await db.getPageSeoByPath(data.path);
-    } catch {}
-
-    return null;
+    return await db.getPageSeoByPath(data.path);
   },
 
   deletePageSeo: async (id: string): Promise<boolean> => {
@@ -1282,7 +1252,7 @@ export const db = {
   },
 
   // -------------------------
-  // 8. Redirects (Direct MySQL with fallback)
+  // 8. Redirects (Strict MySQL Database)
   // -------------------------
   getRedirects: async (): Promise<StoredRedirect[]> => {
     const cached = backendCache.get<StoredRedirect[]>("redirects_all");
@@ -1292,20 +1262,14 @@ export const db = {
     try {
       const pool = getMySQLPool();
       const [rows]: any = await pool.query("SELECT * FROM `redirects` ORDER BY `createdAt` DESC");
-      if (rows && Array.isArray(rows) && rows.length > 0) {
+      if (rows && Array.isArray(rows)) {
         result = rows.map((r: any) => ({
           ...r,
           isActive: Boolean(r.isActive),
         }));
       }
-    } catch {}
-
-    if (!result.length) {
-      const store = getLocalStoreFallback();
-      result = (store?.redirects || []).map((r: any) => ({
-        ...r,
-        isActive: Boolean(r.isActive),
-      }));
+    } catch (err: any) {
+      console.error("[MySQL getRedirects Error]:", err?.message);
     }
 
     backendCache.set("redirects_all", result, 60);
@@ -1322,7 +1286,9 @@ export const db = {
          VALUES (?, ?, ?, ?, ?, 0, NOW())`,
         [id, redirect.sourcePath, redirect.destinationUrl, redirect.statusCode || 301, redirect.isActive ? 1 : 0]
       );
-    } catch {}
+    } catch (err: any) {
+      console.error("[MySQL createRedirect Error]:", err?.message);
+    }
 
     return {
       ...redirect,
@@ -1354,8 +1320,9 @@ export const db = {
 
       const [rows]: any = await pool.query("SELECT * FROM `redirects` WHERE `id` = ? LIMIT 1", [id]);
       return rows && rows.length > 0 ? rows[0] : null;
-    } catch {}
-
+    } catch (err: any) {
+      console.error("[MySQL updateRedirect Error]:", err?.message);
+    }
     return null;
   },
 

@@ -45,14 +45,15 @@ export async function getPageMetadata(
         ? settings.defaultRobotsFollow
         : true;
 
-    // Keywords
+    // Keywords (Deduplicated)
     const keywordsRaw = pageSeo?.secondaryKeywords
       ? `${pageSeo.focusKeyword || ""}, ${pageSeo.secondaryKeywords}, ${settings?.metaKeywords || ""}`
       : settings?.metaKeywords || "";
-    const keywords = keywordsRaw
+    const rawKeywords = keywordsRaw
       .split(",")
       .map((k) => k.trim())
       .filter(Boolean);
+    const keywords = Array.from(new Set(rawKeywords));
 
     // Social OpenGraph & Twitter
     const ogTitle = pageSeo?.ogTitle || metaTitle;
@@ -65,10 +66,15 @@ export async function getPageMetadata(
     const twImg = pageSeo?.twitterImage || settings?.twitterImage || ogImg;
     const fullTwImage = twImg.startsWith("http") ? twImg : `${canonicalBase}${twImg}`;
 
+    const publisherName = settings?.orgLegalName || siteName;
+
     const metadata: Metadata = {
       title: metaTitle,
       description: metaDescription,
       keywords: keywords.length > 0 ? keywords : undefined,
+      publisher: publisherName,
+      creator: siteName,
+      authors: [{ name: siteName }],
       metadataBase: new URL(canonicalBase),
       alternates: {
         canonical: canonicalUrl,

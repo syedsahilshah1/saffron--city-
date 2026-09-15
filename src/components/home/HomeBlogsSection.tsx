@@ -55,6 +55,7 @@ export default function HomeBlogsSection({
         <ScrollReveal animation="fade-up" delay={100} className="shrink-0">
           <Link
             href="/blogs"
+            aria-label="View all Saffron City real estate news, updates, and market insights"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs transition-colors group"
           >
             <span>View All Articles</span>
@@ -78,8 +79,19 @@ export default function HomeBlogsSection({
               {/* Featured Image */}
               <div className="relative w-full h-52 sm:h-56 overflow-hidden bg-slate-100">
                 <img
-                  src={blog.image || "/images/hero-bg.webp"}
+                  src={
+                    blog.image && blog.image.trim().length > 5
+                      ? blog.image.replace(/\.jpg$/, ".webp").replace(/\.jpeg$/, ".webp").replace(/\.png$/, ".webp")
+                      : "/images/hero-bg.webp"
+                  }
                   alt={blog.title}
+                  title={blog.title}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes("/images/hero-bg.webp")) {
+                      target.src = "/images/hero-bg.webp";
+                    }
+                  }}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -129,9 +141,11 @@ export default function HomeBlogsSection({
               </span>
               <Link
                 href={`/blogs/${blog.slug}`}
+                aria-label={`Read full story: ${blog.title}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D49E17] group-hover:text-amber-700 transition-colors"
               >
                 <span>Read Story</span>
+                <span className="sr-only">: {blog.title}</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

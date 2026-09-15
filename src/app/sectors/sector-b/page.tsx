@@ -6,20 +6,21 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   ArrowRight, 
-  MessageCircle,
-  Sparkles,
-  HelpCircle,
-  Layers,
-  Trees,
-  Home,
-  Clock,
-  Award,
-  MapPin,
-  Compass,
-  ExternalLink,
-  Navigation,
-  Zap,
-  Building2
+  MessageCircle, 
+  Sparkles, 
+  HelpCircle, 
+  Layers, 
+  Trees, 
+  Home, 
+  Clock, 
+  Award, 
+  MapPin, 
+  Compass, 
+  ExternalLink, 
+  Navigation, 
+  Zap, 
+  Building2,
+  Droplets
 } from "lucide-react";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
@@ -27,14 +28,53 @@ import WordReveal from "@/components/animations/WordReveal";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
-
 import { getPageMetadata } from "@/lib/seo";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   return await getPageMetadata("/sectors/sector-b");
 }
+
+const SECTOR_B_AMENITIES = [
+  {
+    title: "Dedicated Sector Mosque",
+    desc: "Built directly within the sector boundary for convenient 2-minute daily prayer access.",
+    icon: Building2,
+    image: "/images/amenities/amenity_mosque.webp"
+  },
+  {
+    title: "Family Community Parks",
+    desc: "Lush landscaped gardens, children's play area, and shaded walkways for peaceful evenings.",
+    icon: Trees,
+    image: "/images/sectors/green-community-park.webp"
+  },
+  {
+    title: "100% Underground Electrification",
+    desc: "Safe, wire-free environment ensuring dependable electricity supply without overhead clutter.",
+    icon: Zap,
+    image: "/images/facilities/underground-utilities.webp"
+  },
+  {
+    title: "24/7 Gated Security",
+    desc: "Round-the-clock perimeter monitoring, manned entry checkpoints, and active security patrolling.",
+    icon: ShieldCheck,
+    image: "/images/facilities/gated-security.webp"
+  },
+  {
+    title: "Clean Water Supply & RO Plant",
+    desc: "Dedicated clean water storage and modern filtration systems for every household.",
+    icon: Droplets,
+    image: "/images/facilities/water-filtration.webp"
+  },
+  {
+    title: "Wide Carpeted Streets",
+    desc: "Minimum 40-foot to 60-foot wide asphalt paved streets designed for smooth neighborhood transit.",
+    icon: Compass,
+    image: "/images/amenities/amenity_boulevard.webp"
+  }
+];
 
 const SECTOR_B_PLOTS_FOR_SALE = [
   {
@@ -79,7 +119,7 @@ const SECTOR_B_PLOTS_FOR_SALE = [
     possession: "PKR 31,00,000 (20%)",
     image: "/images/about/about-hero-banner.webp",
     tag: "Park Facing Option",
-    description: "Generous 1 Kanal residential plots positioned along wide carpeted secondary boulevards with direct views of green community belts.",
+    description: "Generous 1 Kanal residential plots positioned along wide carpeted avenues with direct views of green community belts.",
     whatsappText: "Hi, I want to book a 1 Kanal Residential Plot in Saffron City Sector B."
   }
 ];
@@ -114,7 +154,7 @@ const SECTOR_B_HIGHLIGHTS = [
 const SECTOR_B_NEARBY_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
-    time: "0 Minutes Direct",
+    time: "Direct Access",
     timeHighlight: "text-[#D49E17]",
     distance: "Direct Project Access",
     bgClass: "bg-emerald-50/70 border-emerald-300",
@@ -162,8 +202,8 @@ const SECTOR_B_FAQS = [
     category: "Plots"
   },
   {
-    question: "Is Sector B legally approved by RDA?",
-    answer: "Yes, Sector B is completely covered under Saffron City's approved 15,000 Kanal RDA No Objection Certificate (NOC) and town planning authorization.",
+    question: "Is Sector B covered by the approved society master plan?",
+    answer: "Yes, Sector B is completely covered under Saffron City's approved 15,000 Kanal layout plan and town planning authorization.",
     category: "Legal & NOC"
   },
   {
@@ -173,7 +213,37 @@ const SECTOR_B_FAQS = [
   }
 ];
 
-export default function SectorBPage() {
+export default async function SectorBPage() {
+  const allPlots = await db.getPlots();
+  const dynamicSectorBPlots = allPlots.filter(
+    (p) =>
+      p.sector?.toLowerCase().includes("sector b") ||
+      p.sector?.toLowerCase().includes("sector-b")
+  );
+
+  const mergedSectorBPlots = dynamicSectorBPlots.length > 0
+    ? [
+        ...dynamicSectorBPlots.map((p) => ({
+          size: `${p.category || "Plot"} (${p.plotNumber})`,
+          category: p.category || "Residential Plot",
+          dimensions: p.category?.includes("5 Marla") ? "25' × 45' (1,125 Sq. Ft.)" : p.category?.includes("10 Marla") ? "35' × 65' (2,275 Sq. Ft.)" : "50' × 90' (4,500 Sq. Ft.)",
+          totalPrice: `PKR ${(Number(p.totalPrice) || 0).toLocaleString()}`,
+          booking: `PKR ${(Number(p.downPayment || p.totalPrice * 0.1)).toLocaleString()} (10%)`,
+          allocation: `PKR ${(Number(p.totalPrice * 0.1)).toLocaleString()} (10%)`,
+          monthly: `PKR ${(Number(p.monthlyInst || (p.totalPrice * 0.3) / 30)).toLocaleString()} / month (×30)`,
+          biAnnual: `PKR ${(Math.round((p.totalPrice * 0.4) / 6)).toLocaleString()} (×6)`,
+          possession: `PKR ${(Number(p.totalPrice * 0.2)).toLocaleString()} (20%)`,
+          image: p.image && p.image.length > 3 ? p.image : "/images/sectors/sector-b-residential.webp",
+          tag: p.status === "Available" ? "Open for Booking" : p.status || "Family Choice",
+          description: p.features || `Authentic plot ${p.plotNumber} in Sector B with direct park view, wide carpeted road, and 100% underground utilities.`,
+          whatsappText: `Hi, I want to book Plot ${p.plotNumber} (${p.category || "Plot"}) in Saffron City Sector B.`,
+        })),
+        ...SECTOR_B_PLOTS_FOR_SALE.filter(
+          (base) => !dynamicSectorBPlots.some((d) => d.category?.toLowerCase() === base.size.toLowerCase())
+        ),
+      ]
+    : SECTOR_B_PLOTS_FOR_SALE;
+
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
     "Hi, I want to inquire about affordable residential plots in Saffron City Sector B."
   )}`;
@@ -181,12 +251,13 @@ export default function SectorBPage() {
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
       
-      {/* Hero Banner Section with Background Image */}
+      {/* 1. Hero Banner Section */}
       <section className="relative w-full pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
             src="/images/sectors/sector-b-residential.webp"
             alt="Saffron City Sector B Family Living"
+            title="Saffron City Sector B Family Living"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
@@ -194,7 +265,6 @@ export default function SectorBPage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-
           <WordReveal
             text="Sector B: Plots for Sale & Family Living"
             highlightWords={["Sector", "B", "Plots", "Sale", "Family"]}
@@ -204,33 +274,11 @@ export default function SectorBPage() {
 
           <ScrollReveal animation="fade-up" delay={100}>
             <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Designed for budget-conscious families and high-growth investors with accessible 10% booking, dedicated sector parks, and community mosque.
+              Designed for families and smart investors with accessible 10% booking, dedicated sector parks, and community mosque.
             </p>
           </ScrollReveal>
 
-          {/* Quick Metrics Counter Grid */}
-          <ScrollReveal animation="fade-up" delay={150}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">10%</span>
-                <p className="text-xs text-slate-300 font-medium">Down Payment</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">3 Years</span>
-                <p className="text-xs text-slate-300 font-medium">Installment Schedule</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">15,000 K</span>
-                <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">100%</span>
-                <p className="text-xs text-slate-300 font-medium">Legal Security</p>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
+          <ScrollReveal animation="fade-up" delay={150} className="flex flex-wrap justify-center gap-4 pt-4">
             <a
               href="#plots-for-sale"
               className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
@@ -242,7 +290,7 @@ export default function SectorBPage() {
               className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
             >
               <MapPin className="w-4 h-4 text-emerald-400" />
-              <span>Google Map Location</span>
+              <span>Location &amp; Map</span>
             </a>
             <a
               href={whatsappUrl}
@@ -260,98 +308,278 @@ export default function SectorBPage() {
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
 
-        {/* 1. Dedicated Sector B Overview Section */}
-        <section className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <WordReveal
-              text="Sector B Overview: Affordable Family Living"
-              highlightWords={["Sector", "B", "Overview", "Affordable", "Family"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
+        {/* 2. Overview Section (TEXT ON LEFT, IMAGE ON RIGHT) */}
+        <section className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Left: Text Content */}
+            <ScrollReveal animation="fade-right" className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Sector B Family Haven</span>
+              </div>
+              
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-slate-900 tracking-tight leading-tight">
+                Sector B Overview: Affordable Family Living
+              </h2>
 
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Sector B is specifically master-planned for families seeking a peaceful, green, and self-contained neighborhood with easy payment terms.
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-light">
+                Sector B is specifically master-planned for families seeking a peaceful, green, and self-contained neighborhood. Featuring community parks, a dedicated sector mosque, and easy 3-year installments, Sector B delivers exceptional value and tranquil residential living.
               </p>
-            </ScrollReveal>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <ScrollReveal animation="fade-right" delay={80}>
-              <div className="p-7 rounded-3xl bg-emerald-50/40 border border-emerald-200 hover:border-emerald-500 transition-all space-y-3 h-full">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
-                  <HeartHandshake className="w-6 h-6" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <HeartHandshake className="w-4 h-4 text-emerald-600" />
+                    <span>Accessible 10% Booking</span>
+                  </div>
+                  <p className="text-xs text-slate-600">Start your plot booking with manageable 30 monthly installments.</p>
                 </div>
-                <h4 className="font-bold text-slate-900 text-base">Accessible 10% Down Payment</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Start booking your plot from as low as PKR 450,000 with simple 30 monthly installments and no sudden lump-sum balloon payments.
-                </p>
+                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <Trees className="w-4 h-4 text-[#D49E17]" />
+                    <span>Parks &amp; Green Spaces</span>
+                  </div>
+                  <p className="text-xs text-slate-600">Surrounded by family parks, play areas, and quiet residential streets.</p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-wrap gap-4">
+                <a
+                  href="#plots-for-sale"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs shadow transition-all"
+                >
+                  <span>View Sector B Plots</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Inquire on WhatsApp</span>
+                </a>
               </div>
             </ScrollReveal>
 
-            <ScrollReveal animation="fade-up" delay={120}>
-              <div className="p-7 rounded-3xl bg-amber-50/40 border border-amber-200 hover:border-[#D49E17] transition-all space-y-3 h-full">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-[#D49E17] shadow-sm">
-                  <Trees className="w-6 h-6" />
+            {/* Right: Image Card */}
+            <ScrollReveal animation="fade-left" className="lg:col-span-5">
+              <div className="relative w-full h-80 sm:h-[420px] rounded-3xl overflow-hidden shadow-2xl border-2 border-emerald-200 group">
+                <img
+                  src="/images/sectors/sector-b-residential.webp"
+                  alt="Saffron City Sector B Family Living Overview"
+                  title="Saffron City Sector B Family Living Overview"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute top-4 left-4">
+                  <span className="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider shadow-md">
+                    Sector B Overview
+                  </span>
                 </div>
-                <h4 className="font-bold text-slate-900 text-base">Dedicated Parks &amp; Playgrounds</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Multiple pocket parks, jogging tracks, and safe children&apos;s play areas situated within easy walking distance of all residential streets.
-                </p>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal animation="fade-left" delay={160}>
-              <div className="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-400 transition-all space-y-3 h-full">
-                <div className="w-12 h-12 rounded-2xl bg-slate-200 flex items-center justify-center text-slate-800 shadow-sm">
-                  <ShieldCheck className="w-6 h-6" />
+                <div className="absolute bottom-5 left-5 right-5 text-white space-y-1">
+                  <p className="text-xs font-semibold text-emerald-300">Quiet Residential Enclave • Green Parks</p>
+                  <h3 className="text-xl font-bold font-heading text-white">Family Living &amp; High ROI</h3>
                 </div>
-                <h4 className="font-bold text-slate-900 text-base">100% Legal RDA Protection</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Fully covered under the authentic 15,000 Kanal RDA No Objection Certificate (NOC) with guaranteed title ownership.
-                </p>
               </div>
             </ScrollReveal>
           </div>
         </section>
 
-        {/* 2. Available Plots in Sector B (With Photographic Image Headers!) */}
-        <section id="plots-for-sale" className="space-y-12">
+        {/* 3. Amenities Section */}
+        <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Available Residential Plots in Sector B"
-              highlightWords={["Residential", "Plots", "Sector", "B"]}
+              text="Sector B Community Amenities"
+              highlightWords={["Sector", "B", "Amenities", "Community"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
             />
-            <p className="text-sm text-slate-600">
-              Choose your ideal plot size with structured 30-month installments, 6 bi-annual payments, and instant WhatsApp booking.
-            </p>
+            <ScrollReveal animation="fade-up" delay={100}>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Everything your family needs for a comfortable lifestyle right within your immediate neighborhood.
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SECTOR_B_AMENITIES.map((item, idx) => {
+              const IconComp = item.icon;
+              return (
+                <ScrollReveal
+                  key={item.title}
+                  animation={idx % 3 === 0 ? "fade-right" : idx % 3 === 1 ? "fade-up" : "fade-left"}
+                  delay={idx * 80}
+                >
+                  <div className="rounded-3xl bg-white border border-emerald-200 hover:border-emerald-500 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                    <div>
+                      <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          title={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-emerald-600 shadow">
+                          <IconComp className="w-5 h-5" />
+                        </div>
+                      </div>
+                      <div className="p-5 space-y-2">
+                        <h4 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 4. Location & Nearby Landmarks Section */}
+        <section id="sector-location" className="space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <WordReveal
+              text="Sector B Location & Travel Distances"
+              highlightWords={["Sector", "B", "Location", "Travel"]}
+              as="h2"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
+            />
+            <ScrollReveal animation="fade-up" delay={100}>
+              <p className="text-sm text-slate-600">
+                Peacefully situated behind the commercial frontage with fast access to Main GT Road.
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Landmarks List Left */}
+            <ScrollReveal animation="fade-right" className="lg:col-span-6 space-y-4">
+              <div className="p-6 rounded-3xl bg-white border border-emerald-200 shadow-xl space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>GT Road Highway Corridor</span>
+                </div>
+
+                <h3 className="text-2xl font-bold text-slate-900 font-heading">
+                  Twin Cities Commute Times
+                </h3>
+
+                <div className="space-y-3">
+                  {SECTOR_B_NEARBY_LANDMARKS.map((item, idx) => (
+                    <div
+                      key={item.name}
+                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${item.bgClass}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-emerald-300/80 shadow-sm">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            title={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.name}</h4>
+                          <p className="text-[11px] text-slate-500">{item.distance}</p>
+                        </div>
+                      </div>
+                      <strong className={`text-xs sm:text-sm font-bold font-mono ${item.timeHighlight}`}>
+                        {item.time}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 flex flex-wrap gap-3">
+                  <a
+                    href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs shadow transition-all flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Open in Google Maps</span>
+                  </a>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all flex items-center gap-2"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    <span>Schedule Site Visit</span>
+                  </a>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Embedded Google Map Right */}
+            <ScrollReveal animation="fade-left" className="lg:col-span-6 space-y-3">
+              <div className="w-full h-[380px] sm:h-[450px] rounded-3xl overflow-hidden border-2 border-emerald-300 shadow-2xl relative bg-slate-100">
+                <iframe
+                  title="Sector B Saffron City Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                />
+                <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded-full bg-white/95 border border-emerald-300 text-emerald-900 text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-md">
+                  <MapPin className="w-4 h-4 text-emerald-600" />
+                  <span>Sector B • Peaceful Living</span>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* 5. Plots for Sale Section */}
+        <section id="plots-for-sale" className="space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <WordReveal
+              text="Sector B Plots for Sale"
+              highlightWords={["Sector", "B", "Plots", "Sale"]}
+              as="h2"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
+            />
+            <ScrollReveal animation="fade-up" delay={100}>
+              <p className="text-sm text-slate-600">
+                Explore available residential plots in Sector B with dimensions, price breakdown, and instant booking options.
+              </p>
+            </ScrollReveal>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {SECTOR_B_PLOTS_FOR_SALE.map((plot, idx) => {
+            {mergedSectorBPlots.map((plot, idx) => {
               const isLeft = idx === 0;
               const isRight = idx === 2;
               return (
                 <ScrollReveal
-                  key={plot.size}
+                  key={`${plot.size}-${idx}`}
                   animation={isLeft ? "fade-right" : isRight ? "fade-left" : "fade-up"}
                   delay={idx * 100}
                 >
                   <div className="rounded-3xl bg-white border border-emerald-200 hover:border-emerald-500 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
                     <div>
-                      {/* Plot Photographic Header */}
-                      <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                      <Link href="/plot-for-sale" className="block relative h-56 w-full overflow-hidden bg-slate-100 cursor-pointer">
                         <img
                           src={plot.image}
                           alt={`${plot.size} Sector B Plot`}
+                          title={`${plot.size} Sector B Plot`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
                         <div className="absolute top-3 right-3">
-                          <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 text-[11px] font-bold shadow">
+                          <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-emerald-400 border border-emerald-400/40 text-[11px] font-bold shadow">
                             {plot.tag}
                           </span>
                         </div>
@@ -360,16 +588,15 @@ export default function SectorBPage() {
                             {plot.category}
                           </span>
                           <h3 className="text-2xl font-black text-white drop-shadow-sm">
-                            {plot.size} Residential
+                            {plot.size}
                           </h3>
                         </div>
-                      </div>
+                      </Link>
 
-                      {/* Details & Pricing */}
                       <div className="p-6 space-y-4">
                         <div className="space-y-1">
                           <p className="text-xs text-slate-500 font-mono font-medium">{plot.dimensions}</p>
-                          <p className="text-2xl font-black text-[#D49E17]">{plot.totalPrice}</p>
+                          <p className="text-2xl font-black text-slate-900">{plot.totalPrice}</p>
                         </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed">
@@ -401,7 +628,6 @@ export default function SectorBPage() {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="p-6 pt-0 space-y-2">
                       <a
                         href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(plot.whatsappText)}`}
@@ -410,7 +636,7 @@ export default function SectorBPage() {
                         className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-2 shadow transition-all"
                       >
                         <MessageCircle className="w-4 h-4" />
-                        <span>Book via WhatsApp</span>
+                        <span>Book on WhatsApp</span>
                       </a>
                       <Link
                         href="/payment-plan"
@@ -426,19 +652,109 @@ export default function SectorBPage() {
           </div>
         </section>
 
-        {/* 3. Detailed Sector B Pricing Schedule Table */}
+        {/* 6. Master Map / Layout Callout Section */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-emerald-50/50 border border-emerald-200 shadow-xl space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8 space-y-4">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
+                Official Demarcation &amp; Layout
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
+                Explore Sector B on the 4K Master Plan
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Inspect Sector B street networks, family parks, sector mosque placement, and individual plot numbers on our high-resolution interactive master plan viewer.
+              </p>
+            </div>
+            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
+              <Link
+                href="/master-plan"
+                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <Layers className="w-4 h-4" />
+                <span>Open Master Plan Viewer</span>
+              </Link>
+              <Link
+                href="/payment-plan"
+                className="px-6 py-3.5 rounded-xl bg-white border border-slate-300 hover:border-emerald-400 text-slate-800 font-bold text-xs text-center transition-colors"
+              >
+                Payment Schedule
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. Features / Why Choose Sector B */}
+        <section className="space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <WordReveal
+              text="Why Families Choose Sector B"
+              highlightWords={["Families", "Choose", "Sector", "B"]}
+              as="h2"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
+            />
+            <ScrollReveal animation="fade-up" delay={100}>
+              <p className="text-sm text-slate-600">
+                Created to make quality master-planned community living accessible and secure for families.
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {SECTOR_B_HIGHLIGHTS.map((item, index) => {
+              const isLeft = index % 2 === 0;
+              return (
+                <ScrollReveal 
+                  key={item.title} 
+                  animation={isLeft ? "fade-right" : "fade-left"}
+                  delay={index * 80}
+                >
+                  <div className="rounded-3xl bg-white border border-emerald-200 hover:border-emerald-500 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
+                    <div>
+                      <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          title={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-3 left-3">
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow">
+                            {item.tag}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-5 space-y-2">
+                        <h4 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 8. Detailed Sector B Payment Schedule Breakdown */}
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
               Sector B 3-Year Installment Breakdown
             </h3>
             <p className="text-xs sm:text-sm text-slate-600">
-              Verified payment plan for residential plots in Sector B with fixed monthly stages.
+              Clear and transparent 36-month payment breakdown for residential plots in Sector B.
             </p>
           </div>
 
           <ScrollReveal animation="fade-up" delay={100}>
-            {/* 1. Mobile Cards View (Hidden on md and up) */}
+            {/* Mobile Cards View */}
             <div className="block md:hidden space-y-3">
               {RESIDENTIAL_PRICES.map((p) => (
                 <div
@@ -458,7 +774,7 @@ export default function SectorBPage() {
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                         TOTAL PRICE
                       </span>
-                      <span className="text-base font-bold text-[#D49E17] font-heading">
+                      <span className="text-base font-bold text-slate-900 font-heading">
                         {p.totalPriceFormatted}
                       </span>
                     </div>
@@ -466,7 +782,7 @@ export default function SectorBPage() {
 
                   <div className="grid grid-cols-2 gap-2 pt-3 text-xs">
                     <div className="p-2 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                      <span className="text-[10px] text-emerald-900/80 font-medium block">Booking (10%)</span>
+                      <span className="text-[10px] text-emerald-900 font-medium block">Booking (10%)</span>
                       <span className="font-bold text-slate-800 text-[11px]">{p.bookingAmountFormatted}</span>
                     </div>
                     <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
@@ -491,7 +807,7 @@ export default function SectorBPage() {
               ))}
             </div>
 
-            {/* 2. Desktop Full Table View (Hidden on mobile) */}
+            {/* Desktop Full Table View */}
             <div className="hidden md:block overflow-x-auto rounded-3xl border border-emerald-200 bg-white shadow-xl">
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-emerald-50 text-emerald-900 uppercase font-bold text-[11px] border-b border-emerald-200">
@@ -511,7 +827,7 @@ export default function SectorBPage() {
                     <tr key={p.size} className="hover:bg-emerald-50/50 transition-colors">
                       <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
                       <td className="py-4 px-5 text-slate-500 font-mono">{p.dimensions}</td>
-                      <td className="py-4 px-5 font-bold text-[#D49E17] text-sm">{p.totalPriceFormatted}</td>
+                      <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.totalPriceFormatted}</td>
                       <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
                       <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
                       <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
@@ -525,271 +841,7 @@ export default function SectorBPage() {
           </ScrollReveal>
         </section>
 
-        {/* 4. Sector B Community Amenities (4 Cards with Images) */}
-        <section className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <WordReveal
-              text="Sector B Community Highlights"
-              highlightWords={["Community", "Highlights"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
-
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600">
-                Thoughtfully planned to provide serene neighborhood living with top-tier community facilities.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {SECTOR_B_HIGHLIGHTS.map((item, index) => {
-              const isEven = index % 2 === 0;
-              return (
-                <ScrollReveal 
-                  key={item.title} 
-                  animation={isEven ? "fade-right" : "fade-left"}
-                  delay={index * 80}
-                >
-                  <div className="rounded-3xl bg-white border border-emerald-200 hover:border-emerald-500 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col justify-between h-full">
-                    <div>
-                      <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <div className="absolute bottom-3 left-3">
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow">
-                            {item.tag}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-5 space-y-2">
-                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* 5. DEDICATED SEPARATE SECTION: Nearby Landmarks with Image Thumbnails */}
-        <section id="nearby-landmarks" className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-
-            <WordReveal
-              text="Nearby Landmarks & Travel Distances"
-              highlightWords={["Nearby", "Landmarks", "Travel", "Distances"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
-
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600">
-                Direct highway commute times from Sector B to major twin-city destinations.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          {/* Landmark Milestone Rows with Images */}
-          <div className="max-w-4xl mx-auto space-y-4">
-            {SECTOR_B_NEARBY_LANDMARKS.map((item, idx) => (
-              <ScrollReveal
-                key={item.name}
-                animation={idx % 2 === 0 ? "fade-right" : "fade-left"}
-                delay={idx * 70}
-              >
-                <div className={`w-full p-3 sm:p-4 pr-6 sm:pr-8 rounded-2xl sm:rounded-full border shadow-md hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group ${item.bgClass}`}>
-                  <div className="flex items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
-                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-full overflow-hidden shrink-0 border-2 border-emerald-300/80 shadow group-hover:scale-105 transition-transform duration-300">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                        {item.name}
-                      </h4>
-                      <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
-                        {item.distance}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
-                    <span className="sm:hidden text-xs text-slate-500">Travel Time:</span>
-                    <strong className={`text-sm sm:text-lg font-bold font-mono tracking-tight ${item.timeHighlight}`}>
-                      {item.time}
-                    </strong>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </section>
-
-        {/* 6. Sector B Location & Embedded Google Map */}
-        <section id="sector-location" className="space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-
-
-            <WordReveal
-              text="Sector B Location & Google Map"
-              highlightWords={["Sector", "B", "Location", "Google", "Map"]}
-              as="h2"
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
-            />
-
-            <ScrollReveal animation="fade-up" delay={100}>
-              <p className="text-sm text-slate-600">
-                Sector B is located inside the master planned Saffron City on Main GT Road near Rawat, Islamabad.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Location Highlights Left (fade-right) */}
-            <ScrollReveal animation="fade-right" className="lg:col-span-6 space-y-6">
-              <div className="p-8 rounded-3xl bg-white border border-emerald-200 shadow-xl space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Main GT Road (N-5) Access</span>
-                </div>
-
-                <h3 className="text-2xl font-bold text-slate-900 font-heading">
-                  Quiet Family Enclave with Fast Highway Link
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Sector B offers a peaceful residential ambiance set slightly behind the main commercial frontage, providing noise-free living for families while retaining direct connection to the 250-foot grand boulevard and Main GT Road.
-                </p>
-
-                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-800">Project Coordinates:</span>
-                    <span className="font-mono font-bold text-slate-900">33.4939° N, 73.1118° E</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-800">Highway Access:</span>
-                    <span className="font-bold text-emerald-700">Main GT Road (N-5)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-800">Authority Jurisdiction:</span>
-                    <span className="font-bold text-[#D49E17]">RDA Approved</span>
-                  </div>
-                </div>
-
-                <div className="hidden lg:flex pt-3 flex-wrap gap-3">
-                  <a
-                    href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs shadow transition-all flex items-center gap-2"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Open in Google Maps</span>
-                  </a>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all flex items-center gap-2"
-                  >
-                    <Navigation className="w-4 h-4" />
-                    <span>Schedule Site Visit</span>
-                  </a>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Embedded Google Map Right (fade-left) */}
-            <ScrollReveal animation="fade-left" className="lg:col-span-6 space-y-3">
-              <div className="w-full h-[360px] sm:h-[450px] rounded-3xl overflow-hidden border-2 border-emerald-300 shadow-2xl relative bg-slate-100">
-                <iframe
-                  title="Sector B Saffron City Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                />
-                <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded-full bg-white/95 border border-emerald-300 text-emerald-900 text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-md">
-                  <MapPin className="w-4 h-4 text-emerald-600" />
-                  <span>Sector B • Family Residential Block</span>
-                </div>
-              </div>
-
-              {/* Action Buttons below location map on mobile view */}
-              <div className="flex lg:hidden flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-1">
-                <a
-                  href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs shadow transition-all flex items-center justify-center gap-2 text-center"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Open in Google Maps</span>
-                </a>
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition-all flex items-center justify-center gap-2 text-center"
-                >
-                  <Navigation className="w-4 h-4" />
-                  <span>Schedule Site Visit</span>
-                </a>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* 7. Master Plan Map Callout */}
-        <section className="p-8 sm:p-12 rounded-3xl bg-slate-50 border border-slate-200 shadow-xl space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-8 space-y-4">
-              <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">
-                Full Project Map
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-                Inspect Sector B on the 4K Master Plan
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Explore the complete sector road network, park placements, mosque landmarks, and plot demarcations on our interactive high-resolution master plan viewer.
-              </p>
-            </div>
-            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
-              <Link
-                href="/master-plan"
-                className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-[#D49E17] text-white hover:text-slate-950 font-bold text-xs text-center shadow-md transition-all flex items-center justify-center gap-2"
-              >
-                <Layers className="w-4 h-4" />
-                <span>Open Master Plan Viewer</span>
-              </Link>
-              <Link
-                href="/payment-plan"
-                className="px-6 py-3.5 rounded-xl bg-white border border-slate-300 hover:border-emerald-300 text-slate-800 font-bold text-xs text-center transition-colors"
-              >
-                Payment Schedule
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Sector B FAQs */}
+        {/* 9. Sector B FAQs */}
         <section className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-3">
             <WordReveal
@@ -805,7 +857,7 @@ export default function SectorBPage() {
           </ScrollReveal>
         </section>
 
-        {/* 9. Booking Form Section */}
+        {/* 10. Priority Booking Form Section */}
         <section id="booking" className="max-w-3xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <WordReveal
@@ -815,7 +867,7 @@ export default function SectorBPage() {
               className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading block"
             />
             <p className="text-xs sm:text-sm text-slate-600">
-              Submit your inquiry directly to our official sales team to secure Sector B priority allotment.
+              Submit your inquiry to our sales team to secure priority plot allocation in Sector B.
             </p>
           </div>
 
@@ -823,6 +875,7 @@ export default function SectorBPage() {
             <EnquiryForm defaultSector="Sector B" defaultPlotType="Residential" />
           </ScrollReveal>
         </section>
+
       </div>
     </div>
   );

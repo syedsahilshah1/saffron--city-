@@ -123,7 +123,7 @@ export const COMMERCIAL_PRICES: PlotPriceInfo[] = [
     sector: "Signature Commercial Block",
     description: "30×40 (5.33 Marla) with Total 2 Crore, 45 Lac Discount. 3-Year Flexible Payment Plan.",
     dimensions: "30' × 40' (5.33 Marla)",
-    features: ["30×40 Prime Size", "PKR 45 Lac Discount", "Main Commercial Boulevard", "RDA Approved"]
+    features: ["30×40 Prime Size", "PKR 45 Lac Discount", "Main Commercial Boulevard", "Direct GT Road Access"]
   },
   {
     size: "4 Marla Commercial",

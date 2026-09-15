@@ -104,6 +104,7 @@ export default function PrivacyPolicyPage() {
           <img
             src="/images/about/about-hero-banner.webp"
             alt="Saffron City Privacy Policy"
+            title="Saffron City Privacy Policy"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />

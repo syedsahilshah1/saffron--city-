@@ -38,12 +38,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Col 1: Brand & Bio */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-3"
+              aria-label="Saffron City Islamabad Official Homepage"
+            >
               <img
                 src="/images/saffron-city-logo.webp"
-                alt="Saffron City Islamabad"
+                alt="Saffron City Islamabad Official Logo"
+                title="Saffron City Islamabad Official Logo"
                 className="h-20 sm:h-24 w-auto object-contain drop-shadow-sm"
               />
+              <span className="sr-only">Saffron City Islamabad</span>
             </Link>
             <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
               A planned residential and commercial community spread over 15,000 Kanal on Main GT Road, Rawat with official RDA NOC approval.
@@ -147,13 +153,21 @@ export default function Footer() {
 
         {/* Bottom copyright & disclaimer */}
         <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} Saffron City Islamabad / Rawalpindi. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy-policy" className="hover:text-slate-800 transition-colors">
+          <p>© {new Date().getFullYear()} Saffron City Islamabad — Developed by SKB Group. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-6">
+            <Link
+              href="/privacy-policy"
+              className="hover:text-slate-800 transition-colors"
+              aria-label="View Saffron City Privacy Policy"
+            >
               Privacy Policy
             </Link>
-            <Link href="/noc-status" className="hover:text-slate-800 transition-colors">
-              RDA Approval
+            <Link
+              href="/noc-status"
+              className="hover:text-slate-800 transition-colors"
+              aria-label="Verify Saffron City RDA NOC Approval Status"
+            >
+              RDA Approval &amp; NOC
             </Link>
           </div>
         </div>

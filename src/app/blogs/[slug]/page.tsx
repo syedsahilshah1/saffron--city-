@@ -156,6 +156,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
           <img
             src={blog.image || "/images/about/about-hero-banner.webp"}
             alt={blog.imageAlt || blog.title}
+            title={blog.imageAlt || blog.title}
             className="w-full h-full object-cover opacity-25 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/70" />
@@ -235,6 +236,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
               <img
                 src={blog.image || "/images/hero-bg.webp"}
                 alt={blog.imageAlt || blog.title}
+                title={blog.imageAlt || blog.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
@@ -461,6 +463,7 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
                       <img
                         src={rel.image || "/images/hero-bg.webp"}
                         alt={rel.title}
+                        title={rel.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     </div>

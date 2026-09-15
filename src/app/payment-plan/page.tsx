@@ -77,6 +77,7 @@ export default function PaymentPlanPage() {
           <img
             src="/images/about/about-hero-banner.webp"
             alt="Saffron City Payment Plan Overview"
+            title="Saffron City Payment Plan Overview"
             className="w-full h-full object-cover object-center opacity-100 scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/45" />
@@ -188,6 +189,7 @@ export default function PaymentPlanPage() {
                     <img
                       src={SITE_CONFIG.residentialPaymentPlanImg}
                       alt="Saffron City Residential Payment Plan Sector A Block B"
+                      title="Saffron City Residential Payment Plan Sector A Block B"
                       className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-500"
                     />
                   </div>
@@ -236,6 +238,7 @@ export default function PaymentPlanPage() {
                     <img
                       src={SITE_CONFIG.commercialPaymentPlanImg}
                       alt="Saffron City Signature Commercial Payment Plan"
+                      title="Saffron City Signature Commercial Payment Plan"
                       className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-500"
                     />
                   </div>

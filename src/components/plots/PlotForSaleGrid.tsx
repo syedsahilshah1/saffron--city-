@@ -169,6 +169,7 @@ export default function PlotForSaleGrid() {
                 <img
                   src={plot.image}
                   alt={plot.title}
+                  title={plot.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
 
@@ -226,9 +227,11 @@ export default function PlotForSaleGrid() {
                 <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
                   <Link
                     href={plot.href}
+                    aria-label={`View details for ${plot.size} ${plot.category} plot in ${plot.sector}`}
                     className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
                   >
                     <span>View Details</span>
+                    <span className="sr-only"> for {plot.size} in {plot.sector}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
 

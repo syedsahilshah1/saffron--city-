@@ -28,7 +28,7 @@ export async function generateMetadata() {
 const LOCATION_NEARBY_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
-    time: "0 Minutes Direct",
+    time: "Direct Access",
     timeHighlight: "text-[#D49E17]",
     distance: "Direct Frontage Access",
     bgClass: "bg-amber-50/70 border-amber-300",
@@ -78,6 +78,7 @@ export default function LocationPage() {
           <img
             src="/images/landmark_dha_islamabad.webp"
             alt="Saffron City Prime Location GT Road Rawat"
+            title="Saffron City Prime Location GT Road Rawat"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
@@ -92,35 +93,7 @@ export default function LocationPage() {
             className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
           />
 
-          <ScrollReveal animation="fade-up" delay={100}>
-            <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Situated directly on Main GT Road near Rawat, providing effortless 0-minute highway access, seamless connectivity to DHA &amp; Bahria Town, and rapid link to the Rawalpindi Ring Road.
-            </p>
-          </ScrollReveal>
-
-          {/* Location Quick Metrics Counter */}
-          <ScrollReveal animation="fade-up" delay={150}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">0 Min</span>
-                <p className="text-xs text-slate-300 font-medium">GT Road Access</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">5 Mins</span>
-                <p className="text-xs text-slate-300 font-medium">T-Chowk Rawat</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">10 Mins</span>
-                <p className="text-xs text-slate-300 font-medium">DHA &amp; Giga Mall</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">15 Mins</span>
-                <p className="text-xs text-slate-300 font-medium">Ring Road Interchange</p>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-2">
+          <ScrollReveal animation="fade-up" delay={150} className="flex flex-wrap justify-center gap-4 pt-4">
             <a
               href="#location-map"
               className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
@@ -204,6 +177,7 @@ export default function LocationPage() {
                       <img
                         src={item.image}
                         alt={item.name}
+                        title={item.name}
                         className="w-full h-full object-cover"
                       />
                     </div>

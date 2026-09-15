@@ -95,10 +95,6 @@ export default function AboutUsPage() {
             About <span className="text-[#D49E17]">Us</span>
           </h1>
 
-          <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-            Building Pakistan’s premier 15,000 Kanal RDA approved master planned community on Main GT Road, Rawat — delivering trust, architectural excellence, and generational living.
-          </p>
-
           {/* Quick Stats Banner */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-6">
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">

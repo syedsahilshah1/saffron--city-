@@ -2768,9 +2768,17 @@ export default function AdminDashboardPage() {
                           <Search className="w-3.5 h-3.5 text-blue-600" />
                           <span>Google Search Snippet Preview</span>
                         </span>
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                          Live Render
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Check className="w-3 h-3 text-emerald-600" /> SEO Pass
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <X className="w-3 h-3 text-rose-600" /> Needs Review
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 font-sans space-y-1">
                         <div className="flex items-center gap-2 text-[11px] text-[#202124]">
@@ -2784,7 +2792,43 @@ export default function AdminDashboardPage() {
                           {settings.metaTitle || "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat"}
                         </div>
                         <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
-                          {settings.metaDescription || "Invest in Saffron City Islamabad — premier 15,000 Kanal RDA NOC-approved housing society on Main GT Road near Rawat."}
+                          {settings.metaDescription || "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments."}
+                        </div>
+                      </div>
+
+                      {/* SERP Audit Status Pills */}
+                      <div className="pt-2 flex flex-wrap gap-2 text-[11px]">
+                        <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl">
+                          <span className="text-slate-500 font-medium">Title:</span>
+                          {(settings.metaTitle || "").length >= 50 && (settings.metaTitle || "").length <= 60 ? (
+                            <span className="font-bold text-emerald-700 flex items-center gap-0.5">
+                              <Check className="w-3 h-3" /> {(settings.metaTitle || "").length} chars
+                            </span>
+                          ) : (settings.metaTitle || "").length > 60 ? (
+                            <span className="font-bold text-rose-600 flex items-center gap-0.5">
+                              <X className="w-3 h-3" /> {(settings.metaTitle || "").length} chars (Max 60)
+                            </span>
+                          ) : (
+                            <span className="font-bold text-amber-600 flex items-center gap-0.5">
+                              {(settings.metaTitle || "").length} chars
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl">
+                          <span className="text-slate-500 font-medium">Description:</span>
+                          {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
+                            <span className="font-bold text-emerald-700 flex items-center gap-0.5">
+                              <Check className="w-3 h-3" /> {(settings.metaDescription || "").length} chars (Optimal)
+                            </span>
+                          ) : (settings.metaDescription || "").length > 160 ? (
+                            <span className="font-bold text-rose-600 flex items-center gap-0.5">
+                              <X className="w-3 h-3" /> {(settings.metaDescription || "").length} chars (Too long)
+                            </span>
+                          ) : (
+                            <span className="font-bold text-amber-600 flex items-center gap-0.5">
+                              {(settings.metaDescription || "").length} chars (Short)
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2839,11 +2883,23 @@ export default function AdminDashboardPage() {
 
                     <div className="space-y-4 text-xs">
                       <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="font-bold text-slate-700">Default Meta Title</label>
-                          <span className={`text-[11px] font-mono ${settings.metaTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                            {settings.metaTitle.length}/65 chars (Optimal: 50-60)
-                          </span>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="font-bold text-slate-700 flex items-center gap-1.5">
+                            <span>Default Meta Title</span>
+                          </label>
+                          {(settings.metaTitle || "").length >= 50 && (settings.metaTitle || "").length <= 60 ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              <Check className="w-3 h-3 text-emerald-600" /> {(settings.metaTitle || "").length} characters
+                            </span>
+                          ) : (settings.metaTitle || "").length > 60 ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                              <X className="w-3 h-3 text-rose-600" /> {(settings.metaTitle || "").length} characters
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                              {(settings.metaTitle || "").length} characters (Optimal 50-60)
+                            </span>
+                          )}
                         </div>
                         <input
                           type="text"
@@ -2854,11 +2910,39 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="font-bold text-slate-700">Default Meta Description</label>
-                          <span className={`text-[11px] font-mono ${settings.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                            {settings.metaDescription.length}/160 chars (Optimal: 140-160)
-                          </span>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="font-bold text-slate-700 flex items-center gap-1.5">
+                            <span>Default Meta Description</span>
+                          </label>
+                          <div className="flex items-center gap-2">
+                            {(settings.metaDescription || "").length >= 120 && (settings.metaDescription || "").length <= 160 ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <Check className="w-3 h-3 text-emerald-600" /> {(settings.metaDescription || "").length} characters
+                              </span>
+                            ) : (settings.metaDescription || "").length > 160 ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                                <X className="w-3 h-3 text-rose-600" /> {(settings.metaDescription || "").length} characters
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                {(settings.metaDescription || "").length} characters (Optimal 120-160)
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateSettingField(
+                                  "metaDescription",
+                                  "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments."
+                                )
+                              }
+                              className="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full transition flex items-center gap-1 cursor-pointer"
+                              title="Set to 154-character recommended text"
+                            >
+                              <Sparkles className="w-3 h-3 text-amber-600" />
+                              <span>Auto-Fix (154 Chars)</span>
+                            </button>
+                          </div>
                         </div>
                         <textarea
                           rows={3}
@@ -3346,19 +3430,71 @@ export default function AdminDashboardPage() {
                       </div>
 
                       {/* Live SERP Preview for this specific page */}
-                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                          Google Search Result Simulation
-                        </span>
-                        <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
-                          <span className="text-slate-700 font-medium">https://saffroncity.org</span>
-                          <span className="text-slate-400">{selectedPageSeo.path}</span>
+                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-slate-200/80 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Google Search Result Simulation
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <Check className="w-3 h-3 text-emerald-600" /> SEO Pass
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <X className="w-3 h-3 text-rose-600" /> Needs Review
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
-                          {selectedPageSeo.metaTitle || "Default Site Title"}
+
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-[11px] text-[#202124]">
+                            <span className="text-slate-700 font-medium">https://saffroncity.org</span>
+                            <span className="text-slate-400">{selectedPageSeo.path}</span>
+                          </div>
+                          <div className="text-sm text-[#1a0dab] font-medium hover:underline cursor-pointer line-clamp-1">
+                            {selectedPageSeo.metaTitle || "Default Site Title"}
+                          </div>
+                          <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                            {selectedPageSeo.metaDescription || "Default description for this route..."}
+                          </div>
                         </div>
-                        <div className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
-                          {selectedPageSeo.metaDescription || "Default description for this route..."}
+
+                        {/* Page-level SERP Audit Status Pills */}
+                        <div className="pt-1 flex flex-wrap gap-2 text-[11px]">
+                          <div className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-xl">
+                            <span className="text-slate-500 font-medium">Title:</span>
+                            {(selectedPageSeo.metaTitle || "").length >= 50 && (selectedPageSeo.metaTitle || "").length <= 60 ? (
+                              <span className="font-bold text-emerald-700 flex items-center gap-0.5">
+                                <Check className="w-3 h-3" /> {(selectedPageSeo.metaTitle || "").length} chars
+                              </span>
+                            ) : (selectedPageSeo.metaTitle || "").length > 60 ? (
+                              <span className="font-bold text-rose-600 flex items-center gap-0.5">
+                                <X className="w-3 h-3" /> {(selectedPageSeo.metaTitle || "").length} chars (Max 60)
+                              </span>
+                            ) : (
+                              <span className="font-bold text-amber-600 flex items-center gap-0.5">
+                                {(selectedPageSeo.metaTitle || "").length} chars
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-xl">
+                            <span className="text-slate-500 font-medium">Description:</span>
+                            {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
+                              <span className="font-bold text-emerald-700 flex items-center gap-0.5">
+                                <Check className="w-3 h-3" /> {(selectedPageSeo.metaDescription || "").length} chars (Optimal)
+                              </span>
+                            ) : (selectedPageSeo.metaDescription || "").length > 160 ? (
+                              <span className="font-bold text-rose-600 flex items-center gap-0.5">
+                                <X className="w-3 h-3" /> {(selectedPageSeo.metaDescription || "").length} chars (Too long)
+                              </span>
+                            ) : (
+                              <span className="font-bold text-amber-600 flex items-center gap-0.5">
+                                {(selectedPageSeo.metaDescription || "").length} chars (Short)
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -3392,11 +3528,23 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <label className="font-bold text-slate-700">SEO / Meta Title Tag *</label>
-                            <span className={`text-[11px] font-mono ${selectedPageSeo.metaTitle.length > 65 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                              {selectedPageSeo.metaTitle.length}/65 chars recommended
-                            </span>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="font-bold text-slate-700 flex items-center gap-1.5">
+                              <span>SEO / Meta Title Tag *</span>
+                            </label>
+                            {(selectedPageSeo.metaTitle || "").length >= 50 && (selectedPageSeo.metaTitle || "").length <= 60 ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <Check className="w-3 h-3 text-emerald-600" /> {(selectedPageSeo.metaTitle || "").length} characters
+                              </span>
+                            ) : (selectedPageSeo.metaTitle || "").length > 60 ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                                <X className="w-3 h-3 text-rose-600" /> {(selectedPageSeo.metaTitle || "").length} characters
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                {(selectedPageSeo.metaTitle || "").length} characters (Optimal 50-60)
+                              </span>
+                            )}
                           </div>
                           <input
                             type="text"
@@ -3410,11 +3558,42 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <label className="font-bold text-slate-700">Meta Description *</label>
-                            <span className={`text-[11px] font-mono ${selectedPageSeo.metaDescription.length > 160 ? "text-amber-600 font-bold" : "text-slate-400"}`}>
-                              {selectedPageSeo.metaDescription.length}/160 chars recommended
-                            </span>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="font-bold text-slate-700 flex items-center gap-1.5">
+                              <span>Meta Description *</span>
+                            </label>
+                            <div className="flex items-center gap-2">
+                              {(selectedPageSeo.metaDescription || "").length >= 120 && (selectedPageSeo.metaDescription || "").length <= 160 ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  <Check className="w-3 h-3 text-emerald-600" /> {(selectedPageSeo.metaDescription || "").length} characters
+                                </span>
+                              ) : (selectedPageSeo.metaDescription || "").length > 160 ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                                  <X className="w-3 h-3 text-rose-600" /> {(selectedPageSeo.metaDescription || "").length} characters
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                  {(selectedPageSeo.metaDescription || "").length} characters (Optimal 120-160)
+                                </span>
+                              )}
+                              {selectedPageSeo.path === "/" && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedPageSeo({
+                                      ...selectedPageSeo,
+                                      metaDescription:
+                                        "Invest in Saffron City Islamabad — 15,000 Kanal RDA-approved housing society on Main GT Road Rawat. 5, 10 Marla & 1 Kanal plots on easy 3-year installments.",
+                                    })
+                                  }
+                                  className="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full transition flex items-center gap-1 cursor-pointer"
+                                  title="Set to 154-character recommended text"
+                                >
+                                  <Sparkles className="w-3 h-3 text-amber-600" />
+                                  <span>Auto-Fix (154 Chars)</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <textarea
                             rows={3}

@@ -246,6 +246,7 @@ export default function MasterPlanViewer({
             <img
               src={masterPlanImg}
               alt="Saffron City Official Master Plan Layout"
+              title="Saffron City Official Master Plan Layout"
               className="w-auto h-auto max-w-full max-h-full object-contain rounded-2xl shadow-md"
               style={{
                 imageRendering: "auto",
@@ -419,6 +420,7 @@ export default function MasterPlanViewer({
                 <img
                   src={masterPlanImg}
                   alt="Saffron City Master Plan Fullscreen High Resolution"
+                  title="Saffron City Master Plan Fullscreen High Resolution"
                   className="max-w-none w-auto max-h-[82vh] object-contain rounded-xl shadow-2xl"
                   draggable={false}
                 />

@@ -125,6 +125,7 @@ export default function NocApprovalSection({
           <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
             <Link
               href="/noc-status"
+              aria-label="Inspect official RDA NOC approval documents and legal verification for Saffron City"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
             >
               <span>Inspect NOC Documents</span>

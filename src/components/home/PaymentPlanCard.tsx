@@ -93,6 +93,7 @@ export default function PaymentPlanCard({
           <img
             src={imageSrc}
             alt={imageAlt}
+            title={imageAlt || title}
             className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
@@ -112,10 +113,12 @@ export default function PaymentPlanCard({
         {extraAction && extraAction.type === "link" && (
           <Link
             href={extraAction.href}
+            aria-label={`View complete ${title} breakdown and schedule`}
             className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-colors"
           >
             <FileText className="w-3.5 h-3.5 text-slate-600" />
             <span>{extraAction.label}</span>
+            <span className="sr-only"> for {title}</span>
           </Link>
         )}
 

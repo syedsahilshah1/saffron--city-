@@ -95,6 +95,7 @@ export default function SectorsAccordion({ sectorA, sectorB, commercial }: Secto
               <Image
                 src={block.image}
                 alt={block.name}
+                title={block.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 800px"
                 className={`object-cover object-center transition-transform duration-700 ease-out ${isActive ? "scale-105 filter-none" : "scale-100 brightness-75 contrast-95"
@@ -152,9 +153,11 @@ export default function SectorsAccordion({ sectorA, sectorB, commercial }: Secto
                   <div className="pt-1">
                     <Link
                       href={block.href}
+                      aria-label={`Explore ${block.name} master plan and available plots`}
                       className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs lg:text-sm font-bold tracking-wider uppercase transition-all shadow-lg hover:scale-[1.03] active:scale-95 border border-amber-300"
                     >
                       <span>EXPLORE SECTOR</span>
+                      <span className="sr-only"> ({block.name})</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
@@ -180,6 +183,7 @@ export default function SectorsAccordion({ sectorA, sectorB, commercial }: Secto
                 <Image
                   src={block.image}
                   alt={block.name}
+                  title={block.name}
                   fill
                   className="object-cover"
                 />
@@ -211,9 +215,11 @@ export default function SectorsAccordion({ sectorA, sectorB, commercial }: Secto
                   </p>
                   <Link
                     href={block.href}
+                    aria-label={`Explore ${block.name} master plan and available plots`}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] text-white text-xs font-bold uppercase tracking-wider"
                   >
                     <span>EXPLORE SECTOR</span>
+                    <span className="sr-only"> ({block.name})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>

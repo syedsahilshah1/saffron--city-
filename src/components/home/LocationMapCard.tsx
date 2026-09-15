@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { MapPin, Navigation, Layers, Globe, ExternalLink, Download } from "lucide-react";
+import { MapPin, Layers, Globe, ExternalLink, Download } from "lucide-react";
 import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
 
 export default function LocationMapCard() {
@@ -55,6 +55,7 @@ export default function LocationMapCard() {
             <img
               src="/images/imgi_87_LOCATION.webp"
               alt="Saffron City Official Location Map"
+              title="Saffron City Official Location Map"
               className="w-full h-full object-contain rounded-2xl"
             />
           </div>
@@ -76,6 +77,7 @@ export default function LocationMapCard() {
           <div className="pointer-events-auto flex flex-wrap items-center gap-2">
             <Link
               href="/location"
+              aria-label="Explore interactive location map and access routes for Saffron City"
               className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-[#D49E17] text-white hover:text-slate-950 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-lg backdrop-blur-sm"
             >
               <span>Interactive Location Page</span>
@@ -89,12 +91,6 @@ export default function LocationMapCard() {
               <Download className="w-3.5 h-3.5" />
               <span>Download Map</span>
             </button>
-          </div>
-
-          {/* Bottom Route Indicator (Hidden on small mobile if tight, visible on sm+) */}
-          <div className="hidden sm:flex px-3 py-1.5 rounded-xl bg-white/95 border border-slate-200 text-slate-700 text-[11px] font-semibold backdrop-blur-md items-center gap-2 shadow-lg">
-            <Navigation className="w-3 h-3 text-emerald-600" />
-            <span>Near T-Chowk &amp; Ring Road</span>
           </div>
         </div>
       </div>

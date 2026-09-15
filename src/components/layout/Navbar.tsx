@@ -134,15 +134,21 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center justify-between gap-6 min-h-[58px]">
 
           {/* Left Side: Brand Logo */}
-          <Link href="/" className="flex items-center group flex-shrink-0" aria-label="Saffron City">
+          <Link
+            href="/"
+            className="flex items-center group flex-shrink-0"
+            aria-label="Saffron City Islamabad Official Homepage"
+          >
             <img
               src="/images/saffron-city-logo.webp"
-              alt="Saffron City Islamabad"
+              alt="Saffron City Islamabad Official Logo"
+              title="Saffron City Islamabad Official Logo"
               className="h-14 lg:h-16 w-auto object-contain group-hover:scale-105 transition-all flex-shrink-0 drop-shadow-sm"
               fetchPriority="high"
               loading="eager"
               decoding="async"
             />
+            <span className="sr-only">Saffron City Islamabad</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -288,15 +294,21 @@ export default function Navbar() {
 
         {/* Mobile / Tablet Header (< lg) */}
         <div className="lg:hidden flex items-center justify-between min-h-[52px]">
-          <Link href="/" className="flex items-center group" aria-label="Saffron City">
+          <Link
+            href="/"
+            className="flex items-center group"
+            aria-label="Saffron City Islamabad Official Homepage"
+          >
             <img
               src="/images/saffron-city-logo.webp"
-              alt="Saffron City Islamabad"
+              alt="Saffron City Islamabad Official Logo"
+              title="Saffron City Islamabad Official Logo"
               className="h-12 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform flex-shrink-0 drop-shadow-sm"
               fetchPriority="high"
               loading="eager"
               decoding="async"
             />
+            <span className="sr-only">Saffron City Islamabad</span>
           </Link>
 
           <div className="flex items-center gap-2">

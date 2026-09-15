@@ -67,6 +67,7 @@ export default function LegacyOverviewWithSeeMore() {
             <img
               src="/images/imgi_25_saffron-city-islamabad.webp"
               alt="Saffron City Overview"
+              title="Saffron City Overview"
               className="w-full h-64 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

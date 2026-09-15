@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { SITE_CONFIG, RESIDENTIAL_PRICES, COMMERCIAL_PRICES } from "@/data/saffron-data";
 import StaggerReveal from "@/components/animations/StaggerReveal";
+import { StoredPlot } from "@/lib/types";
 
 export interface PlotInventoryItem {
   id: string;
@@ -252,14 +253,74 @@ export const COMPLETE_PLOTS_INVENTORY: PlotInventoryItem[] = [
   }
 ];
 
-export default function PlotsInventoryExplorer() {
+interface PlotsInventoryExplorerProps {
+  initialPlots?: StoredPlot[];
+}
+
+function formatPlotToInventoryItem(p: StoredPlot): PlotInventoryItem {
+  const isComm = (p.type && p.type.toLowerCase().includes("commercial")) || (p.category && p.category.toLowerCase().includes("commercial"));
+  const sectorLower = (p.sector || "").toLowerCase();
+  
+  let href = "/plot-for-sale";
+  if (sectorLower.includes("sector a") || sectorLower.includes("block b")) {
+    href = "/sectors/sector-a";
+  } else if (sectorLower.includes("sector b")) {
+    href = "/sectors/sector-b";
+  } else if (isComm) {
+    href = "/plots/commercial";
+  }
+
+  let dimensions = "Standard Layout";
+  if (p.category) {
+    if (p.category.includes("5 Marla")) dimensions = "25' × 45' (1,125 Sq. Ft.)";
+    else if (p.category.includes("10 Marla")) dimensions = "35' × 65' (2,275 Sq. Ft.)";
+    else if (p.category.includes("1 Kanal")) dimensions = "50' × 90' (4,500 Sq. Ft.)";
+    else if (p.category.includes("4 Marla")) dimensions = "30' × 30' (900 Sq. Ft.)";
+    else if (p.category.includes("8 Marla")) dimensions = "40' × 45' (1,800 Sq. Ft.)";
+  }
+
+  const downPayment = p.downPayment || p.totalPrice * 0.1;
+  const monthly = p.monthlyInst || (p.totalPrice * 0.3) / 30;
+  const possession = p.totalPrice * 0.2;
+
+  let defaultImage = "/images/sectors/sector-a-luxury.webp";
+  if (sectorLower.includes("sector b")) defaultImage = "/images/sectors/sector-b-residential.webp";
+  if (isComm) defaultImage = "/images/sectors/commercial-plaza.webp";
+
+  return {
+    id: p.id,
+    plotNumber: p.plotNumber?.startsWith("#") ? p.plotNumber : `#${p.plotNumber || "PLT"}`,
+    title: `${p.category || "Plot"} (${p.type || "Residential"})`,
+    category: isComm ? "Commercial" : "Residential",
+    sector: p.sector as any,
+    sizeScale: (p.category || "5 Marla") as any,
+    tag: p.status === "Available" ? "Open for Booking" : p.status || "Verified",
+    dimensions,
+    totalPriceNumeric: Number(p.totalPrice) || 0,
+    totalPriceFormatted: `PKR ${(Number(p.totalPrice) || 0).toLocaleString()}`,
+    downPaymentNumeric: Number(downPayment) || 0,
+    downPaymentFormatted: `PKR ${(Number(downPayment) || 0).toLocaleString()} (10%)`,
+    monthlyNumeric: Number(monthly) || 0,
+    monthlyFormatted: `PKR ${(Number(monthly) || 0).toLocaleString()} / mo`,
+    possessionNumeric: Number(possession) || 0,
+    possessionFormatted: `PKR ${(Number(possession) || 0).toLocaleString()} (20%)`,
+    biAnnualFormatted: `PKR ${Math.round((p.totalPrice * 0.4) / 6).toLocaleString()} (×6)`,
+    image: p.image && p.image.trim().length > 3 ? p.image : defaultImage,
+    features: p.features ? [p.features] : ["100% Underground Utilities", "RDA Approved Layout", "30-Month Installment Plan"],
+    href,
+  };
+}
+
+export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInventoryExplorerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSector, setSelectedSector] = useState<string>("all");
   const [selectedScale, setSelectedScale] = useState<string>("all");
   const [budgetTier, setBudgetTier] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "size">("featured");
-  const [dynamicPlots, setDynamicPlots] = useState<PlotInventoryItem[]>([]);
+  const [dynamicPlots, setDynamicPlots] = useState<PlotInventoryItem[]>(() =>
+    initialPlots.map(formatPlotToInventoryItem)
+  );
   
   // Mobile UI States
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -269,29 +330,8 @@ export default function PlotsInventoryExplorer() {
     fetch("/api/plots")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          const mapped: PlotInventoryItem[] = data.data.map((p: any) => ({
-            id: p.id,
-            plotNumber: p.plotNumber.startsWith("#") ? p.plotNumber : `#${p.plotNumber}`,
-            title: `${p.category} ${p.type} Plot ${p.plotNumber}`,
-            category: p.type || "Residential",
-            sector: p.sector,
-            sizeScale: p.category,
-            tag: p.status === "Available" ? "Open for Booking" : p.status,
-            dimensions: p.category.includes("5 Marla") ? "25' × 50'" : p.category.includes("10 Marla") ? "35' × 70'" : "50' × 90'",
-            totalPriceNumeric: p.totalPrice,
-            totalPriceFormatted: `PKR ${(p.totalPrice / 100000).toFixed(0)} Lakh`,
-            downPaymentNumeric: p.downPayment || p.totalPrice * 0.1,
-            downPaymentFormatted: `PKR ${((p.downPayment || p.totalPrice * 0.1) / 100000).toFixed(1)} Lakh (10%)`,
-            monthlyNumeric: p.monthlyInst || (p.totalPrice * 0.3) / 30,
-            monthlyFormatted: `PKR ${((p.monthlyInst || (p.totalPrice * 0.3) / 30)).toLocaleString()} / mo`,
-            possessionNumeric: p.totalPrice * 0.2,
-            possessionFormatted: `PKR ${(p.totalPrice * 0.2 / 100000).toFixed(0)} Lakh`,
-            biAnnualFormatted: "Bi-Annual Schedule",
-            image: p.image || "/images/sectors/sector-a-luxury.webp",
-            features: [p.features || "100% Underground Utilities", "RDA Approved Layout", "30-Month Installment Plan", "Possession on Schedule"],
-            href: p.type === "Commercial" ? "/plots/commercial" : "/plots/residential",
-          }));
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          const mapped: PlotInventoryItem[] = data.data.map(formatPlotToInventoryItem);
           setDynamicPlots(mapped);
         }
       })
@@ -301,9 +341,10 @@ export default function PlotsInventoryExplorer() {
   // Filter & Search Logic
   const allInventory = useMemo(() => {
     if (dynamicPlots.length > 0) {
-      // Merge unique
-      const existingIds = new Set(dynamicPlots.map((d) => d.id));
-      const filteredExisting = COMPLETE_PLOTS_INVENTORY.filter((item) => !existingIds.has(item.id));
+      const existingPlotNumbers = new Set(dynamicPlots.map((d) => d.plotNumber.toLowerCase()));
+      const filteredExisting = COMPLETE_PLOTS_INVENTORY.filter(
+        (item) => !existingPlotNumbers.has(item.plotNumber.toLowerCase())
+      );
       return [...dynamicPlots, ...filteredExisting];
     }
     return COMPLETE_PLOTS_INVENTORY;
@@ -329,13 +370,17 @@ export default function PlotsInventoryExplorer() {
         return false;
       }
 
-      // 3. Sector / Block Filter
-      if (selectedSector !== "all" && item.sector !== selectedSector) {
-        return false;
+      // 3. Sector / Block Filter (flexible matching)
+      if (selectedSector !== "all") {
+        const itemSec = item.sector.toLowerCase();
+        const selSec = selectedSector.toLowerCase();
+        if (!itemSec.includes(selSec) && !selSec.includes(itemSec)) {
+          return false;
+        }
       }
 
       // 4. Scale Filter
-      if (selectedScale !== "all" && item.sizeScale !== selectedScale) {
+      if (selectedScale !== "all" && !item.sizeScale.toLowerCase().includes(selectedScale.toLowerCase())) {
         return false;
       }
 
@@ -588,6 +633,7 @@ export default function PlotsInventoryExplorer() {
                         <img
                           src={plot.image}
                           alt={`${plot.title} - ${plot.sector}`}
+                          title={`${plot.title} - ${plot.sector}`}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
@@ -689,6 +735,7 @@ export default function PlotsInventoryExplorer() {
                         <img
                           src={plot.image}
                           alt={`${plot.title} - ${plot.sector}`}
+                          title={`${plot.title} - ${plot.sector}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />

@@ -102,6 +102,7 @@ export default function NocStatusPage() {
           <img
             src="/images/about/about-hero-banner.webp"
             alt="Saffron City NOC Status RDA Approved"
+            title="Saffron City NOC Status RDA Approved"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
@@ -196,6 +197,7 @@ export default function NocStatusPage() {
                         <img
                           src={doc.image}
                           alt={doc.title}
+                          title={doc.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />

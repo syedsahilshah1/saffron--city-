@@ -94,9 +94,11 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           <div className="pt-2 hidden lg:block">
             <Link
               href={ctaLink}
+              aria-label={`Discover more about Saffron City leadership and developers (${name})`}
               className="group inline-flex items-center gap-2.5 text-[#5C1D24] hover:text-[#7E2430] font-medium text-sm sm:text-base transition-colors border-b-2 border-[#5C1D24] pb-0.5"
             >
               <span>{ctaText}</span>
+              <span className="sr-only"> About Leadership &amp; Developers</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </Link>
           </div>
@@ -113,6 +115,7 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
             <img
               src={portrait}
               alt={`${title} ${name} - Saffron City`}
+              title={`${title} ${name} - Saffron City`}
               className="w-full h-auto object-contain select-none pointer-events-none transition-all duration-500"
             />
           </div>
@@ -121,9 +124,11 @@ export default function ChairmanSection({ initialSettings }: { initialSettings?:
           <div className="pt-5 flex lg:hidden justify-center w-full">
             <Link
               href={ctaLink}
+              aria-label={`Discover more about Saffron City leadership and developers (${name})`}
               className="group inline-flex items-center justify-center gap-2.5 text-[#5C1D24] hover:text-[#7E2430] font-semibold text-sm sm:text-base transition-colors border-b-2 border-[#5C1D24] pb-1"
             >
               <span>{ctaText}</span>
+              <span className="sr-only"> About Leadership &amp; Developers</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </Link>
           </div>

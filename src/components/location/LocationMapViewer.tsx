@@ -187,6 +187,7 @@ export default function LocationMapViewer({
               <img
                 src={imageSrc}
                 alt="Saffron City Official Location and Access Map"
+                title="Saffron City Official Location and Access Map"
                 className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-100"
                 draggable={false}
               />
@@ -365,6 +366,7 @@ export default function LocationMapViewer({
                 <img
                   src={imageSrc}
                   alt="Saffron City Official Location Map Fullscreen"
+                  title="Saffron City Official Location Map Fullscreen"
                   className="max-w-none w-auto max-h-[82vh] object-contain rounded-xl shadow-2xl"
                   draggable={false}
                 />

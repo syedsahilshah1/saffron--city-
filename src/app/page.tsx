@@ -66,6 +66,7 @@ import { db } from "@/lib/db";
 export default async function HomePage() {
   const settings = await db.getSettings();
   const blogs = await db.getBlogs(true);
+  const plots = await db.getPlots();
 
   const whatsappUrl = `https://wa.me/${settings.whatsappPhone || SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
     "Hi, I want to start booking a plot in Saffron City."
@@ -83,6 +84,7 @@ export default async function HomePage() {
           <img
             src={settings.heroBgImage || "/images/hero-bg.webp"}
             alt="Saffron City Master Community"
+            title="Saffron City Master Community"
             className="w-full h-full object-cover object-center scale-105"
             fetchPriority="high"
             loading="eager"
@@ -179,8 +181,9 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <GsapSplitReveal
-            leftContent={
-              <div className="space-y-6">
+            leftContent={<LocationMapCard />}
+            rightContent={
+              <div className="space-y-6 flex flex-col justify-center h-full">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium text-slate-900 tracking-normal leading-[1.18]">
                   Located on GT Road,{" "}
                   <span className="font-serif italic font-normal text-slate-800">
@@ -193,22 +196,6 @@ export default async function HomePage() {
                 <p className="text-sm text-slate-600 leading-relaxed">
                   Saffron City sits on Main GT Road near T-Chowk, Rawat, putting it within a reasonable drive of both Islamabad and Rawalpindi without being in the middle of either city&apos;s traffic. For residents, that means access to major commercial areas like Giga Mall and DHA without giving up the quieter pace that comes with being slightly outside the urban core.
                 </p>
-              </div>
-            }
-            rightContent={
-              <div className="space-y-4">
-                <LocationMapCard />
-                <div className="flex flex-wrap items-center justify-center lg:justify-start pt-1">
-                  <a
-                    href="https://maps.google.com/?q=Saffron+City+Rawat+Islamabad"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shimmer-gold-btn inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
-                  >
-                    <Compass className="w-4 h-4" />
-                    <span>Get Directions on Google Maps</span>
-                  </a>
-                </div>
               </div>
             }
           />
@@ -298,6 +285,7 @@ export default async function HomePage() {
                   <img
                     src={item.image}
                     alt={item.title}
+                    title={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -372,6 +360,7 @@ export default async function HomePage() {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
                   <Link
                     href="/master-plan"
+                    aria-label="View official 15,000 Kanal Saffron City detailed master plan and sector map"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
                   >
                     <span>View Detailed Master Plan</span>
@@ -455,6 +444,7 @@ export default async function HomePage() {
                   <img
                     src={item.image}
                     alt={item.title}
+                    title={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -496,7 +486,7 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <ScrollReveal animation="fade-up">
-            <PlotsForSaleGrid />
+            <PlotsForSaleGrid initialPlots={plots} />
           </ScrollReveal>
         </section>
 

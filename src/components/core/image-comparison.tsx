@@ -131,6 +131,7 @@ export function ImageComparisonImage({
         <img
           src={src}
           alt={alt}
+          title={props.title || alt || label}
           className={cn("w-full h-full object-cover", className)}
           {...props}
         />
@@ -149,6 +150,7 @@ export function ImageComparisonImage({
       <img
         src={src}
         alt={alt}
+        title={props.title || alt || label}
         className={cn("w-full h-full object-cover", className)}
         {...props}
       />

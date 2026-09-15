@@ -13,6 +13,7 @@ import PlotsInventoryExplorer from "@/components/plots/PlotsInventoryExplorer";
 import { SITE_CONFIG } from "@/data/saffron-data";
 
 import { getPageMetadata } from "@/lib/seo";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,9 @@ export async function generateMetadata() {
   return await getPageMetadata("/plot-for-sale");
 }
 
-export default function PlotForSalePage() {
+export default async function PlotForSalePage() {
+  const plots = await db.getPlots();
+
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
     "Hi, I want to inquire about available plots for sale in Saffron City."
   )}`;
@@ -34,6 +37,7 @@ export default function PlotForSalePage() {
           <img
             src="/images/landmark_dha_islamabad.webp"
             alt="Saffron City All Plots For Sale"
+            title="Saffron City All Plots For Sale"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50" />
@@ -109,7 +113,7 @@ export default function PlotForSalePage() {
           </div>
 
           {/* Interactive Live Explorer Component */}
-          <PlotsInventoryExplorer />
+          <PlotsInventoryExplorer initialPlots={plots} />
         </section>
 
       </div>
