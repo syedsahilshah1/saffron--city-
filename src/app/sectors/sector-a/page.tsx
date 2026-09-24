@@ -604,31 +604,31 @@ export default async function SectorAPage() {
             </div>
 
             {/* Desktop Full Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-amber-50 text-amber-900 uppercase font-bold text-[11px] border-b border-amber-200">
-                  <tr>
-                    <th className="py-4 px-5">Plot Size</th>
-                    <th className="py-4 px-5">Dimensions</th>
-                    <th className="py-4 px-5">Total Price</th>
-                    <th className="py-4 px-5">Booking (10%)</th>
-                    <th className="py-4 px-5">Allocation (10%)</th>
-                    <th className="py-4 px-5">Monthly (×30)</th>
-                    <th className="py-4 px-5">Bi-Annual (×6)</th>
-                    <th className="py-4 px-5">On Possession (20%)</th>
+            <div className="hidden md:block overflow-x-auto rounded-2xl sm:rounded-3xl border-2 border-amber-300/90 bg-[#FFFDF7] shadow-lg shadow-amber-950/5">
+              <table className="w-full border-collapse text-left text-sm whitespace-nowrap">
+                <thead>
+                  <tr className="bg-[#FFF9EA] text-[11px] sm:text-xs font-bold tracking-wider text-[#9B6A34] uppercase">
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">PLOT SIZE</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">DIMENSIONS</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">TOTAL PRICE</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">BOOKING (10%)</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">ALLOCATION (10%)</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">30 MONTHLY INST.</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">6 BI-ANNUAL INST.</th>
+                    <th className="border border-amber-200/90 py-4 sm:py-5 px-4 sm:px-6">POSSESSION (20%)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
+                <tbody className="font-medium">
                   {RESIDENTIAL_PRICES.map((p) => (
-                    <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
-                      <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 text-slate-500 font-mono">{p.dimensions}</td>
-                      <td className="py-4 px-5 font-bold text-[#D49E17] text-sm">{p.totalPriceFormatted}</td>
-                      <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
-                      <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{p.biAnnualInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-bold text-emerald-700">{p.possessionAmountFormatted}</td>
+                    <tr key={p.size} className="hover:bg-amber-50/60 transition-colors">
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 font-bold text-slate-900 text-sm sm:text-base">{p.size}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 text-slate-600 font-mono text-sm">{p.dimensions}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 font-bold text-[#D49E17] text-sm sm:text-base">{p.totalPriceFormatted}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 text-slate-700 text-sm">{p.bookingAmountFormatted}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 text-slate-700 text-sm">{p.allocationAmountFormatted}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 text-slate-700 text-sm">{p.monthlyInstallmentFormatted}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 text-slate-700 text-sm">{p.biAnnualInstallmentFormatted}</td>
+                      <td className="border border-amber-200/80 py-4 sm:py-5 px-4 sm:px-6 font-bold text-slate-900 text-sm sm:text-base">{p.possessionAmountFormatted}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -24,6 +24,7 @@ import ScrollReveal from "@/components/animations/ScrollReveal";
 import WordReveal from "@/components/animations/WordReveal";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 import FaqAccordion from "@/components/ui/FaqAccordion";
+import PaymentPlanTable from "@/components/payment-plan/PaymentPlanTable";
 import { RESIDENTIAL_PRICES, SITE_CONFIG } from "@/data/saffron-data";
 import { getPageMetadata } from "@/lib/seo";
 
@@ -738,34 +739,7 @@ export default function ResidentialPlotsPage() {
             </div>
 
             {/* Desktop Full Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-amber-50 text-amber-900 uppercase text-[11px] font-bold border-b border-amber-200">
-                  <tr>
-                    <th className="py-4 px-5">Plot Size</th>
-                    <th className="py-4 px-5">Total Price</th>
-                    <th className="py-4 px-5">Booking (10%)</th>
-                    <th className="py-4 px-5">Allocation (10%)</th>
-                    <th className="py-4 px-5">Monthly (×30)</th>
-                    <th className="py-4 px-5">Bi-Annual (×6)</th>
-                    <th className="py-4 px-5">Possession (20%)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {RESIDENTIAL_PRICES.map((p) => (
-                    <tr key={p.size} className="hover:bg-amber-50/50 transition-colors">
-                      <td className="py-4 px-5 font-bold text-slate-900 text-sm">{p.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D49E17]">{p.totalPriceFormatted}</td>
-                      <td className="py-4 px-5">{p.bookingAmountFormatted}</td>
-                      <td className="py-4 px-5">{p.allocationAmountFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{p.monthlyInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{p.biAnnualInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-bold text-emerald-700">{p.possessionAmountFormatted}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <PaymentPlanTable className="hidden md:block" />
           </ScrollReveal>
         </section>
 

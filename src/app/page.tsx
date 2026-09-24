@@ -58,6 +58,7 @@ import SectorsAccordion from "@/components/home/SectorsAccordion";
 import PlotsForSaleGrid from "@/components/home/PlotsForSaleGrid";
 import FaqAccordion from "@/components/home/FaqAccordion";
 import HomeBlogsSection from "@/components/home/HomeBlogsSection";
+import PaymentPlanTable from "@/components/payment-plan/PaymentPlanTable";
 import NocApprovalSection from "@/components/home/NocApprovalSection";
 import SeeMoreDrawer from "@/components/ui/SeeMoreDrawer";
 import PaymentPlanCard from "@/components/home/PaymentPlanCard";
@@ -618,34 +619,7 @@ export default async function HomePage() {
             </div>
 
             {/* 2. Desktop Full Table View (Hidden on mobile) */}
-            <div className="hidden md:block overflow-x-auto rounded-3xl border border-amber-200 bg-white shadow-xl">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-amber-50 text-[11px] text-amber-900 uppercase tracking-wider font-bold border-b border-amber-200">
-                  <tr>
-                    <th className="py-4 px-5">Plot Size</th>
-                    <th className="py-4 px-5">Total Price</th>
-                    <th className="py-4 px-5">Booking (10%)</th>
-                    <th className="py-4 px-5">Allocation (10%)</th>
-                    <th className="py-4 px-5">30 Monthly Inst.</th>
-                    <th className="py-4 px-5">6 Bi-Annual Inst.</th>
-                    <th className="py-4 px-5">Possession (20%)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {RESIDENTIAL_PRICES.map((plot) => (
-                    <tr key={plot.size} className="hover:bg-amber-50/50 transition-colors">
-                      <td className="py-4 px-5 font-bold text-slate-900 text-sm">{plot.size}</td>
-                      <td className="py-4 px-5 font-bold text-[#D49E17]">{plot.totalPriceFormatted}</td>
-                      <td className="py-4 px-5">{plot.bookingAmountFormatted}</td>
-                      <td className="py-4 px-5">{plot.allocationAmountFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{plot.monthlyInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-mono">{plot.biAnnualInstallmentFormatted}</td>
-                      <td className="py-4 px-5 font-bold text-slate-900">{plot.possessionAmountFormatted}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <PaymentPlanTable className="hidden md:block" />
           </ScrollReveal>
 
           {/* Interactive Payment Calculator Section */}
