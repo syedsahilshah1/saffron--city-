@@ -1201,25 +1201,25 @@ export default function AdminDashboardPage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Brand & Sidebar Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] transition-colors cursor-pointer shrink-0"
               title="Toggle Sidebar"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-[#D49E17] to-amber-600 flex items-center justify-center text-slate-950 font-bold shadow-sm">
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              <div className="hidden sm:flex w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-[#D49E17] to-amber-600 items-center justify-center text-slate-950 font-bold shadow-sm shrink-0">
                 <LayoutDashboard className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-sm sm:text-base font-bold text-slate-900 font-heading leading-none">
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-[11px] sm:text-sm font-bold text-slate-900 font-heading leading-tight truncate">
                   Saffron City Portal
                 </h1>
-                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  RDA Official Management
+                <span className="text-[8px] sm:text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="truncate">RDA Official</span>
                 </span>
               </div>
             </div>
@@ -1238,9 +1238,9 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Current Logged In SuperAdmin / User Badge */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs shrink-0">
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-500 to-[#D49E17] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
                 {currentUser?.name?.charAt(0) || "U"}
               </div>
@@ -1256,19 +1256,20 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={fetchData}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer shrink-0"
               title="Sync Data"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#D49E17]" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? "animate-spin text-[#D49E17]" : ""}`} />
               <span className="hidden sm:inline">Sync Data</span>
             </button>
 
             <button
               onClick={() => handleSaveSettings()}
               disabled={savingSettings}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
+              title="Save All Changes"
             >
-              <Save className={`w-3.5 h-3.5 ${savingSettings ? "animate-spin" : ""}`} />
+              <Save className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${savingSettings ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">
                 {savingSettings ? "Saving..." : "Save All Changes"}
               </span>
@@ -1277,18 +1278,19 @@ export default function AdminDashboardPage() {
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[#D49E17] hover:bg-amber-100 text-xs font-bold transition-colors"
+              className="flex items-center gap-1.5 px-2 sm:px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[#D49E17] hover:bg-amber-100 text-xs font-bold transition-colors shrink-0"
+              title="View Live Site"
             >
               <span className="hidden sm:inline">View Live Site</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Link>
 
             <Link
               href="/ubaid/login/admin"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition-all shrink-0"
               title="Sign Out to Login Portal"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Sign Out</span>
             </Link>
           </div>
@@ -1317,11 +1319,11 @@ export default function AdminDashboardPage() {
         <aside
           className={`${
             sidebarOpen
-              ? "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl lg:static lg:w-64 lg:shadow-none lg:bg-transparent"
+              ? "fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[280px] bg-white shadow-2xl lg:static lg:w-64 lg:shadow-none lg:bg-transparent"
               : "hidden lg:block lg:w-20"
-          } shrink-0 transition-all duration-300`}
+          } shrink-0 transition-transform duration-300`}
         >
-          <div className="bg-white border border-amber-200/80 rounded-3xl shadow-lg p-3 space-y-3 sticky top-24 h-full lg:h-auto overflow-y-auto max-h-[calc(100vh-7rem)]">
+          <div className="bg-white lg:border border-amber-200/80 lg:rounded-3xl lg:shadow-lg p-3 space-y-3 lg:sticky lg:top-24 h-full overflow-y-auto lg:max-h-[calc(100vh-7rem)]">
             {/* Mobile Header inside drawer */}
             <div className="flex items-center justify-between p-2 pb-3 border-b border-slate-100 lg:hidden">
               <div className="flex items-center gap-2">

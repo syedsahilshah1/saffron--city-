@@ -391,6 +391,7 @@ export interface StoredSettings {
   homeAmenitiesJson?: string;
   homeFaqsHeading?: string;
   homeFaqsJson?: string;
+  homeReviewsJson?: string;
   homeCtaHeading?: string;
   homeCtaSubtitle?: string;
 

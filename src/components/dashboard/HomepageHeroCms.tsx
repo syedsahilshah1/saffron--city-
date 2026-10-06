@@ -23,6 +23,16 @@ import {
 import { StoredSettings } from "@/lib/types";
 import FileUploadField from "@/components/dashboard/FileUploadField";
 import RichTextEditor from "@/components/dashboard/RichTextEditor";
+import { REVIEWS } from "@/data/saffron-data";
+
+interface HomeReviewItem {
+  id: string;
+  rating: number;
+  quote: string;
+  author: string;
+  location: string;
+  role?: string;
+}
 
 interface HomepageHeroCmsProps {
   settings: StoredSettings;
@@ -228,6 +238,46 @@ export default function HomepageHeroCms({
     const updated = faqs.filter((_, i) => i !== index);
     setFaqs(updated);
     updateSettingField("homeFaqsJson", JSON.stringify(updated));
+  };
+
+  // Parse Reviews
+  const getReviews = (): HomeReviewItem[] => {
+    if (!settings.homeReviewsJson) return REVIEWS as HomeReviewItem[];
+    try {
+      const parsed = JSON.parse(settings.homeReviewsJson);
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : REVIEWS as HomeReviewItem[];
+    } catch {
+      return REVIEWS as HomeReviewItem[];
+    }
+  };
+
+  const [reviews, setReviews] = useState<HomeReviewItem[]>(getReviews());
+
+  const handleReviewChange = (index: number, field: keyof HomeReviewItem, value: string | number) => {
+    const updated = [...reviews];
+    updated[index] = { ...updated[index], [field]: value };
+    setReviews(updated);
+    updateSettingField("homeReviewsJson", JSON.stringify(updated));
+  };
+
+  const handleAddReview = () => {
+    const newReview: HomeReviewItem = {
+      id: `review-${Date.now()}`,
+      rating: 5,
+      quote: "Amazing society with great potential.",
+      author: "New Buyer",
+      location: "Islamabad",
+      role: "Investor"
+    };
+    const updated = [...reviews, newReview];
+    setReviews(updated);
+    updateSettingField("homeReviewsJson", JSON.stringify(updated));
+  };
+
+  const handleRemoveReview = (index: number) => {
+    const updated = reviews.filter((_, i) => i !== index);
+    setReviews(updated);
+    updateSettingField("homeReviewsJson", JSON.stringify(updated));
   };
 
   return (
@@ -672,6 +722,102 @@ export default function HomepageHeroCms({
                     onChange={(e) => handleFaqChange(idx, "answer", e.target.value)}
                     placeholder="Detailed response..."
                     className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Reviews Editor Block */}
+      <div className="pt-10 border-t border-slate-100 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-[#D49E17]" />
+              Buyer Reviews (What Buyers Are Saying)
+            </h4>
+            <p className="text-sm text-slate-500">
+              Manage the testimonials shown on the homepage.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddReview}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Review
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {reviews.map((rev, idx) => (
+            <div key={rev.id || idx} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-slate-500 text-xs uppercase tracking-wider">
+                  Review #{idx + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveReview(idx)}
+                  className="text-red-500 hover:text-red-700 p-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Author Name</label>
+                  <input
+                    type="text"
+                    value={rev.author}
+                    onChange={(e) => handleReviewChange(idx, "author", e.target.value)}
+                    placeholder="e.g. Ahmed Khan"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={rev.location}
+                    onChange={(e) => handleReviewChange(idx, "location", e.target.value)}
+                    placeholder="e.g. Rawalpindi"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Role/Tag</label>
+                  <input
+                    type="text"
+                    value={rev.role || ""}
+                    onChange={(e) => handleReviewChange(idx, "role", e.target.value)}
+                    placeholder="e.g. Verified Buyer"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Rating (1-5)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={rev.rating || 5}
+                    onChange={(e) => handleReviewChange(idx, "rating", parseInt(e.target.value) || 5)}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">Quote</label>
+                  <textarea
+                    rows={2}
+                    value={rev.quote}
+                    onChange={(e) => handleReviewChange(idx, "quote", e.target.value)}
+                    placeholder="Great location..."
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
                   />
                 </div>
               </div>

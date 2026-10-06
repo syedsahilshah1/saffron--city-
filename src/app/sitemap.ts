@@ -7,9 +7,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const settings = await db.getSettings();
   const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
 
-  const [pageSeoList, blogs] = await Promise.all([
+  const [pageSeoList, blogs, plots] = await Promise.all([
     db.getPageSeoList(),
     db.getBlogs(true),
+    db.getPlots(),
   ]);
 
   // Static / Dashboard-managed core pages
@@ -42,5 +43,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  return [...pageEntries, ...blogEntries];
+  // Dynamic Plot Detail Pages
+  const plotEntries: MetadataRoute.Sitemap = plots
+    .filter((p) => p.status !== "Booked")
+    .map((p) => ({
+      url: `${baseUrl}/plots/${p.id}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+
+  return [...pageEntries, ...plotEntries, ...blogEntries];
 }

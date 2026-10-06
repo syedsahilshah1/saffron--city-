@@ -636,12 +636,14 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
                   >
                     <div>
                       <div className="relative h-28 w-full overflow-hidden bg-slate-100">
-                        <img
-                          src={plot.image}
-                          alt={`${plot.title} - ${plot.sector}`}
-                          title={`${plot.title} - ${plot.sector}`}
-                          className="w-full h-full object-cover"
-                        />
+                        <Link href="/plot-for-sale" aria-label="View full plot inventory">
+                          <img
+                            src={plot.image}
+                            alt={`${plot.title} - ${plot.sector}`}
+                            title={`${plot.title} - ${plot.sector}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </Link>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                         
                         <div className="absolute top-2 left-2 z-10">
@@ -658,9 +660,11 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
                       </div>
 
                       <div className="p-2.5 space-y-1">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">
-                          {plot.title}
-                        </h4>
+                        <Link href={`/plots/${plot.id}`} className="hover:text-[#D49E17] transition-colors block">
+                          <h4 className="text-xs font-bold text-slate-900 truncate">
+                            {plot.title}
+                          </h4>
+                        </Link>
                         <div className="flex items-center gap-1 text-[10px] text-slate-600 truncate">
                           <MapPin className="w-2.5 h-2.5 text-[#D49E17] shrink-0" />
                           <span className="truncate">{plot.sector}</span>
@@ -673,10 +677,10 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
 
                     <div className="p-2 pt-0 flex gap-1 mt-1">
                       <Link
-                        href={plot.href}
+                        href={`/plots/${plot.id}`}
                         className="flex-1 py-1 px-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold text-center"
                       >
-                        Sector
+                        Details
                       </Link>
                       <a
                         href={plotWhatsappUrl}
@@ -736,14 +740,16 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
                     className="group rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
                   >
                     <div>
-                      {/* Plot Photographic Header */}
+                      {/* Plot Photographic Header - Image links to inventory */}
                       <div className="relative h-56 w-full overflow-hidden bg-slate-100">
-                        <img
-                          src={plot.image}
-                          alt={`${plot.title} - ${plot.sector}`}
-                          title={`${plot.title} - ${plot.sector}`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                        />
+                        <Link href="/plot-for-sale" aria-label="View full plot inventory">
+                          <img
+                            src={plot.image}
+                            alt={`${plot.title} - ${plot.sector}`}
+                            title={`${plot.title} - ${plot.sector}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          />
+                        </Link>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                         
                         {/* Top Badges */}
@@ -792,6 +798,13 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
                           </span>
                         </div>
 
+                        {/* Plot Title - links to detail page */}
+                        <Link href={`/plots/${plot.id}`} className="block hover:text-[#D49E17] transition-colors">
+                          <h3 className="text-xl font-bold font-heading text-slate-900 tracking-tight">
+                            {plot.title}
+                          </h3>
+                        </Link>
+
                         {/* Pricing Breakdown Breakdown Box */}
                         <div className="space-y-2 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 text-xs text-slate-700">
                           <div className="flex justify-between py-0.5">
@@ -834,16 +847,16 @@ export default function PlotsInventoryExplorer({ initialPlots = [] }: PlotsInven
 
                       <div className="flex gap-2">
                         <Link
-                          href={plot.href}
+                          href={`/plots/${plot.id}`}
                           className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center transition-colors"
                         >
-                          Sector Details
+                          Plot Details
                         </Link>
                         <Link
-                          href="/payment-plan"
+                          href="/plot-for-sale"
                           className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#D49E17] font-bold text-xs text-center transition-colors"
                         >
-                          Payment Plan
+                          Full Inventory
                         </Link>
                       </div>
                     </div>

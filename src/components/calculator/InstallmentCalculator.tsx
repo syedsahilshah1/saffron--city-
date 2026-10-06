@@ -18,42 +18,42 @@ export default function InstallmentCalculator() {
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`;
 
   return (
-    <div className="relative w-full rounded-3xl border border-amber-200/90 bg-white shadow-2xl overflow-hidden p-6 sm:p-8 lg:p-10 space-y-6 group">
+    <div className="relative w-full rounded-2xl sm:rounded-3xl border border-amber-200/90 bg-white shadow-2xl overflow-hidden p-4 sm:p-8 lg:p-10 space-y-4 sm:space-y-6 group">
       {/* Subtle Gold Ambient Glow */}
       <div className="absolute -top-28 -right-28 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-28 -left-28 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Content */}
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 space-y-4 sm:space-y-6">
         {/* Header & Plot Selector Chips */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-          <div className="flex items-start sm:items-center gap-3.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 pb-4 sm:pb-6 border-b border-slate-100">
+          <div className="flex items-start sm:items-center gap-3">
             {/* Calculator Icon Box */}
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] shrink-0 shadow-sm">
-              <Calculator className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] shrink-0 shadow-sm">
+              <Calculator className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading tracking-tight">
+            <div className="space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-lg sm:text-2xl font-bold text-slate-900 font-heading tracking-tight leading-tight">
                   Official Installment Calculator
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-300 text-[10px] font-bold text-amber-900 uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-[#D49E17]" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 border border-amber-300 text-[9px] sm:text-[10px] font-bold text-amber-900 uppercase tracking-wider">
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#D49E17]" />
                   2026 NEW RATES
                 </span>
               </div>
-              <p className="text-xs text-slate-600">
+              <p className="text-[10px] sm:text-xs text-slate-600 leading-tight">
                 Calculate official 3-year installment breakdown, monthly schedule, and booking payment
               </p>
             </div>
           </div>
 
           {/* Plot Selector Chips - Strictly 2 Lines */}
-          <div className="flex flex-col gap-2 shrink-0 max-w-full">
+          <div className="flex flex-col gap-1.5 sm:gap-2 shrink-0 max-w-full">
             {/* Line 1: Residential Plots */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pb-0.5">
-              <span className="text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Residential:</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Residential:</span>
               {RESIDENTIAL_PRICES.map((plot) => {
                 const isSelected = selectedSize === plot.size;
                 return (
@@ -61,7 +61,7 @@ export default function InstallmentCalculator() {
                     key={plot.size}
                     type="button"
                     onClick={() => setSelectedSize(plot.size)}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
+                    className={`px-2.5 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
                       isSelected
                         ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-md shadow-amber-500/20 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
                         : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm active:scale-95"
@@ -75,7 +75,7 @@ export default function InstallmentCalculator() {
 
             {/* Line 2: Commercial Plots */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pb-0.5">
-              <span className="text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Commercial:</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-amber-900/60 uppercase tracking-wider hidden xl:inline-block mr-1">Commercial:</span>
               {COMMERCIAL_PRICES.map((plot) => {
                 const isSelected = selectedSize === plot.size;
                 return (
@@ -83,7 +83,7 @@ export default function InstallmentCalculator() {
                     key={plot.size}
                     type="button"
                     onClick={() => setSelectedSize(plot.size)}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
+                    className={`px-2.5 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer select-none ${
                       isSelected
                         ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-md shadow-amber-500/20 scale-105 border border-amber-400 ring-2 ring-amber-300/40"
                         : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-amber-100/80 hover:text-amber-900 hover:border-amber-400 hover:shadow-sm active:scale-95"
@@ -97,88 +97,88 @@ export default function InstallmentCalculator() {
           </div>
         </div>
 
-        {/* 4 Result Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4 Result Metrics Grid - Changed to 2-columns on mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           {/* Total Price */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+          <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-0.5 sm:space-y-1">
+            <span className="text-[9px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-tight">
               TOTAL PRICE
             </span>
-            <span className="text-2xl lg:text-3xl font-bold text-slate-900 font-heading block">
+            <span className="text-base sm:text-2xl lg:text-3xl font-bold text-slate-900 font-heading block leading-tight truncate">
               {currentPlot.totalPriceFormatted}
             </span>
-            <span className="text-[11px] text-emerald-600 font-semibold block pt-0.5">
+            <span className="text-[9px] sm:text-[11px] text-emerald-600 font-semibold block leading-tight">
               Official Rate
             </span>
           </div>
 
           {/* Booking (10% or Down Payment) */}
-          <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-300 space-y-1 shadow-sm">
-            <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">
+          <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-300 space-y-0.5 sm:space-y-1 shadow-sm">
+            <span className="text-[9px] sm:text-[11px] font-bold text-amber-900 uppercase tracking-wider block leading-tight">
               {isCommercial ? "DOWN PAYMENT" : "BOOKING (10%)"}
             </span>
-            <span className="text-2xl lg:text-3xl font-bold text-[#D49E17] font-heading block">
+            <span className="text-base sm:text-2xl lg:text-3xl font-bold text-[#D49E17] font-heading block leading-tight truncate">
               {currentPlot.bookingAmountFormatted}
             </span>
-            <span className="text-[11px] text-slate-600 block pt-0.5">
+            <span className="text-[9px] sm:text-[11px] text-slate-600 block leading-tight">
               Due at registration
             </span>
           </div>
 
           {/* Monthly */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+          <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-0.5 sm:space-y-1">
+            <span className="text-[9px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-tight truncate">
               MONTHLY INSTALLMENT
             </span>
-            <span className="text-2xl lg:text-3xl font-bold text-slate-900 font-heading block">
+            <span className="text-base sm:text-2xl lg:text-3xl font-bold text-slate-900 font-heading block leading-tight truncate">
               {currentPlot.monthlyInstallmentFormatted}
             </span>
-            <span className="text-[11px] text-slate-500 block pt-0.5">
+            <span className="text-[9px] sm:text-[11px] text-slate-500 block leading-tight">
               Spread over 30-36 months
             </span>
           </div>
 
           {/* Bi-Annual or Possession */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-              {currentPlot.biAnnualCount > 0 ? "BI-ANNUAL (×6)" : "BALLOTING / POSSESSION"}
+          <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-0.5 sm:space-y-1">
+            <span className="text-[9px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-tight truncate">
+              {currentPlot.biAnnualCount > 0 ? "BI-ANNUAL (×6)" : "BALLOTING"}
             </span>
-            <span className="text-2xl lg:text-3xl font-bold text-slate-900 font-heading block">
+            <span className="text-base sm:text-2xl lg:text-3xl font-bold text-slate-900 font-heading block leading-tight truncate">
               {currentPlot.biAnnualCount > 0 ? currentPlot.biAnnualInstallmentFormatted : currentPlot.possessionAmountFormatted}
             </span>
-            <span className="text-[11px] text-slate-500 block pt-0.5">
+            <span className="text-[9px] sm:text-[11px] text-slate-500 block leading-tight">
               {currentPlot.biAnnualCount > 0 ? "Every 6 months" : "On handover"}
             </span>
           </div>
         </div>
 
         {/* Detailed Breakdown Rows */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200 divide-y divide-slate-200 text-xs sm:text-sm">
+        <div className="p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 divide-y divide-slate-200 text-[10px] sm:text-sm">
           {!isCommercial && (
-            <div className="flex justify-between items-center py-2.5">
-              <span className="text-slate-600 font-medium">Allocation Payment (10%):</span>
-              <span className="font-bold text-slate-900">{currentPlot.allocationAmountFormatted}</span>
+            <div className="flex justify-between items-center py-1.5 sm:py-2.5">
+              <span className="text-slate-600 font-medium truncate pr-2">Allocation Payment (10%):</span>
+              <span className="font-bold text-slate-900 shrink-0">{currentPlot.allocationAmountFormatted}</span>
             </div>
           )}
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-slate-600 font-medium">Possession / Handover:</span>
-            <span className="font-bold text-slate-900">{currentPlot.possessionAmountFormatted}</span>
+          <div className="flex justify-between items-center py-1.5 sm:py-2.5">
+            <span className="text-slate-600 font-medium truncate pr-2">Possession / Handover:</span>
+            <span className="font-bold text-slate-900 shrink-0">{currentPlot.possessionAmountFormatted}</span>
           </div>
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-slate-600 font-medium">Processing Fee (Non-refundable):</span>
-            <span className="font-bold text-amber-700">PKR 5,000</span>
+          <div className="flex justify-between items-center py-1.5 sm:py-2.5">
+            <span className="text-slate-600 font-medium truncate pr-2">Processing Fee (Non-refundable):</span>
+            <span className="font-bold text-amber-700 shrink-0">PKR 5,000</span>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 pt-1 sm:pt-2">
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all"
+            className="w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
           >
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Get Official Plan on WhatsApp</span>
           </a>
 
@@ -186,9 +186,9 @@ export default function InstallmentCalculator() {
           <button
             type="button"
             onClick={() => setIsDownloadModalOpen(true)}
-            className="w-full py-3.5 px-6 rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-slate-950 font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg cursor-pointer"
+            className="w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-[#D49E17] hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Download Official Rate Flyer</span>
           </button>
         </div>

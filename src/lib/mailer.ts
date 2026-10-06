@@ -12,10 +12,10 @@ let cachedTransporter: any = null;
 let lastTransporterKey = "";
 
 function getMailTransporter(settings?: Partial<StoredSettings>) {
-  const host = settings?.smtpHost || process.env.SMTP_HOST || "smtp.hostinger.com";
-  const user = settings?.smtpUser || process.env.SMTP_USER || "info@saffroncity.org";
-  const pass = settings?.smtpPass || process.env.SMTP_PASS || "2igu-plh8-etms-ioqc";
-  const port = Number(settings?.smtpPort || process.env.SMTP_PORT) || 465;
+  const host = process.env.SMTP_HOST || settings?.smtpHost || "smtp.hostinger.com";
+  const user = process.env.SMTP_USER || settings?.smtpUser || "ubaidnasir147.un@gmail.com";
+  const pass = process.env.SMTP_PASS || settings?.smtpPass || "2igu-plh8-etms-ioqc";
+  const port = Number(process.env.SMTP_PORT || settings?.smtpPort) || 465;
   const isSecure = settings?.smtpSecure !== undefined ? Boolean(settings.smtpSecure) : port === 465;
 
   if (!host || !user || !pass) {
@@ -54,7 +54,7 @@ export async function sendLeadNotificationEmail(
   lead: StoredInquiry,
   settings: StoredSettings
 ): Promise<{ success: boolean; message: string }> {
-  const targetEmail = settings.leadNotificationEmail || settings.officialEmail || "info@saffroncity.org";
+  const targetEmail = settings.leadNotificationEmail || settings.officialEmail || "ubaidnasir147.un@gmail.com";
   const subject = `🔔 [New Saffron City Lead] ${lead.name} (${lead.source || "Website Lead"})`;
 
   const htmlContent = `
@@ -154,7 +154,7 @@ export async function sendLeadNotificationEmail(
   try {
     const transporter = getMailTransporter(settings);
     if (transporter) {
-      const fromEmail = settings.smtpFromEmail || settings.smtpUser || "info@saffroncity.org";
+      const fromEmail = process.env.SMTP_USER || settings.smtpFromEmail || settings.smtpUser || "ubaidnasir147.un@gmail.com";
       const info = await transporter.sendMail({
         from: `"Saffron City Islamabad" <${fromEmail}>`,
         to: targetEmail,
@@ -248,7 +248,7 @@ export async function sendPasswordResetOtpEmail(
       };
     }
 
-    const fromEmail = settings.smtpFromEmail || settings.smtpUser || "info@saffroncity.org";
+    const fromEmail = process.env.SMTP_USER || settings.smtpFromEmail || settings.smtpUser || "ubaidnasir147.un@gmail.com";
     const info = await transporter.sendMail({
       from: `"Saffron City Security" <${fromEmail}>`,
       to: targetEmail,
@@ -359,7 +359,7 @@ export async function sendTestSmtpEmail(
     // Verify SMTP connection
     await transporter.verify();
 
-    const fromEmail = settings.smtpFromEmail || settings.smtpUser;
+    const fromEmail = process.env.SMTP_USER || settings.smtpFromEmail || settings.smtpUser;
     const info = await transporter.sendMail({
       from: `"Saffron City Test" <${fromEmail}>`,
       to: targetEmail,

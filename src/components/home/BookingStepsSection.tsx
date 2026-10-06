@@ -88,9 +88,9 @@ export default function BookingStepsSection({ whatsappUrl }: { whatsappUrl: stri
       {/* =========================================================
           1. UNIQUE MOBILE VIEW (Connected Golden Journey Stepper)
       ========================================================= */}
-      <div className="block md:hidden space-y-6">
+      <div className="block md:hidden space-y-6 px-1">
         {/* Mobile Horizontal Step Quick-Chips Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none px-1">
+        <div className="flex flex-wrap items-center gap-2 pb-2">
           {STEPS_DATA.map((s) => {
             const isActive = activeStep === s.step;
             return (
@@ -104,15 +104,12 @@ export default function BookingStepsSection({ whatsappUrl }: { whatsappUrl: stri
                     el.scrollIntoView({ behavior: "smooth", block: "center" });
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                   isActive
                     ? "bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 text-white shadow-md scale-105"
                     : "bg-amber-50 text-slate-700 border border-amber-200/80 hover:bg-amber-100"
                 }`}
               >
-                <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
-                  {s.step}
-                </span>
                 <span>Step {s.step}</span>
               </button>
             );
@@ -120,9 +117,9 @@ export default function BookingStepsSection({ whatsappUrl }: { whatsappUrl: stri
         </div>
 
         {/* Vertical Connected Journey Timeline */}
-        <div className="relative pl-6 space-y-5">
+        <div className="relative pl-10 space-y-5">
           {/* Continuous Glowing Golden Track Line */}
-          <div className="absolute left-[17px] top-4 bottom-6 w-[2.5px] bg-gradient-to-b from-amber-400 via-[#D49E17] to-amber-500 rounded-full" />
+          <div className="absolute left-[20px] top-4 bottom-6 w-[2.5px] bg-gradient-to-b from-amber-400 via-[#D49E17] to-amber-500 rounded-full" />
 
           {STEPS_DATA.map((s) => {
             const IconComponent = s.icon;
@@ -141,7 +138,7 @@ export default function BookingStepsSection({ whatsappUrl }: { whatsappUrl: stri
               >
                 {/* Milestone Node Badge on the Golden Spine */}
                 <div
-                  className={`absolute -left-6 top-4 -translate-x-1/2 w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold shadow-md transition-transform duration-300 ${
+                  className={`absolute -left-5 top-4 -translate-x-1/2 w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold shadow-md transition-transform duration-300 ${
                     isSelected
                       ? "bg-gradient-to-br from-[#D49E17] to-amber-600 text-white border-white scale-110 ring-4 ring-amber-400/30"
                       : "bg-white text-[#D49E17] border-amber-400"
