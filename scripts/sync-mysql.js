@@ -94,6 +94,10 @@ async function initAndSyncMySQL() {
     await alterTableSafe("sitesetting", "`landmarksJson` JSON NULL");
     await alterTableSafe("sitesetting", "`paymentTiersJson` JSON NULL");
     await alterTableSafe("blogs", "`faqs` JSON NULL");
+    await alterTableSafe("blogs", "`authorRole` VARCHAR(191) NULL");
+    await alterTableSafe("blogs", "`authorBio` TEXT NULL");
+    await alterTableSafe("blogs", "`authorImage` VARCHAR(500) NULL");
+    await alterTableSafe("blogs", "`showProjectSnapshot` BOOLEAN DEFAULT 0");
 
     await connection.query(`
       CREATE TABLE IF NOT EXISTS \`pageseo\` (
@@ -174,8 +178,15 @@ async function initAndSyncMySQL() {
           "heroTitle", "heroHighlightedWord", "heroSubtitle", "heroBgImage", "heroButtonText",
           "masterPlanImage", "masterPlanFullImage", "masterPlanPdf", "masterPlanDescription",
           "sectorATitle", "sectorATagline", "sectorAPlots", "sectorAPrice", "sectorAImage",
+          "sectorADescription", "sectorABrochurePdf",
           "sectorBTitle", "sectorBTagline", "sectorBPlots", "sectorBPrice", "sectorBImage",
-          "residentialPaymentPlanImage", "commercialPaymentPlanImage", "officialPaymentPlanPdf"
+          "sectorBDescription", "sectorBBrochurePdf",
+          "residentialPaymentPlanImage", "commercialPaymentPlanImage", "officialPaymentPlanPdf",
+          "aboutHeroHeading", "aboutHeroSubtitle", "aboutHeroImage", "aboutStoryHeading", "aboutStoryText", "aboutMissionText", "aboutVisionText", "aboutLegacyYears",
+          "nocPageHeading", "nocPageSubtitle", "nocPageDescription", "nocApprovalNumber", "nocCertificateImage", "nocRdaLetterPdf", "nocLegalFeaturesJson",
+          "locationPageHeading", "locationPageSubtitle", "locationPageDescription", "locationMapImage", "locationGoogleEmbedUrl",
+          "residentialPageHeading", "residentialPageSubtitle", "residentialPageBanner",
+          "commercialPageHeading", "commercialPageSubtitle", "commercialPageBanner"
         ];
         const heroData = {};
         for (const key of heroKeys) {
@@ -375,6 +386,28 @@ async function initAndSyncMySQL() {
         UPDATE \`blogs\` SET \`image\` = '/images/sectors/commercial-plaza.webp' WHERE \`id\` = 'blog-03';
       `);
       console.log("✅ Verified and normalized all blog images in MySQL database");
+    }
+
+    // 4. Migrate and enforce cryptographic PBKDF2 hashing on all users
+    const crypto = require("crypto");
+    try {
+      const [users] = await connection.query("SELECT `id`, `email`, `password`, `passwordHash`, `salt` FROM `users`");
+      if (Array.isArray(users)) {
+        for (const u of users) {
+          if (u.password || !u.passwordHash || !u.salt) {
+            const raw = u.password || u.email;
+            const salt = crypto.randomBytes(32).toString("hex");
+            const hash = crypto.pbkdf2Sync(raw, salt, 100000, 64, "sha512").toString("hex");
+            await connection.query(
+              "UPDATE `users` SET `passwordHash` = ?, `salt` = ?, `password` = NULL WHERE `id` = ?",
+              [hash, salt, u.id]
+            );
+            console.log(`🔒 Upgraded user ${u.email} to PBKDF2-SHA512 (100k rounds)`);
+          }
+        }
+      }
+    } catch (userMigrateErr) {
+      console.log("User password migration notice:", userMigrateErr.message);
     }
 
     console.log("=========================================");

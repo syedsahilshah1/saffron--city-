@@ -29,6 +29,7 @@ import {
   TIMELINE_MILESTONES
 } from "@/data/saffron-data";
 
+import { db } from "@/lib/db";
 import { getPageMetadata } from "@/lib/seo";
 import { BreadcrumbSchema } from "@/components/seo/JsonLd";
 
@@ -68,10 +69,97 @@ const COMMITMENTS = [
   }
 ];
 
-export default function AboutUsPage() {
-  const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
+export default async function AboutUsPage() {
+  const settings = await db.getSettings();
+  const whatsappNumber = settings.whatsappPhone || SITE_CONFIG.whatsapp;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi, I want to learn more about Saffron City's development team and RDA approval."
   )}`;
+
+  const heroBg = settings.aboutHeroImage || "/images/about/about-hero-banner.webp";
+  const heroHeading = settings.aboutHeroHeading || "About Us | Shaping Pakistan's Future";
+  const heroSubtitle = settings.aboutHeroSubtitle || "70+ Years of Engineering Excellence backed by SKB Group";
+
+  // Parse Stats Counter Cards
+  let stats = {
+    yearsLegacy: "70+",
+    yearsLegacyLabel: "Years Legacy",
+    landExpanse: "15000 Kanal",
+    landExpanseLabel: "Total Land Expanse",
+    rdaStatus: "100%",
+    rdaStatusLabel: "RDA Approved",
+    boulevard: "250 Ft",
+    boulevardLabel: "Main Boulevard"
+  };
+  if (settings.aboutStatsJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutStatsJson);
+      if (parsed) stats = { ...stats, ...parsed };
+    } catch (e) {}
+  }
+
+  // Parse Leadership Team Cards
+  let leadershipList = LEADERSHIP;
+  if (settings.aboutLeadershipJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutLeadershipJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        leadershipList = parsed;
+      }
+    } catch (e) {}
+  }
+
+  // Parse Timeline Milestones
+  let timelineList = TIMELINE_MILESTONES;
+  if (settings.aboutTimelineJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutTimelineJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        timelineList = parsed;
+      }
+    } catch (e) {}
+  }
+
+  // Parse Differentiators
+  let differentiatorsList: any[] | undefined = undefined;
+  if (settings.aboutDifferentiatorsJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutDifferentiatorsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        differentiatorsList = parsed;
+      }
+    } catch (e) {}
+  }
+
+  // Parse Core Values
+  let coreValuesList: any[] | undefined = undefined;
+  if (settings.aboutCoreValuesJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutCoreValuesJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        coreValuesList = parsed;
+      }
+    } catch (e) {}
+  }
+
+  // Parse Commitments
+  let commitmentsList = COMMITMENTS;
+  if (settings.aboutCommitmentsJson) {
+    try {
+      const parsed = JSON.parse(settings.aboutCommitmentsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        commitmentsList = parsed.map((item: any, idx: number) => ({
+          title: item.title,
+          subtitle: item.subtitle,
+          desc: item.desc,
+          image: item.image || "/images/about/about-hero-banner.webp",
+          icon: idx === 0 ? Home : idx === 1 ? TrendingUp : Globe2,
+          accent: idx === 0 ? "text-amber-600" : idx === 1 ? "text-emerald-600" : "text-blue-600",
+          border: idx === 0 ? "border-amber-200" : idx === 1 ? "border-emerald-200" : "border-blue-200"
+        }));
+      }
+    } catch (e) {}
+  }
 
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
@@ -81,7 +169,7 @@ export default function AboutUsPage() {
         {/* Background Hero Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/about/about-hero-banner.webp"
+            src={heroBg}
             alt="Saffron City Islamabad Master View"
             className="w-full h-full object-cover object-center opacity-100 scale-105 animate-pulse-slow"
           />
@@ -92,30 +180,48 @@ export default function AboutUsPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white">
-            About <span className="text-[#D49E17]">Us</span>
+            {heroHeading.includes("|") ? (
+              <>
+                {heroHeading.split("|")[0]} <span className="text-[#D49E17]">{heroHeading.split("|")[1]}</span>
+              </>
+            ) : (
+              <>
+                About <span className="text-[#D49E17]">Us</span>
+              </>
+            )}
           </h1>
+
+          {heroSubtitle && (
+            <p className="text-sm sm:text-base text-slate-200 max-w-2xl mx-auto font-medium">
+              {heroSubtitle}
+            </p>
+          )}
 
           {/* Quick Stats Banner */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-6">
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
               <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">
-                <AnimatedCounter end={70} suffix="+" />
+                {stats.yearsLegacy}
               </span>
-              <p className="text-xs text-slate-300 font-medium">Years Legacy</p>
+              <p className="text-xs text-slate-300 font-medium">{stats.yearsLegacyLabel}</p>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
               <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">
-                <AnimatedCounter end={15000} suffix=" Kanal" />
+                {stats.landExpanse}
               </span>
-              <p className="text-xs text-slate-300 font-medium">Total Land Expanse</p>
+              <p className="text-xs text-slate-300 font-medium">{stats.landExpanseLabel}</p>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-              <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">100%</span>
-              <p className="text-xs text-slate-300 font-medium">RDA Approved</p>
+              <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">
+                {stats.rdaStatus}
+              </span>
+              <p className="text-xs text-slate-300 font-medium">{stats.rdaStatusLabel}</p>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
-              <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">250 Ft</span>
-              <p className="text-xs text-slate-300 font-medium">Main Boulevard</p>
+              <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">
+                {stats.boulevard}
+              </span>
+              <p className="text-xs text-slate-300 font-medium">{stats.boulevardLabel}</p>
             </div>
           </div>
         </div>
@@ -124,8 +230,14 @@ export default function AboutUsPage() {
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
 
-        {/* Introduction & Developer Overview with See More */}
-        <LegacyOverviewWithSeeMore />
+        {/* Introduction & Developer Overview with See More & Rich HTML + SEO Links */}
+        <LegacyOverviewWithSeeMore
+          heading={settings.aboutStoryHeading || "A Legacy Built on Quality & Trust"}
+          storyHtml={settings.aboutStoryText}
+          mission={settings.aboutMissionText}
+          vision={settings.aboutVisionText}
+          image={settings.aboutLegacyImage}
+        />
 
         {/* Leadership Section */}
         <section className="space-y-10">
@@ -149,7 +261,7 @@ export default function AboutUsPage() {
             staggerDelay={120}
             direction="up"
           >
-            {LEADERSHIP.map((leader) => (
+            {leadershipList.map((leader) => (
               <div
                 key={leader.name}
                 className="p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all space-y-4 group flex flex-col justify-between"
@@ -158,7 +270,7 @@ export default function AboutUsPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-amber-200 group-hover:border-[#D49E17] transition-colors shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center">
                       <img
-                        src={leader.image}
+                        src={leader.image || "/images/about/val-integrity.webp"}
                         alt={leader.name}
                         className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-300"
                       />
@@ -202,9 +314,9 @@ export default function AboutUsPage() {
             staggerDelay={80}
             direction="up"
           >
-            {TIMELINE_MILESTONES.map((item, index) => (
+            {timelineList.map((item, index) => (
               <div
-                key={item.year}
+                key={`${item.year}-${index}`}
                 className="relative p-6 rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 space-y-3 group"
               >
                 <div className="flex items-center justify-between">
@@ -224,10 +336,10 @@ export default function AboutUsPage() {
         </section>
 
         {/* What Makes Saffron City Different (3 cards per line - 2 lines total) */}
-        <DifferentiatorsSection />
+        <DifferentiatorsSection items={differentiatorsList} />
 
         {/* Our Core Values (3 cards per row - 2 rows total) */}
-        <CoreValuesSection />
+        <CoreValuesSection items={coreValuesList} />
 
         {/* Our Commitment to You (With Images & Icons) */}
         <section className="space-y-8">
@@ -251,7 +363,7 @@ export default function AboutUsPage() {
               staggerDelay={100}
               direction="up"
             >
-              {COMMITMENTS.map((item) => {
+              {commitmentsList.map((item) => {
                 const IconComponent = item.icon;
                 return (
                   <div

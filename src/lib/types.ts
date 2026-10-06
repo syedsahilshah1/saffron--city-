@@ -57,6 +57,7 @@ export interface StoredBlog {
   // Author & Display Options
   authorRole?: string;
   authorBio?: string;
+  authorImage?: string;
   showProjectSnapshot?: boolean;
 
   // Comprehensive SEO & Social Metadata
@@ -298,6 +299,172 @@ export interface StoredSettings {
   residentialPaymentPlanImage: string;
   commercialPaymentPlanImage: string;
   officialPaymentPlanPdf: string;
+
+  // About Us Page Content
+  aboutHeroHeading?: string;
+  aboutHeroSubtitle?: string;
+  aboutHeroImage?: string;
+  aboutStoryHeading?: string;
+  aboutStoryText?: string;
+  aboutMissionText?: string;
+  aboutVisionText?: string;
+  aboutLegacyYears?: string;
+  aboutLegacyImage?: string;
+  aboutStatsJson?: string;
+  aboutLeadershipJson?: string;
+  aboutTimelineJson?: string;
+  aboutDifferentiatorsJson?: string;
+  aboutCoreValuesJson?: string;
+  aboutCommitmentsJson?: string;
+
+  // NOC Status Page Content
+  nocPageHeading?: string;
+  nocPageSubtitle?: string;
+  nocPageDescription?: string;
+  nocApprovalNumber?: string;
+  nocCertificateImage?: string;
+  nocRdaLetterPdf?: string;
+  nocLegalFeaturesJson?: string;
+  nocHeroImage?: string;
+  nocHeroHeading?: string;
+  nocHeroSubtitle?: string;
+  nocVerificationUrl?: string;
+  nocStatsJson?: string;
+  nocOverviewHeading?: string;
+  nocOverviewText?: string;
+  nocDocumentsHeading?: string;
+  nocDocumentsJson?: string;
+  nocStepsHeading?: string;
+  nocStepsSubtitle?: string;
+  nocStepsJson?: string;
+  nocFaqsHeading?: string;
+  nocFaqsJson?: string;
+  nocCtaHeading?: string;
+  nocCtaSubtitle?: string;
+  nocCtaPhone?: string;
+
+  // Location & Access Page Content
+  locationPageHeading?: string;
+  locationPageSubtitle?: string;
+  locationPageDescription?: string;
+  locationHeroHeading?: string;
+  locationHeroSubtitle?: string;
+  locationHeroImage?: string;
+  locationStatsJson?: string;
+  locationOverviewHeading?: string;
+  locationOverviewText?: string;
+  locationMapImage?: string;
+  locationGoogleEmbedUrl?: string;
+  locationLandmarksHeading?: string;
+  locationLandmarksJson?: string;
+  locationRoutesHeading?: string;
+  locationRoutesJson?: string;
+  locationTableHeading?: string;
+  locationTableJson?: string;
+  locationCtaHeading?: string;
+  locationCtaSubtitle?: string;
+  locationCtaPhone?: string;
+
+  // Master Plan & Media Content
+  masterPlanHeroHeading?: string;
+  masterPlanHeroSubtitle?: string;
+  masterPlanHeroImage?: string;
+  masterPlanStatsJson?: string;
+  masterPlanOverviewHeading?: string;
+  masterPlanOverviewText?: string;
+  masterPlanSectorsHeading?: string;
+  masterPlanSectorsJson?: string;
+  masterPlanFacilitiesHeading?: string;
+  masterPlanFacilitiesJson?: string;
+  masterPlanFaqsHeading?: string;
+  masterPlanFaqsJson?: string;
+  masterPlanCtaHeading?: string;
+  masterPlanCtaSubtitle?: string;
+  masterPlanCtaPhone?: string;
+
+  // Homepage Content Granular Fields
+  homeStatsJson?: string;
+  homeOverviewHeading?: string;
+  homeOverviewText?: string;
+  homeOverviewImage?: string;
+  homeAmenitiesHeading?: string;
+  homeAmenitiesJson?: string;
+  homeFaqsHeading?: string;
+  homeFaqsJson?: string;
+  homeCtaHeading?: string;
+  homeCtaSubtitle?: string;
+
+  // Commercial Plots Page Content
+  commercialHeroHeading?: string;
+  commercialHeroSubtitle?: string;
+  commercialHeroImage?: string;
+  commercialStatsJson?: string;
+  commercialOverviewHeading?: string;
+  commercialOverviewText?: string;
+  commercialOverviewImage?: string;
+  commercialAmenitiesHeading?: string;
+  commercialAmenitiesJson?: string;
+  commercialLandmarksHeading?: string;
+  commercialLandmarksJson?: string;
+  commercialGoogleMapEmbed?: string;
+  commercialPlotsHeading?: string;
+  commercialPlotsSubtitle?: string;
+  commercialPlotsJson?: string;
+  commercialWhyChooseHeading?: string;
+  commercialWhyChooseJson?: string;
+  commercialPricingHeading?: string;
+  commercialPricingJson?: string;
+  commercialFaqsHeading?: string;
+  commercialFaqsJson?: string;
+  commercialCtaHeading?: string;
+  commercialCtaSubtitle?: string;
+  commercialCtaPhone?: string;
+
+  // Sectors & Plots Detailed Content
+  sectorADescription?: string;
+  sectorABrochurePdf?: string;
+  sectorAOverviewHeading?: string;
+  sectorAOverviewImage?: string;
+  sectorAStatsJson?: string;
+  sectorAAmenitiesHeading?: string;
+  sectorAAmenitiesJson?: string;
+  sectorALandmarksHeading?: string;
+  sectorALandmarksJson?: string;
+  sectorAWhyChooseHeading?: string;
+  sectorAWhyChooseJson?: string;
+  sectorAFaqsJson?: string;
+  sectorAMapEmbedUrl?: string;
+  sectorAPlotsHeading?: string;
+  sectorAPlotsSubtitle?: string;
+  sectorACtaHeading?: string;
+  sectorACtaSubtitle?: string;
+  sectorACtaPhone?: string;
+
+  sectorBDescription?: string;
+  sectorBBrochurePdf?: string;
+  sectorBOverviewHeading?: string;
+  sectorBOverviewImage?: string;
+  sectorBStatsJson?: string;
+  sectorBAmenitiesHeading?: string;
+  sectorBAmenitiesJson?: string;
+  sectorBLandmarksHeading?: string;
+  sectorBLandmarksJson?: string;
+  sectorBWhyChooseHeading?: string;
+  sectorBWhyChooseJson?: string;
+  sectorBFaqsJson?: string;
+  sectorBMapEmbedUrl?: string;
+  sectorBPlotsHeading?: string;
+  sectorBPlotsSubtitle?: string;
+  sectorBCtaHeading?: string;
+  sectorBCtaSubtitle?: string;
+  sectorBCtaPhone?: string;
+
+  residentialPageHeading?: string;
+  residentialPageSubtitle?: string;
+  residentialPageBanner?: string;
+  commercialPageHeading?: string;
+  commercialPageSubtitle?: string;
+  commercialPageBanner?: string;
 
   // Dynamic Lists
   amenities: StoredAmenity[];

@@ -12,7 +12,9 @@ import {
   CheckCircle2,
   Sparkles,
   MapPin,
-  HelpCircle
+  HelpCircle,
+  Phone,
+  MessageCircle
 } from "lucide-react";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
@@ -21,7 +23,7 @@ import MasterPlanViewer from "@/components/master-plan/MasterPlanViewer";
 import MasterPlanDownloadButton from "@/components/master-plan/MasterPlanDownloadButton";
 import FaqAccordion from "@/components/ui/FaqAccordion";
 import { SITE_CONFIG } from "@/data/saffron-data";
-
+import { db } from "@/lib/db";
 import { getPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +32,18 @@ export async function generateMetadata() {
   return await getPageMetadata("/master-plan");
 }
 
-const SECTOR_CARDS = [
+const DEFAULT_STATS = {
+  stat1: "15,000 Kanal",
+  stat1Label: "Total Master Plan Expanse",
+  stat2: "250 Feet",
+  stat2Label: "Main Central Boulevard",
+  stat3: "45%",
+  stat3Label: "Green Open Spaces & Parks",
+  stat4: "100%",
+  stat4Label: "Underground Infrastructure"
+};
+
+const DEFAULT_SECTORS = [
   {
     id: "sector-a",
     name: "Sector A Residential",
@@ -93,38 +106,38 @@ const SECTOR_CARDS = [
   }
 ];
 
-const CIVIC_FACILITIES = [
+const DEFAULT_FACILITIES = [
   {
+    id: "fac-1",
     title: "Roads & Underground Utilities",
     desc: "Carpeted wide boulevards with complete underground electrical, optical fiber, and drainage networks.",
     image: "/images/facilities/underground-utilities.webp",
-    icon: Zap,
     tag: "Underground Wiring"
   },
   {
+    id: "fac-2",
     title: "Water Filtration & Power Grid",
     desc: "Dedicated RO water filtration plant for 24/7 pure water and uninterrupted power grid station.",
     image: "/images/facilities/water-filtration.webp",
-    icon: Droplets,
     tag: "RO Plant"
   },
   {
+    id: "fac-3",
     title: "Green Parks & Sports Complexes",
     desc: "Over 45% land allocated to themed family parks, sports grounds, community gardens, and lakes.",
     image: "/images/facilities/green-parks.webp",
-    icon: Trees,
     tag: "45% Green Spaces"
   },
   {
+    id: "fac-4",
     title: "Gated Smart 24/7 Security",
     desc: "Round-the-clock CCTV surveillance, biometric entrance barriers, and active security patrols.",
     image: "/images/facilities/gated-security.webp",
-    icon: ShieldCheck,
     tag: "Smart Security"
   }
 ];
 
-const MASTER_PLAN_FAQS = [
+const DEFAULT_FAQS = [
   {
     question: "How many sectors does Saffron City master plan comprise?",
     answer: "Saffron City spans 15,000 Kanal featuring Sector A (Premium flagship with underground utilities), Sector B (Affordable residential with 3-year installments), and a dedicated Signature Commercial block directly along Main GT Road.",
@@ -152,7 +165,61 @@ const MASTER_PLAN_FAQS = [
   }
 ];
 
-export default function MasterPlanPage() {
+export default async function MasterPlanPage() {
+  const settings = await db.getSettings();
+
+  // Parse dynamic stats
+  let dynamicStats = DEFAULT_STATS;
+  if (settings.masterPlanStatsJson) {
+    try {
+      const parsed = JSON.parse(settings.masterPlanStatsJson);
+      dynamicStats = { ...DEFAULT_STATS, ...parsed };
+    } catch {}
+  }
+
+  // Parse dynamic sectors
+  let dynamicSectors = DEFAULT_SECTORS;
+  if (settings.masterPlanSectorsJson) {
+    try {
+      const parsed = JSON.parse(settings.masterPlanSectorsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        dynamicSectors = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse dynamic facilities
+  let dynamicFacilities = DEFAULT_FACILITIES;
+  if (settings.masterPlanFacilitiesJson) {
+    try {
+      const parsed = JSON.parse(settings.masterPlanFacilitiesJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        dynamicFacilities = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse dynamic FAQs
+  let dynamicFaqs = DEFAULT_FAQS;
+  if (settings.masterPlanFaqsJson) {
+    try {
+      const parsed = JSON.parse(settings.masterPlanFaqsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        dynamicFaqs = parsed;
+      }
+    } catch {}
+  }
+
+  const heroHeading = settings.masterPlanHeroHeading || "Saffron City Master Plan: Sectors & Layout";
+  const heroSubtitle = settings.masterPlanHeroSubtitle || "Explore the master layout model of Saffron City on Main GT Road, Rawat. Features dedicated residential sectors, 250-foot grand boulevard, commercial hub, and 45% open green spaces.";
+  const masterPlanPdf = settings.masterPlanPdf || SITE_CONFIG.masterPlanPdf;
+  const masterPlanImg = settings.masterPlanImage || SITE_CONFIG.masterPlanImage || "/images/saffron-city-master-plan.webp";
+
+  const ctaPhone = settings.masterPlanCtaPhone || settings.whatsappPhone || SITE_CONFIG.whatsapp;
+  const whatsappUrl = `https://wa.me/${ctaPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+    "Hi, I want more information about the Saffron City Master Plan layout."
+  )}`;
+
   return (
     <div className="space-y-20 lg:space-y-28 pt-24 lg:pt-28 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-slate-900 bg-white">
       
@@ -161,29 +228,58 @@ export default function MasterPlanPage() {
         {/* Left Side: Information & Highlights */}
         <div className="lg:col-span-6 space-y-6">
           <WordReveal
-            text="Saffron City Master Plan: Sectors & Layout"
-            highlightWords={["Master", "Plan", "Layout"]}
+            text={heroHeading}
+            highlightWords={["Master", "Plan", "Layout", "Sectors"]}
             as="h1"
             className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight leading-tight block"
           />
 
           <ScrollReveal animation="fade-up" delay={100}>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Explore the master layout model of Saffron City on Main GT Road, Rawat. Features dedicated residential sectors, 250-foot grand boulevard, commercial hub, and 45% open green spaces.
-            </p>
+            {settings.masterPlanOverviewText ? (
+              <div
+                className="prose prose-sm sm:prose max-w-none text-slate-600 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: settings.masterPlanOverviewText }}
+              />
+            ) : (
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+                {heroSubtitle}
+              </p>
+            )}
+          </ScrollReveal>
+
+          {/* 4 Quick Stat Counters */}
+          <ScrollReveal animation="fade-up" delay={150}>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                <span className="block text-lg font-bold font-mono text-[#D49E17]">{dynamicStats.stat1}</span>
+                <span className="text-xs text-slate-600">{dynamicStats.stat1Label}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                <span className="block text-lg font-bold font-mono text-slate-900">{dynamicStats.stat2}</span>
+                <span className="text-xs text-slate-600">{dynamicStats.stat2Label}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                <span className="block text-lg font-bold font-mono text-emerald-700">{dynamicStats.stat3}</span>
+                <span className="text-xs text-slate-600">{dynamicStats.stat3Label}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                <span className="block text-lg font-bold font-mono text-[#D49E17]">{dynamicStats.stat4}</span>
+                <span className="text-xs text-slate-600">{dynamicStats.stat4Label}</span>
+              </div>
+            </div>
           </ScrollReveal>
         </div>
 
         {/* Right Side: Master Plan Viewer with Action Buttons below it */}
         <div className="lg:col-span-6 space-y-4">
           <ScrollReveal animation="fade-left" duration={850}>
-            <MasterPlanViewer />
+            <MasterPlanViewer initialImage={masterPlanImg} />
           </ScrollReveal>
 
           {/* Action Buttons placed below Master Map */}
           <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
             <MasterPlanDownloadButton 
-              downloadUrl={SITE_CONFIG.masterPlanPdf} 
+              downloadUrl={masterPlanPdf} 
               buttonText="Download Master Plan" 
               documentTitle="Saffron City Master Plan Layout"
             />
@@ -193,15 +289,24 @@ export default function MasterPlanPage() {
             >
               View Payment Plans
             </Link>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-1.5"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Advisory Desk</span>
+            </a>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* 4 Sectors Visual Cards */}
+      {/* Sectors Visual Cards */}
       <section className="space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <WordReveal
-            text="Saffron City Sector Layout"
+            text={settings.masterPlanSectorsHeading || "Saffron City Sector Layout"}
             highlightWords={["Sector", "Layout"]}
             as="h2"
             className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -219,16 +324,16 @@ export default function MasterPlanPage() {
           staggerDelay={100}
           direction="up"
         >
-          {SECTOR_CARDS.map((sector) => (
+          {dynamicSectors.map((sector: any) => (
             <div
-              key={sector.id}
+              key={sector.id || sector.name}
               className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group flex flex-col justify-between"
             >
               <div>
                 {/* Sector Card Header Image */}
                 <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-slate-100">
                   <img
-                    src={sector.image}
+                    src={sector.image || "/images/sectors/sector-a-luxury.webp"}
                     alt={sector.name}
                     title={sector.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -238,10 +343,10 @@ export default function MasterPlanPage() {
                   {/* Badges */}
                   <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
                     <span className="px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-slate-700 text-amber-400 text-xs font-bold uppercase tracking-wider">
-                      {sector.type}
+                      {sector.type || "Residential"}
                     </span>
                     <span className="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-xs font-semibold">
-                      {sector.status}
+                      {sector.status || "Open"}
                     </span>
                   </div>
 
@@ -255,7 +360,7 @@ export default function MasterPlanPage() {
                 {/* Card Body with Key Points */}
                 <div className="p-6 space-y-4">
                   <div className="space-y-2">
-                    {sector.features.map((f, i) => (
+                    {Array.isArray(sector.features) && sector.features.map((f: string, i: number) => (
                       <div key={i} className="flex items-center gap-2.5 text-xs text-slate-700">
                         <CheckCircle2 className="w-4 h-4 text-[#D49E17] shrink-0" />
                         <span>{f}</span>
@@ -272,7 +377,7 @@ export default function MasterPlanPage() {
                   <span className="text-base font-bold text-slate-900">{sector.priceStarting}</span>
                 </div>
                 <Link
-                  href={sector.href}
+                  href={sector.href || "/payment-plan"}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 group-hover:bg-[#D49E17] group-hover:text-slate-950 text-white text-xs font-bold transition-all shadow cursor-pointer"
                 >
                   <span>Explore Sector</span>
@@ -284,78 +389,11 @@ export default function MasterPlanPage() {
         </StaggerReveal>
       </section>
 
-      {/* Sector A vs Sector B Comparison */}
-      <section className="space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <WordReveal
-            text="Sector A vs Sector B: Which Fits You?"
-            highlightWords={["Sector", "A", "B"]}
-            as="h3"
-            className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading block"
-          />
-          <p className="text-xs sm:text-sm text-slate-600">
-            Compare premium features against budget-friendly installment flexibilities.
-          </p>
-        </div>
-
-        <ScrollReveal animation="fade-up" duration={850}>
-          <div className="p-8 sm:p-12 rounded-3xl bg-amber-50/60 border border-amber-200 shadow-xl space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-700">
-              <div className="p-6 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-base font-bold text-[#D49E17]">Sector A (Premium Residential)</h4>
-                  <span className="text-[11px] font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                    Flagship
-                  </span>
-                </div>
-                <ul className="space-y-2.5 pt-1">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
-                    <span>Underground electrical lines, fiber optics &amp; utilities</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
-                    <span>Extra-wide carpeted boulevards &amp; direct boulevard access</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D49E17] shrink-0" />
-                    <span>Nearest access to Grand Mosque and Central Commercial Hub</span>
-                  </li> 
-                </ul>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-base font-bold text-emerald-700">Sector B (Affordable Residential)</h4>
-                  <span className="text-[11px] font-bold text-emerald-900 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    High Value
-                  </span>
-                </div>
-                <ul className="space-y-2.5 pt-1">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>10% booking amount with flexible 3-year installment schedule</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Same 15,000 Kanal RDA NOC verified legal protection</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Dedicated community mosque &amp; local family parks</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
       {/* Infrastructure & Civic Facilities (With Images) */}
       <section className="space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <WordReveal
-            text="Infrastructure & Civic Facilities"
+            text={settings.masterPlanFacilitiesHeading || "Infrastructure & Civic Facilities"}
             highlightWords={["Infrastructure", "Facilities"]}
             as="h2"
             className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -373,54 +411,51 @@ export default function MasterPlanPage() {
           staggerDelay={80}
           direction="up"
         >
-          {CIVIC_FACILITIES.map((facility) => {
-            const IconComponent = facility.icon;
-            return (
-              <div
-                key={facility.title}
-                className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={facility.image}
-                      alt={facility.title}
-                      title={facility.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3">
-                      <div className="p-2 rounded-xl bg-white/95 text-[#D49E17] shadow">
-                        <IconComponent className="w-4 h-4 text-[#D49E17]" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[11px] font-bold shadow">
-                        {facility.tag}
-                      </span>
+          {dynamicFacilities.map((facility: any, idx: number) => (
+            <div
+              key={facility.id || idx}
+              className="rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col justify-between"
+            >
+              <div>
+                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={facility.image || "/images/facilities/underground-utilities.webp"}
+                    alt={facility.title}
+                    title={facility.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute top-3 left-3">
+                    <div className="p-2 rounded-xl bg-white/95 text-[#D49E17] shadow">
+                      <Zap className="w-4 h-4 text-[#D49E17]" />
                     </div>
                   </div>
-
-                  <div className="p-5 space-y-2">
-                    <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D49E17] transition-colors">
-                      {facility.title}
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {facility.desc}
-                    </p>
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <span className="px-2.5 py-1 rounded-full bg-[#D49E17] text-slate-950 text-[11px] font-bold shadow">
+                      {facility.tag || "World-Class"}
+                    </span>
                   </div>
                 </div>
+
+                <div className="p-5 space-y-2">
+                  <h4 className="font-bold text-slate-900 text-sm group-hover:text-[#D49E17] transition-colors">
+                    {facility.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {facility.desc}
+                  </p>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </StaggerReveal>
       </section>
 
-      {/* Redesigned Master Plan FAQs (Interactive Accordion) */}
+      {/* Master Plan FAQs (Interactive Accordion) */}
       <section className="space-y-8 max-w-4xl mx-auto">
         <div className="text-center space-y-3">
           <WordReveal
-            text="Frequently Asked Questions"
+            text={settings.masterPlanFaqsHeading || "Frequently Asked Questions"}
             highlightWords={["Frequently", "Questions"]}
             as="h2"
             className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -434,7 +469,7 @@ export default function MasterPlanPage() {
         </div>
 
         <ScrollReveal animation="fade-up" delay={150}>
-          <FaqAccordion items={MASTER_PLAN_FAQS} defaultOpenIndex={0} />
+          <FaqAccordion items={dynamicFaqs} defaultOpenIndex={0} />
         </ScrollReveal>
       </section>
     </div>

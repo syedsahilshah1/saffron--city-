@@ -26,12 +26,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Initial Seed Users
-INSERT INTO `users` (`id`, `email`, `name`, `password`, `role`, `permissions`, `failedAttempts`, `isActive`, `createdAt`)
+-- Initial Seed Users (Cryptographically Hashed with PBKDF2-SHA512 + 32-Byte Salt)
+INSERT INTO `users` (`id`, `email`, `name`, `password`, `passwordHash`, `salt`, `role`, `permissions`, `failedAttempts`, `isActive`, `createdAt`)
 VALUES
-('usr-superadmin-01', 'ubaidnasir401@gmail.com', 'Ubaid Nasir (Super Admin)', 'ubaidnasir401@gmail.com', 'SUPER_ADMIN', '["overview", "leads", "plots", "blogs", "content", "masterplan", "paymentplans", "seo", "settings", "users"]', 0, 1, NOW()),
-('usr-admin-02', 'sahilkhan536ah@gmail.com', 'Sahil Shah', 'admin123', 'ADMIN', '["overview", "leads", "plots", "blogs", "content", "masterplan", "paymentplans", "seo", "settings", "users"]', 0, 1, NOW())
-ON DUPLICATE KEY UPDATE `email` = VALUES(`email`);
+('usr-superadmin-01', 'ubaidnasir401@gmail.com', 'Ubaid Nasir (Super Admin)', NULL, '62433b50e709c8ceb98396d323093efd8946db5f403bad743e6d8049b420ee38d5e913afcd63b5634d72319aa769d89643a3e696edd96031f446f2f35fffc341', '17fbebc9e07e1a0eb2f2654ce5d789491e844a0fc6fcf8e1b7eccf9dd8e573c8', 'SUPER_ADMIN', '["overview", "leads", "plots", "blogs", "content", "masterplan", "paymentplans", "seo", "settings", "users"]', 0, 1, NOW()),
+('usr-admin-02', 'sahilkhan536ah@gmail.com', 'Sahil Shah', NULL, 'fb458ce4e84ce86651eb5f2a19556ef6c84dc5b20eccb641ed8a3c6eb01cd6531d63dd14856784024a420b994b4ba0683fb2664c21cc6d1c2afd751bb1537917', '6e06be04178da06caf5c7ec9018afd9ed3bd1fc73291a788490f4403d119b0c7', 'ADMIN', '["overview", "leads", "plots", "blogs", "content", "masterplan", "paymentplans", "seo", "settings", "users"]', 0, 1, NOW())
+ON DUPLICATE KEY UPDATE `email` = VALUES(`email`), `passwordHash` = VALUES(`passwordHash`), `salt` = VALUES(`salt`), `password` = NULL;
 
 -- -------------------------------------------------------------
 -- 2. Password Reset Tokens Table

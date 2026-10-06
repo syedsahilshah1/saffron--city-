@@ -196,9 +196,17 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-xs text-slate-300 font-medium">
             <span className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-[10px]">
-                {blog.author.charAt(0)}
-              </div>
+              {blog.authorImage ? (
+                <img
+                  src={blog.authorImage}
+                  alt={blog.author}
+                  className="w-5 h-5 rounded-full object-cover border border-amber-400/50"
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-[10px]">
+                  {blog.author ? blog.author.charAt(0) : "A"}
+                </div>
+              )}
               <span>By {blog.author}</span>
             </span>
             <span className="hidden sm:inline w-1 h-1 bg-amber-400/40 rounded-full"></span>
@@ -384,12 +392,20 @@ export default async function SingleBlogPostPage({ params }: BlogPostPageProps) 
               </div>
             )}
 
-            {/* Author Profile Footer (Optional - only displayed if author provides bio or role) */}
-            {(blog.authorBio || blog.authorRole) && (
+            {/* Author Profile Footer (Optional - displayed if author provides bio, role, or photo) */}
+            {(blog.authorBio || blog.authorRole || blog.authorImage) && (
               <div className="p-6 rounded-2xl bg-[#fbf8f3] border border-amber-200/80 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-                <div className="w-14 h-14 rounded-2xl bg-[#D49E17] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
-                  {blog.author ? blog.author.charAt(0) : "A"}
-                </div>
+                {blog.authorImage ? (
+                  <img
+                    src={blog.authorImage}
+                    alt={blog.author}
+                    className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-400/80 shadow-md shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-[#D49E17] text-white flex items-center justify-center font-serif font-black text-xl shadow-md shrink-0">
+                    {blog.author ? blog.author.charAt(0) : "A"}
+                  </div>
+                )}
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                     <span className="font-bold text-slate-900 text-sm">{blog.author}</span>

@@ -65,7 +65,8 @@ import {
   Link2,
   Quote,
   HelpCircle,
-  ImagePlus
+  ImagePlus,
+  LayoutGrid
 } from "lucide-react";
 import {
   StoredInquiry,
@@ -84,6 +85,13 @@ import { formatPKR } from "@/lib/utils";
 import FileUploadField from "@/components/dashboard/FileUploadField";
 import MediaGalleryModal from "@/components/dashboard/MediaGalleryModal";
 import RichTextEditor from "@/components/dashboard/RichTextEditor";
+import SectorBlockCms from "@/components/dashboard/SectorBlockCms";
+import AboutUsCms from "@/components/dashboard/AboutUsCms";
+import NocStatusCms from "@/components/dashboard/NocStatusCms";
+import CommercialPlotsCms from "@/components/dashboard/CommercialPlotsCms";
+import LocationMapCms from "@/components/dashboard/LocationMapCms";
+import MasterPlanCms from "@/components/dashboard/MasterPlanCms";
+import HomepageHeroCms from "@/components/dashboard/HomepageHeroCms";
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<
@@ -92,6 +100,12 @@ export default function AdminDashboardPage() {
     | "plots"
     | "blogs"
     | "content"
+    | "sector-a"
+    | "sector-b"
+    | "commercial"
+    | "about-us"
+    | "noc-status"
+    | "location"
     | "masterplan"
     | "paymentplans"
     | "seo"
@@ -153,6 +167,7 @@ export default function AdminDashboardPage() {
     author: string;
     authorRole: string;
     authorBio: string;
+    authorImage: string;
     showProjectSnapshot: boolean;
     readTime: string;
     isPublished: boolean;
@@ -183,6 +198,7 @@ export default function AdminDashboardPage() {
     author: "Admin",
     authorRole: "",
     authorBio: "",
+    authorImage: "",
     showProjectSnapshot: false,
     readTime: "4 min read",
     isPublished: true,
@@ -700,6 +716,7 @@ export default function AdminDashboardPage() {
       author: currentUser?.name || "Admin",
       authorRole: "",
       authorBio: "",
+      authorImage: "",
       showProjectSnapshot: false,
       readTime: "4 min read",
       isPublished: true,
@@ -737,6 +754,7 @@ export default function AdminDashboardPage() {
       author: blog.author || "Admin",
       authorRole: blog.authorRole || "",
       authorBio: blog.authorBio || "",
+      authorImage: blog.authorImage || "",
       showProjectSnapshot: Boolean(blog.showProjectSnapshot),
       readTime: blog.readTime || "4 min read",
       isPublished: blog.isPublished ?? true,
@@ -1430,7 +1448,7 @@ export default function AdminDashboardPage() {
               <div className="space-y-1 pt-2 border-t border-slate-100">
                 {sidebarOpen && (
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
-                    CMS &amp; Media Control
+                    Pages &amp; Blocks CMS
                   </span>
                 )}
 
@@ -1441,7 +1459,7 @@ export default function AdminDashboardPage() {
                       if (window.innerWidth < 1024) setSidebarOpen(false);
                     }}
                     title="Blogs & News CMS"
-                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
                       activeTab === "blogs"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
@@ -1472,23 +1490,133 @@ export default function AdminDashboardPage() {
                 )}
 
                 {hasAccess("content") && (
-                  <button
-                    onClick={() => {
-                      setActiveTab("content");
-                      if (window.innerWidth < 1024) setSidebarOpen(false);
-                    }}
-                    title="Content & Images"
-                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === "content"
-                        ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
-                        : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <ImageIcon className="w-4 h-4 shrink-0" />
-                      {sidebarOpen && <span>Content &amp; Images</span>}
-                    </div>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        setActiveTab("sector-a");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="Sector A (Executive / Luxury Block)"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "sector-a"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Layers className="w-4 h-4 shrink-0 text-amber-500" />
+                        {sidebarOpen && <span>Sector A (Block A)</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("sector-b");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="Sector B (Affordable / Smart Living)"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "sector-b"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Layers className="w-4 h-4 shrink-0 text-emerald-500" />
+                        {sidebarOpen && <span>Sector B (Block B)</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("commercial");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="Commercial Plots CMS"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "commercial"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <TrendingUp className="w-4 h-4 shrink-0 text-[#D49E17]" />
+                        {sidebarOpen && <span>Commercial Plots</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("about-us");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="About Us Page CMS"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "about-us"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Building2 className="w-4 h-4 shrink-0 text-blue-500" />
+                        {sidebarOpen && <span>About Us Page</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("noc-status");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="NOC Status & Legal Approvals"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "noc-status"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
+                        {sidebarOpen && <span>NOC &amp; RDA Status</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("location");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="Location & Landmarks"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "location"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <MapPin className="w-4 h-4 shrink-0 text-rose-500" />
+                        {sidebarOpen && <span>Location &amp; Map</span>}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("content");
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title="Homepage & Hero CMS"
+                      className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "content"
+                          ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
+                          : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ImageIcon className="w-4 h-4 shrink-0 text-[#D49E17]" />
+                        {sidebarOpen && <span>Homepage &amp; Hero</span>}
+                      </div>
+                    </button>
+                  </>
                 )}
 
                 {hasAccess("masterplan") && (
@@ -1498,14 +1626,14 @@ export default function AdminDashboardPage() {
                       if (window.innerWidth < 1024) setSidebarOpen(false);
                     }}
                     title="Master Plan & Media"
-                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "masterplan"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Compass className="w-4 h-4 shrink-0" />
+                      <Compass className="w-4 h-4 shrink-0 text-amber-600" />
                       {sidebarOpen && <span>Master Plan &amp; Media</span>}
                     </div>
                   </button>
@@ -1518,14 +1646,14 @@ export default function AdminDashboardPage() {
                       if (window.innerWidth < 1024) setSidebarOpen(false);
                     }}
                     title="Payment Plans"
-                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`w-full flex items-center ${sidebarOpen ? "justify-between px-3.5" : "justify-center px-0"} py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                       activeTab === "paymentplans"
                         ? "bg-[#D49E17] text-white shadow-md shadow-amber-500/20"
                         : "text-slate-700 hover:bg-amber-50 hover:text-[#D49E17]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <CreditCard className="w-4 h-4 shrink-0" />
+                      <CreditCard className="w-4 h-4 shrink-0 text-indigo-500" />
                       {sidebarOpen && <span>Payment Plans</span>}
                     </div>
                   </button>
@@ -2435,372 +2563,101 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================
-              TAB 4: WEBSITE CONTENT & IMAGES
+              TAB 4: HOMEPAGE & HERO CMS
           ======================================================== */}
           {activeTab === "content" && hasAccess("content") && settings && (
-            <div className="space-y-6">
-              {/* Section: Hero Banner */}
-              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Sparkles className="w-4 h-4 text-[#D49E17]" />
-                  <h3 className="font-bold text-slate-900 font-heading text-base">
-                    Hero Banner &amp; Headline Content
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Headline Prefix</label>
-                    <input
-                      type="text"
-                      value={settings.heroTitle}
-                      onChange={(e) => updateSettingField("heroTitle", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Highlighted Golden Word
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.heroHighlightedWord}
-                      onChange={(e) => updateSettingField("heroHighlightedWord", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-[#D49E17]"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="font-bold text-slate-700 block mb-1">Hero Subtitle / Description</label>
-                    <textarea
-                      rows={2}
-                      value={settings.heroSubtitle}
-                      onChange={(e) => updateSettingField("heroSubtitle", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <FileUploadField
-                      label="Hero Background Image (Full Cover)"
-                      currentValue={settings.heroBgImage}
-                      onUploadSuccess={(url) => updateSettingField("heroBgImage", url)}
-                      helperText="High-resolution panoramic photo of Saffron City community or landscape."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section: Story of Legacy & Chairman Leadership */}
-              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17]">
-                      <Briefcase className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 font-heading text-base">
-                        Story of Legacy &amp; Leadership Section
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Controls Homepage Section 2 — &quot;A STORY of LEGACY&quot; &amp; Chairman profile
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                    Homepage Section 2
-                  </span>
-                </div>
-
-                {/* Live Section Headline Preview */}
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/60 via-amber-50/30 to-transparent border border-amber-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-amber-800 block mb-1">
-                      Live Headline Typography Preview
-                    </span>
-                    <div className="text-xl sm:text-2xl font-serif text-slate-900 leading-tight">
-                      <span>{settings.chairmanHeadingTop || "A STORY"}</span>
-                      <br />
-                      <span className="italic font-serif font-normal lowercase pr-2 inline-block">
-                        {settings.chairmanHeadingSub || "of"}
-                      </span>
-                      <span className="font-serif font-medium uppercase tracking-wider text-[#5C1D24]">
-                        {settings.chairmanHeadingMain || "LEGACY"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-slate-500 border-l border-amber-200/80 pl-3 sm:max-w-xs">
-                    Renders with bespoke editorial typography and elegant serif styling on the homepage.
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  {/* Headline controls */}
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Top Heading Text</label>
-                    <input
-                      type="text"
-                      placeholder="A STORY"
-                      value={settings.chairmanHeadingTop ?? "A STORY"}
-                      onChange={(e) => updateSettingField("chairmanHeadingTop", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Connector Word (Italic)</label>
-                    <input
-                      type="text"
-                      placeholder="of"
-                      value={settings.chairmanHeadingSub ?? "of"}
-                      onChange={(e) => updateSettingField("chairmanHeadingSub", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 italic font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Main Accent Word (Uppercase)</label>
-                    <input
-                      type="text"
-                      placeholder="LEGACY"
-                      value={settings.chairmanHeadingMain ?? "LEGACY"}
-                      onChange={(e) => updateSettingField("chairmanHeadingMain", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold uppercase tracking-wider text-[#5C1D24]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Chairman / Founder Name</label>
-                    <input
-                      type="text"
-                      value={settings.chairmanName}
-                      onChange={(e) => updateSettingField("chairmanName", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Official Designation</label>
-                    <input
-                      type="text"
-                      value={settings.chairmanTitle}
-                      onChange={(e) => updateSettingField("chairmanTitle", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[#D49E17] font-bold"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Brief Overview (Initial paragraph visible on homepage)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={settings.chairmanBioShort}
-                      onChange={(e) => updateSettingField("chairmanBioShort", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Expanded Bio &amp; SKB Legacy (Revealed when clicking &quot;Read more&quot;)
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={settings.chairmanBioFull}
-                      onChange={(e) => updateSettingField("chairmanBioFull", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Action Button Text</label>
-                    <input
-                      type="text"
-                      placeholder="Discover More"
-                      value={settings.chairmanCtaText ?? "Discover More"}
-                      onChange={(e) => updateSettingField("chairmanCtaText", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Action Button Target Link</label>
-                    <input
-                      type="text"
-                      placeholder="/about-us"
-                      value={settings.chairmanCtaLink ?? "/about-us"}
-                      onChange={(e) => updateSettingField("chairmanCtaLink", e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-blue-600"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <FileUploadField
-                      label="Chairman HD Portrait Photo (Transparent PNG or Cutout)"
-                      currentValue={settings.chairmanPortrait}
-                      onUploadSuccess={(url) => updateSettingField("chairmanPortrait", url)}
-                      helperText="Official portrait of Malik Tariq Mehmood seamlessly blended into background."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section: Sectors Showcase */}
-              <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                  <Layers className="w-4 h-4 text-[#D49E17]" />
-                  <h3 className="font-bold text-slate-900 font-heading text-base">
-                    Sectors Comparison &amp; Visuals
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-                  {/* Sector A */}
-                  <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm text-[#D49E17]">Sector A Settings</h4>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Title</label>
-                      <input
-                        type="text"
-                        value={settings.sectorATitle}
-                        onChange={(e) => updateSettingField("sectorATitle", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tagline</label>
-                      <input
-                        type="text"
-                        value={settings.sectorATagline}
-                        onChange={(e) => updateSettingField("sectorATagline", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                      />
-                    </div>
-                    <FileUploadField
-                      label="Sector A Image"
-                      currentValue={settings.sectorAImage}
-                      onUploadSuccess={(url) => updateSettingField("sectorAImage", url)}
-                    />
-                  </div>
-
-                  {/* Sector B */}
-                  <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm text-[#D49E17]">Sector B Settings</h4>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Title</label>
-                      <input
-                        type="text"
-                        value={settings.sectorBTitle}
-                        onChange={(e) => updateSettingField("sectorBTitle", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tagline</label>
-                      <input
-                        type="text"
-                        value={settings.sectorBTagline}
-                        onChange={(e) => updateSettingField("sectorBTagline", e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200"
-                      />
-                    </div>
-                    <FileUploadField
-                      label="Sector B Image"
-                      currentValue={settings.sectorBImage}
-                      onUploadSuccess={(url) => updateSettingField("sectorBImage", url)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Save Button for Content */}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => handleSaveSettings()}
-                  disabled={savingSettings}
-                  className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Save Website Content Changes</span>
-                </button>
-              </div>
-            </div>
+            <HomepageHeroCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
           )}
 
           {/* ========================================================
-              TAB 5: MASTER PLAN & MEDIA
+              DEDICATED CMS TAB: SECTOR A (BLOCK A)
+          ======================================================== */}
+          {activeTab === "sector-a" && hasAccess("content") && settings && (
+            <SectorBlockCms
+              sectorKey="sector-a"
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              DEDICATED CMS TAB: SECTOR B (BLOCK B)
+          ======================================================== */}
+          {activeTab === "sector-b" && hasAccess("content") && settings && (
+            <SectorBlockCms
+              sectorKey="sector-b"
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              DEDICATED CMS TAB: COMMERCIAL PLOTS & BROADWAY
+          ======================================================== */}
+          {activeTab === "commercial" && hasAccess("content") && settings && (
+            <CommercialPlotsCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              DEDICATED CMS TAB: ABOUT US PAGE
+          ======================================================== */}
+          {activeTab === "about-us" && hasAccess("content") && settings && (
+            <AboutUsCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              DEDICATED CMS TAB: NOC STATUS & LEGAL CLEARANCES
+          ======================================================== */}
+          {activeTab === "noc-status" && hasAccess("content") && settings && (
+            <NocStatusCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              DEDICATED CMS TAB: LOCATION & MAP PAGE
+          ======================================================== */}
+          {activeTab === "location" && hasAccess("content") && settings && (
+            <LocationMapCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
+          )}
+
+          {/* ========================================================
+              TAB 5: MASTER PLAN & MEDIA CMS
           ======================================================== */}
           {activeTab === "masterplan" && hasAccess("masterplan") && settings && (
-            <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div>
-                  <h3 className="font-bold text-slate-900 font-heading text-base">
-                    Master Plan Layout &amp; PDF Brochure Uploader
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Updating files here automatically synchronizes the Interactive Zoom Viewer, download buttons, and master plan pages.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 text-xs">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Master Plan Description</label>
-                  <textarea
-                    rows={2}
-                    value={settings.masterPlanDescription}
-                    onChange={(e) => updateSettingField("masterPlanDescription", e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200"
-                  />
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-4">
-                  <FileUploadField
-                    label="1. Interactive Master Plan Layout Image (WebP / JPG / PNG)"
-                    currentValue={settings.masterPlanImage}
-                    onUploadSuccess={(url) => updateSettingField("masterPlanImage", url)}
-                    helperText="Used inside the interactive panning & zooming viewer on Homepage and /master-plan."
-                  />
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-4">
-                  <FileUploadField
-                    label="2. Full High-Resolution 4K Master Layout Image"
-                    currentValue={settings.masterPlanFullImage}
-                    onUploadSuccess={(url) => updateSettingField("masterPlanFullImage", url)}
-                    helperText="High-res full map opened when visitors click 'Expand 4K Layout'."
-                  />
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-4">
-                  <FileUploadField
-                    label="3. Official Master Plan PDF Document"
-                    currentValue={settings.masterPlanPdf}
-                    onUploadSuccess={(url) => updateSettingField("masterPlanPdf", url)}
-                    accept=".pdf,image/*"
-                    previewType="file"
-                    helperText="Downloadable PDF brochure served when users click 'Download Plan PDF'."
-                  />
-                </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleSaveSettings()}
-                    disabled={savingSettings}
-                    className="px-6 py-3 rounded-2xl bg-[#D49E17] text-white font-bold text-xs shadow-md hover:scale-105 transition-all cursor-pointer flex items-center gap-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Sync Master Plan Files Everywhere</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <MasterPlanCms
+              settings={settings}
+              updateSettingField={updateSettingField}
+              onSave={() => handleSaveSettings()}
+              saving={savingSettings}
+            />
           )}
 
           {/* ========================================================
@@ -4723,11 +4580,37 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* 3. Author Bio & Read Time */}
+              {/* 3. Author Bio, Profile Photo & Read Time */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-                <div className="sm:col-span-2">
+                <div>
                   <label className="font-bold text-slate-800 block mb-1 text-xs">
-                    Author Biography <span className="text-[10px] text-slate-400 font-normal">(Optional - leave empty to hide bio box)</span>
+                    Author Profile Photo / Avatar <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {blogForm.authorImage ? (
+                      <img
+                        src={blogForm.authorImage}
+                        alt="Author Avatar"
+                        className="w-10 h-10 rounded-full object-cover border border-amber-400 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-amber-100 text-[#D49E17] font-bold flex items-center justify-center text-xs shrink-0">
+                        {blogForm.author ? blogForm.author.charAt(0) : "A"}
+                      </div>
+                    )}
+                    <input
+                      type="text"
+                      value={blogForm.authorImage}
+                      onChange={(e) => setBlogForm({ ...blogForm, authorImage: e.target.value })}
+                      placeholder="Image URL or upload"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:border-[#D49E17] focus:bg-white outline-none font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1 text-xs">
+                    Author Biography <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <textarea
                     rows={2}

@@ -51,8 +51,13 @@ const CORE_VALUES: CoreValueItem[] = [
   }
 ];
 
-export default function CoreValuesSection() {
+interface CoreValuesSectionProps {
+  items?: CoreValueItem[];
+}
+
+export default function CoreValuesSection({ items }: CoreValuesSectionProps) {
   const [showAllMobile, setShowAllMobile] = useState(false);
+  const coreValuesList = items && items.length > 0 ? items : CORE_VALUES;
 
   return (
     <section className="space-y-8 sm:space-y-12">
@@ -73,7 +78,7 @@ export default function CoreValuesSection() {
 
       {/* 3 Cards In a Row (Exactly 2 Rows on Tablet/Desktop) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-        {CORE_VALUES.map((val, index) => (
+        {coreValuesList.map((val, index) => (
           <div
             key={val.title}
             className={`rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between ${

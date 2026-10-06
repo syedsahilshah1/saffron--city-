@@ -20,7 +20,8 @@ import {
   CheckCircle,
   Truck,
   Wifi,
-  Coins
+  Coins,
+  DollarSign
 } from "lucide-react";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
@@ -37,41 +38,35 @@ export async function generateMetadata() {
   return await getPageMetadata("/plots/commercial");
 }
 
-const COMMERCIAL_AMENITIES = [
+const DEFAULT_COMMERCIAL_AMENITIES = [
   {
     title: "Direct GT Road Frontage",
     desc: "Unbeatable visibility to over 100,000 daily vehicles traversing between Islamabad, Rawalpindi, and Punjab.",
-    icon: Compass,
     image: "/images/amenities/amenity_boulevard.webp"
   },
   {
     title: "Dedicated Customer Parking Bays",
     desc: "Engineered with spacious multi-lane customer parking areas to ensure frictionless access for retail patrons.",
-    icon: Car,
     image: "/images/sectors/commercial-plaza.webp"
   },
   {
     title: "Multi-Storey Commercial Permission",
     desc: "Approved building bylaws allowing multi-level retail plazas, executive offices, and rooftop restaurants.",
-    icon: Building2,
     image: "/images/about/about-hero-banner.webp"
   },
   {
     title: "High-Capacity Power & 100% Underground Grid",
     desc: "Subterranean utility infrastructure with dedicated transformers to power high-demand commercial equipment.",
-    icon: Zap,
     image: "/images/facilities/underground-utilities.webp"
   },
   {
     title: "24/7 Gated Business Security",
     desc: "Round-the-clock surveillance, CCTV monitoring, and dedicated security guards protecting your business assets.",
-    icon: ShieldCheck,
     image: "/images/facilities/gated-security.webp"
   },
   {
     title: "Dedicated Loading & Logistic Bays",
     desc: "Rear loading zones designed for supermarkets, pharmacies, banks, and corporate franchises.",
-    icon: Truck,
     image: "/images/facilities/water-filtration.webp"
   }
 ];
@@ -118,7 +113,7 @@ const DEFAULT_COMMERCIAL_PLOT_CARDS = [
   }
 ];
 
-const COMMERCIAL_INVESTOR_REASONS = [
+const DEFAULT_COMMERCIAL_REASONS = [
   {
     title: "Unbeatable Highway Exposure",
     desc: "Direct visual presence on Main GT Road ensuring continuous brand exposure and sustained customer flow.",
@@ -145,13 +140,12 @@ const COMMERCIAL_INVESTOR_REASONS = [
   }
 ];
 
-const COMMERCIAL_NEARBY_LANDMARKS = [
+const DEFAULT_COMMERCIAL_LANDMARKS = [
   {
     name: "Main GT Road (N-5 Highway)",
     time: "Direct Access",
     timeHighlight: "text-[#D49E17]",
     distance: "Direct Frontage Exposure",
-    bgClass: "bg-amber-50/70 border-amber-300",
     image: "/images/amenities/amenity_boulevard.webp"
   },
   {
@@ -159,7 +153,6 @@ const COMMERCIAL_NEARBY_LANDMARKS = [
     time: "5 Minutes",
     timeHighlight: "text-slate-900",
     distance: "3.5 km Direct Commute",
-    bgClass: "bg-white border-slate-200 hover:border-amber-300",
     image: "/images/landmark_t_chowk.webp"
   },
   {
@@ -167,7 +160,6 @@ const COMMERCIAL_NEARBY_LANDMARKS = [
     time: "10 Minutes",
     timeHighlight: "text-slate-900",
     distance: "8.0 km Expressway Link",
-    bgClass: "bg-white border-slate-200 hover:border-amber-300",
     image: "/images/landmark_giga_mall.webp"
   },
   {
@@ -175,44 +167,131 @@ const COMMERCIAL_NEARBY_LANDMARKS = [
     time: "15 Minutes",
     timeHighlight: "text-emerald-700",
     distance: "11.0 km Direct Bypass",
-    bgClass: "bg-white border-slate-200 hover:border-emerald-400",
     image: "/images/landmark_dha_islamabad.webp"
   }
 ];
 
+const DEFAULT_COMMERCIAL_FAQS = [
+  {
+    question: "What makes Saffron City Commercial plots high-return investments?",
+    answer: "Saffron City commercial plots boast direct frontage along Main GT Road (N-5 Highway) near Rawat, capturing massive daily commuter traffic between Islamabad and Punjab. Combined with multi-storey building permissions and a dedicated launch discount, the rental yields and capital appreciation are unmatched.",
+    category: "Investment"
+  },
+  {
+    question: "What is the installment schedule for Commercial plots?",
+    answer: "Commercial plots follow a convenient 3-year payment structure with a 10% down payment (or PKR 35 Lac for Signature 30x40), followed by 30 monthly installments and possession payments upon completion.",
+    category: "Payment"
+  },
+  {
+    question: "Are commercial plots covered under the approved master layout?",
+    answer: "Yes, Saffron City holds full authentic approval covering 15,000 Kanals, including all commercial zones, layout designs, and utility infrastructure.",
+    category: "Legal"
+  }
+];
+
 export default async function CommercialPlotsPage() {
-  const allPlots = await db.getPlots();
-  const dynamicCommercialPlots = allPlots.filter(
-    (p) =>
-      p.type?.toLowerCase().includes("commercial") ||
-      p.category?.toLowerCase().includes("commercial") ||
-      p.sector?.toLowerCase().includes("commercial")
-  );
+  const settings = await db.getSettings();
 
-  const mergedCommercialPlots = dynamicCommercialPlots.length > 0
-    ? [
-        ...dynamicCommercialPlots.map((p) => ({
-          size: `${p.category || "Commercial Plot"} (${p.plotNumber})`,
-          dimensions: p.category?.includes("4 Marla") ? "30' × 30' (900 Sq. Ft.)" : p.category?.includes("8 Marla") ? "40' × 45' (1,800 Sq. Ft.)" : "30' × 40' (1,200 Sq. Ft.)",
-          totalPrice: `PKR ${(Number(p.totalPrice) || 0).toLocaleString()}`,
-          discountBadge: "Prime High-Footfall Location",
-          downPayment: `PKR ${(Number(p.downPayment || p.totalPrice * 0.1)).toLocaleString()} (10%)`,
-          monthly: `PKR ${(Number(p.monthlyInst || (p.totalPrice * 0.3) / 30)).toLocaleString()} / month`,
-          possession: `PKR ${(Number(p.totalPrice * 0.2)).toLocaleString()} (20%)`,
-          image: p.image && p.image.length > 3 ? p.image : "/images/sectors/commercial-plaza.webp",
-          tag: p.status === "Available" ? "Open for Booking" : p.status || "High ROI",
-          desc: p.features || `Premium commercial plot ${p.plotNumber} in Saffron City with direct highway access, high foot traffic, and dedicated parking.`,
-          whatsappText: `Hi, I am interested in Commercial Plot ${p.plotNumber} (${p.category || "Commercial"}) in Saffron City.`,
-        })),
-        ...DEFAULT_COMMERCIAL_PLOT_CARDS.filter(
-          (base) => !dynamicCommercialPlots.some((d) => d.category?.toLowerCase() === base.size.toLowerCase())
-        ),
-      ]
-    : DEFAULT_COMMERCIAL_PLOT_CARDS;
+  const heroBg = settings.commercialHeroImage || "/images/sectors/commercial-plaza.webp";
+  const heroHeading = settings.commercialHeroHeading || "Commercial Plots for Sale | High Footfall & High Yield";
+  const heroSubtitle = settings.commercialHeroSubtitle || "Positioned directly along Main GT Road (N-5 Highway) with dedicated customer parking, multistory building permission, and exceptional rental returns.";
 
-  const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
+  const whatsappPhone = settings.commercialCtaPhone || settings.whatsappPhone || SITE_CONFIG.whatsapp;
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
     "Hi, I am interested in booking a Commercial Plot in Saffron City."
   )}`;
+
+  // Parse 4 Stats
+  let stats = {
+    stat1: "100,000+",
+    stat1Label: "Daily Traffic",
+    stat2: "Direct N-5",
+    stat2Label: "GT Road Frontage",
+    stat3: "Multi-Storey",
+    stat3Label: "Building Approval",
+    stat4: "3 Years",
+    stat4Label: "Installment Plan"
+  };
+  if (settings.commercialStatsJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialStatsJson);
+      if (parsed) stats = { ...stats, ...parsed };
+    } catch {}
+  }
+
+  // Parse Amenities
+  let amenities = DEFAULT_COMMERCIAL_AMENITIES;
+  if (settings.commercialAmenitiesJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialAmenitiesJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        amenities = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse Landmarks
+  let landmarks = DEFAULT_COMMERCIAL_LANDMARKS;
+  if (settings.commercialLandmarksJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialLandmarksJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        landmarks = parsed.map((item: any) => ({
+          name: item.name || item.title,
+          time: item.time || item.driveTime || "Direct Access",
+          timeHighlight: item.time?.includes("Direct") ? "text-[#D49E17]" : "text-slate-900",
+          distance: item.distance || "Prime Commute",
+          image: item.image || "/images/landmark_t_chowk.webp"
+        }));
+      }
+    } catch {}
+  }
+
+  // Parse Plot Cards
+  let plotCards = DEFAULT_COMMERCIAL_PLOT_CARDS;
+  if (settings.commercialPlotsJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialPlotsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        plotCards = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse Investor Reasons
+  let reasons = DEFAULT_COMMERCIAL_REASONS;
+  if (settings.commercialWhyChooseJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialWhyChooseJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        reasons = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse Pricing Table
+  let pricingRows = COMMERCIAL_PRICES;
+  if (settings.commercialPricingJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialPricingJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        pricingRows = parsed;
+      }
+    } catch {}
+  }
+
+  // Parse FAQs
+  let faqs = DEFAULT_COMMERCIAL_FAQS;
+  if (settings.commercialFaqsJson) {
+    try {
+      const parsed = JSON.parse(settings.commercialFaqsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        faqs = parsed;
+      }
+    } catch {}
+  }
+
+  const mapEmbedUrl = settings.commercialGoogleMapEmbed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s";
 
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
@@ -221,7 +300,7 @@ export default async function CommercialPlotsPage() {
       <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/sectors/commercial-plaza.webp"
+            src={heroBg}
             alt="Saffron City Commercial Plazas"
             title="Saffron City Commercial Plazas"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
@@ -231,20 +310,49 @@ export default async function CommercialPlotsPage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <WordReveal
-            text="Commercial Plots for Sale: High Footfall & High Yield"
-            highlightWords={["Commercial", "Plots", "Sale", "Footfall", "Yield"]}
-            as="h1"
-            className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
-          />
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block">
+            {heroHeading.includes("|") ? (
+              <>
+                {heroHeading.split("|")[0]} <span className="text-[#D49E17]">{heroHeading.split("|")[1]}</span>
+              </>
+            ) : (
+              <>
+                Commercial Plots <span className="text-[#D49E17]">for Sale</span>
+              </>
+            )}
+          </h1>
 
-          <ScrollReveal animation="fade-up" delay={100}>
-            <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Positioned directly along Main GT Road (N-5 Highway) with dedicated customer parking, multistory building permission, and exceptional rental returns.
-            </p>
+          {heroSubtitle && (
+            <ScrollReveal animation="fade-up" delay={100}>
+              <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
+                {heroSubtitle}
+              </p>
+            </ScrollReveal>
+          )}
+
+          {/* 4 Stat Metrics */}
+          <ScrollReveal animation="fade-up" delay={150}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-4">
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">{stats.stat1}</span>
+                <p className="text-xs text-slate-300 font-medium">{stats.stat1Label}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
+                <span className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats.stat2}</span>
+                <p className="text-xs text-slate-300 font-medium">{stats.stat2Label}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
+                <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono">{stats.stat3}</span>
+                <p className="text-xs text-slate-300 font-medium">{stats.stat3Label}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-1">
+                <span className="text-2xl sm:text-3xl font-bold text-[#D49E17] font-mono">{stats.stat4}</span>
+                <p className="text-xs text-slate-300 font-medium">{stats.stat4Label}</p>
+              </div>
+            </div>
           </ScrollReveal>
 
-          <ScrollReveal animation="fade-up" delay={150} className="flex flex-wrap justify-center gap-4 pt-4">
+          <ScrollReveal animation="fade-up" delay={200} className="flex flex-wrap justify-center gap-4 pt-4">
             <a
               href="#commercial-inventory"
               className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:scale-105 transition-all"
@@ -285,12 +393,17 @@ export default async function CommercialPlotsPage() {
               </div>
               
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-slate-900 tracking-tight leading-tight">
-                Commercial Overview: The Business Hub of Rawat
+                {settings.commercialOverviewHeading || "Commercial Overview: The Business Hub of Rawat"}
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-light">
-                Engineered to capture immense transit footfall along the twin cities National Highway corridor with multi-level construction allowances, dedicated customer parking, and high appreciation rates.
-              </p>
+              <div
+                className="prose prose-sm max-w-none text-slate-600 leading-relaxed font-light [&_a]:text-[#D49E17] [&_a]:underline [&_a]:font-bold [&_a]:transition-colors [&_a:hover]:text-amber-700 space-y-3"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    settings.commercialOverviewText ||
+                    `<p>Engineered to capture immense transit footfall along the twin cities National Highway corridor with multi-level construction allowances, dedicated customer parking, and high appreciation rates.</p><p>Saffron City Commercial Broadway offers prime frontage plots for flagship retail, multinational franchises, corporate banks, and executive healthcare centers with 100% legal RDA compliance.</p>`
+                }}
+              />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-1">
@@ -333,7 +446,7 @@ export default async function CommercialPlotsPage() {
             <ScrollReveal animation="fade-left" className="lg:col-span-5">
               <div className="relative w-full h-80 sm:h-[420px] rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-200 group">
                 <img
-                  src="/images/sectors/commercial-plaza.webp"
+                  src={settings.commercialOverviewImage || "/images/sectors/commercial-plaza.webp"}
                   alt="Saffron City Commercial Broadway Plaza Overview"
                   title="Saffron City Commercial Broadway Plaza Overview"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -357,7 +470,7 @@ export default async function CommercialPlotsPage() {
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Commercial Infrastructure & Facilities"
+              text={settings.commercialAmenitiesHeading || "Commercial Infrastructure & Facilities"}
               highlightWords={["Commercial", "Infrastructure", "Facilities"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -370,11 +483,10 @@ export default async function CommercialPlotsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {COMMERCIAL_AMENITIES.map((item, idx) => {
-              const IconComp = item.icon;
+            {amenities.map((item, idx) => {
               return (
                 <ScrollReveal
-                  key={item.title}
+                  key={`${item.title}-${idx}`}
                   animation={idx % 3 === 0 ? "fade-right" : idx % 3 === 1 ? "fade-up" : "fade-left"}
                   delay={idx * 80}
                 >
@@ -382,14 +494,14 @@ export default async function CommercialPlotsPage() {
                     <div>
                       <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={item.image}
+                          src={item.image || "/images/amenities/amenity_boulevard.webp"}
                           alt={item.title}
                           title={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-[#D49E17] shadow">
-                          <IconComp className="w-5 h-5" />
+                          <Building2 className="w-5 h-5" />
                         </div>
                       </div>
                       <div className="p-5 space-y-2">
@@ -412,7 +524,7 @@ export default async function CommercialPlotsPage() {
         <section id="commercial-location" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Commercial Location & Commute Distances"
+              text={settings.commercialLandmarksHeading || "Commercial Location & Commute Distances"}
               highlightWords={["Commercial", "Location", "Commute"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -438,10 +550,10 @@ export default async function CommercialPlotsPage() {
                 </h3>
 
                 <div className="space-y-3">
-                  {COMMERCIAL_NEARBY_LANDMARKS.map((item, idx) => (
+                  {landmarks.map((item, idx) => (
                     <div
-                      key={item.name}
-                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${item.bgClass}`}
+                      key={`${item.name}-${idx}`}
+                      className="p-3 rounded-2xl border flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-amber-300 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-amber-300/80 shadow-sm">
@@ -457,7 +569,7 @@ export default async function CommercialPlotsPage() {
                           <p className="text-[11px] text-slate-500">{item.distance}</p>
                         </div>
                       </div>
-                      <strong className={`text-xs sm:text-sm font-bold font-mono ${item.timeHighlight}`}>
+                      <strong className={`text-xs sm:text-sm font-bold font-mono ${item.timeHighlight || "text-[#D49E17]"}`}>
                         {item.time}
                       </strong>
                     </div>
@@ -492,7 +604,7 @@ export default async function CommercialPlotsPage() {
               <div className="w-full h-[380px] sm:h-[450px] rounded-3xl overflow-hidden border-2 border-amber-300 shadow-2xl relative bg-slate-100">
                 <iframe
                   title="Saffron City Commercial Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                  src={mapEmbedUrl}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -512,20 +624,20 @@ export default async function CommercialPlotsPage() {
         <section id="commercial-inventory" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Commercial Plots for Sale"
+              text={settings.commercialPlotsHeading || "Commercial Plots for Sale"}
               highlightWords={["Commercial", "Plots", "Sale"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
             />
             <ScrollReveal animation="fade-up" delay={100}>
               <p className="text-sm text-slate-600">
-                Choose your commercial plot size with structured 3-year installments and special discount pricing.
+                {settings.commercialPlotsSubtitle || "Choose your commercial plot size with structured 3-year installments and special discount pricing."}
               </p>
             </ScrollReveal>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {mergedCommercialPlots.map((plot, idx) => (
+            {plotCards.map((plot, idx) => (
               <ScrollReveal
                 key={`${plot.size}-${idx}`}
                 animation={idx === 0 ? "fade-right" : idx === 1 ? "fade-up" : "fade-left"}
@@ -535,7 +647,7 @@ export default async function CommercialPlotsPage() {
                   <div>
                     <Link href="/plot-for-sale" className="block relative h-52 w-full overflow-hidden bg-slate-100 cursor-pointer">
                       <img
-                        src={plot.image}
+                        src={plot.image || "/images/sectors/commercial-plaza.webp"}
                         alt={plot.size}
                         title={`${plot.size} Commercial Plot`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -583,7 +695,7 @@ export default async function CommercialPlotsPage() {
 
                   <div className="p-6 pt-0 space-y-2">
                     <a
-                      href={`https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(plot.whatsappText)}`}
+                      href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(plot.whatsappText || `Hi, I am interested in ${plot.size}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-2 shadow transition-all"
@@ -640,7 +752,7 @@ export default async function CommercialPlotsPage() {
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Why Invest in Saffron Commercial Plots"
+              text={settings.commercialWhyChooseHeading || "Why Invest in Saffron Commercial Plots"}
               highlightWords={["Invest", "Saffron", "Commercial"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -653,11 +765,11 @@ export default async function CommercialPlotsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {COMMERCIAL_INVESTOR_REASONS.map((item, index) => {
+            {reasons.map((item, index) => {
               const isLeft = index % 2 === 0;
               return (
                 <ScrollReveal 
-                  key={item.title} 
+                  key={`${item.title}-${index}`} 
                   animation={isLeft ? "fade-right" : "fade-left"}
                   delay={index * 80}
                 >
@@ -665,7 +777,7 @@ export default async function CommercialPlotsPage() {
                     <div>
                       <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={item.image}
+                          src={item.image || "/images/amenities/amenity_boulevard.webp"}
                           alt={item.title}
                           title={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -698,7 +810,7 @@ export default async function CommercialPlotsPage() {
         <section className="space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-              Official Commercial Pricing &amp; Payment Schedule
+              {settings.commercialPricingHeading || "Official Commercial Pricing & Payment Schedule"}
             </h3>
             <p className="text-xs sm:text-sm text-slate-600">
               Approved rates for Saffron City commercial plots with 3-year flexible terms.
@@ -718,7 +830,7 @@ export default async function CommercialPlotsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {COMMERCIAL_PRICES.map((row, i) => (
+                {pricingRows.map((row: any, i: number) => (
                   <tr key={i} className="hover:bg-amber-50/40 transition-colors">
                     <td className="p-4 sm:p-5 font-bold text-slate-900 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-[#D49E17]" />
@@ -742,10 +854,10 @@ export default async function CommercialPlotsPage() {
             <div className="space-y-2">
               <span className="text-xs font-bold text-[#D49E17] uppercase tracking-wider">Book Now</span>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading">
-                Reserve Your Commercial Plot
+                {settings.commercialCtaHeading || "Reserve Your Commercial Plot"}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600">
-                Fill the priority commercial inquiry form or contact our corporate sales desk for customized corner &amp; main boulevard allocations.
+                {settings.commercialCtaSubtitle || "Fill the priority commercial inquiry form or contact our corporate sales desk for customized corner & main boulevard allocations."}
               </p>
             </div>
             <EnquiryForm id="commercial-lead-form" title="Reserve Commercial Plot" />
@@ -755,28 +867,10 @@ export default async function CommercialPlotsPage() {
             <div className="space-y-2">
               <span className="text-xs font-bold text-[#D49E17] uppercase tracking-wider">FAQs</span>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading">
-                Commercial Frequently Asked Questions
+                {settings.commercialFaqsHeading || "Commercial Frequently Asked Questions"}
               </h3>
             </div>
-            <FaqAccordion
-              items={[
-                {
-                  question: "What makes Saffron City Commercial plots high-return investments?",
-                  answer: "Saffron City commercial plots boast direct frontage along Main GT Road (N-5 Highway) near Rawat, capturing massive daily commuter traffic between Islamabad and Punjab. Combined with multi-storey building permissions and a dedicated 45 Lac launch discount, the rental yields and capital appreciation are unmatched.",
-                  category: "Investment"
-                },
-                {
-                  question: "What is the installment schedule for Commercial plots?",
-                  answer: "Commercial plots follow a convenient 3-year payment structure with a 10% down payment (or PKR 35 Lac for Signature 30x40), followed by 30 monthly installments and possession payments upon completion.",
-                  category: "Payment"
-                },
-                {
-                  question: "Are commercial plots covered under the approved master layout?",
-                  answer: "Yes, Saffron City holds full authentic approval covering 15,000 Kanals, including all commercial zones, layout designs, and utility infrastructure.",
-                  category: "Legal"
-                }
-              ]}
-            />
+            <FaqAccordion items={faqs} />
           </div>
         </div>
 

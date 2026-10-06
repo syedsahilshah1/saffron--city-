@@ -18,8 +18,20 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const auth = await requireAdminAuth(req, "settings");
+  const auth = await requireAdminAuth(req);
   if (!auth.authenticated) return auth.errorResponse!;
+
+  const user = auth.user;
+  const userPerms = Array.isArray(user?.permissions) ? user.permissions : [];
+  const allowedPerms = ["settings", "content", "masterplan", "paymentplans", "seo"];
+  const hasPerm = user?.role === "SUPER_ADMIN" || allowedPerms.some((p) => userPerms.includes(p as any));
+
+  if (!hasPerm) {
+    return NextResponse.json(
+      { success: false, message: "Forbidden: Missing permissions to update settings or CMS content" },
+      { status: 403 }
+    );
+  }
 
   try {
     const body = await req.json();

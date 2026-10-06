@@ -20,7 +20,8 @@ import {
   Navigation, 
   Zap, 
   Building2,
-  Droplets
+  Droplets,
+  Download
 } from "lucide-react";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import ScrollReveal from "@/components/animations/ScrollReveal";
@@ -167,10 +168,61 @@ const SECTOR_B_FAQS = [
 ];
 
 export default async function SectorBPage() {
-  const allPlots = await db.getPlots();
-  const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
+  const [allPlots, settings] = await Promise.all([
+    db.getPlots(),
+    db.getSettings()
+  ]);
+
+  const phoneToUse = settings.sectorBCtaPhone || settings.whatsappPhone || SITE_CONFIG.whatsapp;
+  const whatsappUrl = `https://wa.me/${phoneToUse}?text=${encodeURIComponent(
     "Hi, I want to inquire about affordable residential plots and schedule a site visit in Saffron City Sector B."
   )}`;
+
+  const heroTitle = settings.sectorBTitle || "Sector B: Plots for Sale & Family Living";
+  const heroTagline = settings.sectorBTagline || "Designed for families and smart investors with accessible 10% booking, dedicated sector parks, and community mosque.";
+  const heroImage = settings.sectorBImage || "/images/sectors/sector-b-residential.webp";
+  const overviewHeading = settings.sectorBOverviewHeading || "Sector B Overview: Affordable Family Living";
+  const overviewDesc = settings.sectorBDescription || "Sector B is specifically master-planned for families seeking a peaceful, green, and self-contained neighborhood. Featuring community parks, a dedicated sector mosque, and easy 3-year installments, Sector B delivers exceptional value and tranquil residential living.";
+  const overviewImage = settings.sectorBOverviewImage || "/images/sectors/sector-b-residential.webp";
+  const amenitiesHeading = settings.sectorBAmenitiesHeading || "Sector B Community Amenities";
+  const landmarksHeading = settings.sectorBLandmarksHeading || "Sector B Location & Travel Distances";
+  const mapEmbedUrl = settings.sectorBMapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s";
+  const plotsHeading = settings.sectorBPlotsHeading || "Sector B Plots for Sale";
+  const plotsSubtitle = settings.sectorBPlotsSubtitle || "Explore available residential plots in Sector B with dimensions, price breakdown, and instant booking options.";
+  const ctaHeading = settings.sectorBCtaHeading || "Book Your Sector B Plot Today";
+  const ctaSubtitle = settings.sectorBCtaSubtitle || "Submit your inquiry to our sales team to secure priority plot allocation in Sector B.";
+
+  let dynamicAmenities = SECTOR_B_AMENITIES;
+  if (settings.sectorBAmenitiesJson) {
+    try {
+      const parsed = JSON.parse(settings.sectorBAmenitiesJson);
+      if (Array.isArray(parsed) && parsed.length > 0) dynamicAmenities = parsed;
+    } catch {}
+  }
+
+  let dynamicLandmarks = SECTOR_B_NEARBY_LANDMARKS;
+  if (settings.sectorBLandmarksJson) {
+    try {
+      const parsed = JSON.parse(settings.sectorBLandmarksJson);
+      if (Array.isArray(parsed) && parsed.length > 0) dynamicLandmarks = parsed;
+    } catch {}
+  }
+
+  let dynamicHighlights = SECTOR_B_HIGHLIGHTS;
+  if (settings.sectorBWhyChooseJson) {
+    try {
+      const parsed = JSON.parse(settings.sectorBWhyChooseJson);
+      if (Array.isArray(parsed) && parsed.length > 0) dynamicHighlights = parsed;
+    } catch {}
+  }
+
+  let dynamicFaqs = SECTOR_B_FAQS;
+  if (settings.sectorBFaqsJson) {
+    try {
+      const parsed = JSON.parse(settings.sectorBFaqsJson);
+      if (Array.isArray(parsed) && parsed.length > 0) dynamicFaqs = parsed;
+    } catch {}
+  }
 
   return (
     <div className="space-y-20 lg:space-y-28 pb-24 text-slate-900 bg-white">
@@ -179,7 +231,7 @@ export default async function SectorBPage() {
       <section className="relative w-full min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white">
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/sectors/sector-b-residential.webp"
+            src={heroImage}
             alt="Saffron City Sector B Family Living"
             title="Saffron City Sector B Family Living"
             className="w-full h-full object-cover object-center scale-105 animate-pulse-slow"
@@ -190,7 +242,7 @@ export default async function SectorBPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <WordReveal
-            text="Sector B: Plots for Sale & Family Living"
+            text={heroTitle}
             highlightWords={["Sector", "B", "Plots", "Sale", "Family"]}
             as="h1"
             className="text-4xl sm:text-6xl lg:text-7xl font-black font-heading tracking-tight text-white block"
@@ -198,7 +250,7 @@ export default async function SectorBPage() {
 
           <ScrollReveal animation="fade-up" delay={100}>
             <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-200 font-light leading-relaxed">
-              Designed for families and smart investors with accessible 10% booking, dedicated sector parks, and community mosque.
+              {heroTagline}
             </p>
           </ScrollReveal>
 
@@ -209,6 +261,17 @@ export default async function SectorBPage() {
             >
               View Sector B Plots For Sale
             </a>
+            {settings.sectorBBrochurePdf && (
+              <a
+                href={settings.sectorBBrochurePdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
+              >
+                <Download className="w-4 h-4 text-emerald-300" />
+                <span>Download Brochure PDF</span>
+              </a>
+            )}
             <a
               href="#sector-location"
               className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs shadow-lg hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
@@ -226,16 +289,17 @@ export default async function SectorBPage() {
         {/* 2. Overview Section (TEXT ON LEFT, IMAGE ON RIGHT) */}
         <section className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left: Text Content */}
+            {/* Left: Text Content with HTML/Links support */}
             <ScrollReveal animation="fade-right" className="lg:col-span-7 space-y-6">
              
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-slate-900 tracking-tight leading-tight">
-                Sector B Overview: Affordable Family Living
+                {overviewHeading}
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-light">
-                Sector B is specifically master-planned for families seeking a peaceful, green, and self-contained neighborhood. Featuring community parks, a dedicated sector mosque, and easy 3-year installments, Sector B delivers exceptional value and tranquil residential living.
-              </p>
+              <div
+                className="text-sm sm:text-base text-slate-600 leading-relaxed font-light prose prose-emerald max-w-none [&_a]:text-emerald-600 [&_a]:font-bold [&_a]:underline [&_a:hover]:text-emerald-700"
+                dangerouslySetInnerHTML={{ __html: overviewDesc }}
+              />
 
               <div className="pt-2 flex flex-wrap gap-4">
                 <a
@@ -252,7 +316,7 @@ export default async function SectorBPage() {
             <ScrollReveal animation="fade-left" className="lg:col-span-5">
               <div className="relative w-full h-80 sm:h-[420px] rounded-3xl overflow-hidden shadow-2xl border-2 border-emerald-200 group">
                 <img
-                  src="/images/sectors/sector-b-residential.webp"
+                  src={overviewImage}
                   alt="Saffron City Sector B Family Living Overview"
                   title="Saffron City Sector B Family Living Overview"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -276,7 +340,7 @@ export default async function SectorBPage() {
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Sector B Community Amenities"
+              text={amenitiesHeading}
               highlightWords={["Sector", "B", "Amenities", "Community"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -289,11 +353,11 @@ export default async function SectorBPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SECTOR_B_AMENITIES.map((item, idx) => {
-              const IconComp = item.icon;
+            {dynamicAmenities.map((item: any, idx: number) => {
+              const IconComp = item.icon || Sparkles;
               return (
                 <ScrollReveal
-                  key={item.title}
+                  key={item.title || idx}
                   animation={idx % 3 === 0 ? "fade-right" : idx % 3 === 1 ? "fade-up" : "fade-left"}
                   delay={idx * 80}
                 >
@@ -301,14 +365,14 @@ export default async function SectorBPage() {
                     <div>
                       <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={item.image}
+                          src={item.image || "/images/amenities/amenity_park.webp"}
                           alt={item.title}
                           title={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-emerald-600 shadow">
-                          <IconComp className="w-5 h-5" />
+                          {typeof IconComp === "function" ? <IconComp className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
                         </div>
                       </div>
                       <div className="p-5 space-y-2">
@@ -331,7 +395,7 @@ export default async function SectorBPage() {
         <section id="sector-location" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Sector B Location & Travel Distances"
+              text={landmarksHeading}
               highlightWords={["Sector", "B", "Location", "Travel"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -357,15 +421,15 @@ export default async function SectorBPage() {
                 </h3>
 
                 <div className="space-y-3">
-                  {SECTOR_B_NEARBY_LANDMARKS.map((item, idx) => (
+                  {dynamicLandmarks.map((item: any, idx: number) => (
                     <div
-                      key={item.name}
-                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${item.bgClass}`}
+                      key={item.name || idx}
+                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${item.bgClass || "bg-white border-slate-200 hover:border-emerald-300"}`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-emerald-300/80 shadow-sm">
                           <img
-                            src={item.image}
+                            src={item.image || "/images/landmark_t_chowk.webp"}
                             alt={item.name}
                             title={item.name}
                             className="w-full h-full object-cover"
@@ -376,7 +440,7 @@ export default async function SectorBPage() {
                           <p className="text-[11px] text-slate-500">{item.distance}</p>
                         </div>
                       </div>
-                      <strong className={`text-xs sm:text-sm font-bold font-mono ${item.timeHighlight}`}>
+                      <strong className={`text-xs sm:text-sm font-bold font-mono ${item.timeHighlight || "text-slate-900"}`}>
                         {item.time}
                       </strong>
                     </div>
@@ -411,7 +475,7 @@ export default async function SectorBPage() {
               <div className="w-full h-[380px] sm:h-[450px] rounded-3xl overflow-hidden border-2 border-emerald-300 shadow-2xl relative bg-slate-100">
                 <iframe
                   title="Sector B Saffron City Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                  src={mapEmbedUrl}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -431,14 +495,14 @@ export default async function SectorBPage() {
         <section id="plots-for-sale" className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Sector B Plots for Sale"
+              text={plotsHeading}
               highlightWords={["Sector", "B", "Plots", "Sale"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
             />
             <ScrollReveal animation="fade-up" delay={100}>
               <p className="text-sm text-slate-600">
-                Explore available residential plots in Sector B with dimensions, price breakdown, and instant booking options.
+                {plotsSubtitle}
               </p>
             </ScrollReveal>
           </div>
@@ -482,7 +546,7 @@ export default async function SectorBPage() {
         <section className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <WordReveal
-              text="Why Families Choose Sector B"
+              text={settings.sectorBWhyChooseHeading || "Why Families Choose Sector B"}
               highlightWords={["Families", "Choose", "Sector", "B"]}
               as="h2"
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 font-heading tracking-tight block"
@@ -495,11 +559,11 @@ export default async function SectorBPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {SECTOR_B_HIGHLIGHTS.map((item, index) => {
+            {dynamicHighlights.map((item: any, index: number) => {
               const isLeft = index % 2 === 0;
               return (
                 <ScrollReveal 
-                  key={item.title} 
+                  key={item.title || index} 
                   animation={isLeft ? "fade-right" : "fade-left"}
                   delay={index * 80}
                 >
@@ -507,7 +571,7 @@ export default async function SectorBPage() {
                     <div>
                       <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={item.image}
+                          src={item.image || "/images/sectors/green-community-park.webp"}
                           alt={item.title}
                           title={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -515,7 +579,7 @@ export default async function SectorBPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-3">
                           <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow">
-                            {item.tag}
+                            {item.tag || "Sector B"}
                           </span>
                         </div>
                       </div>
@@ -525,7 +589,7 @@ export default async function SectorBPage() {
                           {item.title}
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed">
-                          {item.desc}
+                          {item.description || item.desc}
                         </p>
                       </div>
                     </div>
@@ -647,7 +711,7 @@ export default async function SectorBPage() {
           </div>
 
           <ScrollReveal animation="fade-up" delay={100}>
-            <FaqAccordion items={SECTOR_B_FAQS} defaultOpenIndex={0} />
+            <FaqAccordion items={dynamicFaqs} defaultOpenIndex={0} />
           </ScrollReveal>
         </section>
 
@@ -655,13 +719,13 @@ export default async function SectorBPage() {
         <section id="booking" className="max-w-3xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <WordReveal
-              text="Book Your Sector B Plot Today"
+              text={ctaHeading}
               highlightWords={["Book", "Sector", "B"]}
               as="h2"
               className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading block"
             />
             <p className="text-xs sm:text-sm text-slate-600">
-              Submit your inquiry to our sales team to secure priority plot allocation in Sector B.
+              {ctaSubtitle}
             </p>
           </div>
 

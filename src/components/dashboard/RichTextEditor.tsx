@@ -42,16 +42,19 @@ interface RichTextEditorProps {
 }
 
 const PRESET_INTERNAL_LINKS = [
-  { label: "Residential Plots", url: "/plots/residential" },
-  { label: "Commercial Plots", url: "/plots/commercial" },
-  { label: "Sector A (Master Plan)", url: "/sectors/sector-a" },
-  { label: "Sector B (Master Plan)", url: "/sectors/sector-b" },
-  { label: "Installment & Payment Plans", url: "/payment-plan" },
-  { label: "NOC & Legal Approvals", url: "/noc-status" },
-  { label: "Master Plan & Layout", url: "/master-plan" },
-  { label: "Location & Access", url: "/location" },
-  { label: "About Saffron City", url: "/about-us" },
-  { label: "All Blogs & News", url: "/blogs" },
+  { label: "Home Page", url: "/" },
+  { label: "About Saffron City & SKB", url: "/about-us" },
+  { label: "RDA NOC & Legal Clearances", url: "/noc-status" },
+  { label: "15,000 Kanal Master Plan", url: "/master-plan" },
+  { label: "3-Year Installment Payment Plan", url: "/payment-plan" },
+  { label: "Location & GT Road Access", url: "/location" },
+  { label: "Sector A (Executive / Luxury)", url: "/sectors/sector-a" },
+  { label: "Sector B (Affordable / Smart Living)", url: "/sectors/sector-b" },
+  { label: "Residential Plots (5M, 10M, 1K)", url: "/plots/residential" },
+  { label: "Commercial Plots & Plazas", url: "/plots/commercial" },
+  { label: "Plots Inventory Explorer", url: "/plot-for-sale" },
+  { label: "Blogs, News & Market Insights", url: "/blogs" },
+  { label: "Privacy Policy", url: "/privacy-policy" },
 ];
 
 export default function RichTextEditor({

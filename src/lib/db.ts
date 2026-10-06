@@ -100,24 +100,35 @@ class MemoryCacheManager {
 export const backendCache = new MemoryCacheManager();
 
 // -------------------------------------------------------------
-// Helper to verify database user password (supports direct string & PBKDF2 hashed)
+// Helper to verify and hash database user password (PBKDF2-SHA512 with 100,000 iterations)
 // -------------------------------------------------------------
-function verifyUserPasswordInDb(inputPassword: string, storedHash: string, storedSalt?: string): boolean {
-  if (!inputPassword || !storedHash) return false;
-  // 1. Direct match (plain text in DB)
-  if (inputPassword === storedHash) return true;
+export function hashUserPassword(password: string, salt?: string): { hash: string; salt: string } {
+  const finalSalt = salt || crypto.randomBytes(32).toString("hex");
+  const hash = crypto.pbkdf2Sync(password, finalSalt, 100000, 64, "sha512").toString("hex");
+  return { hash, salt: finalSalt };
+}
 
-  // 2. Hash verification if salt exists
+function verifyUserPasswordInDb(inputPassword: string, storedHash: string, storedSalt?: string): { valid: boolean; needsUpgrade?: boolean } {
+  if (!inputPassword || !storedHash) return { valid: false };
+
+  // 1. PBKDF2 100,000 iterations check (Current Standard)
   if (storedSalt) {
     try {
-      const h10k = crypto.pbkdf2Sync(inputPassword, storedSalt, 10000, 64, "sha512").toString("hex");
-      if (h10k === storedHash) return true;
       const h100k = crypto.pbkdf2Sync(inputPassword, storedSalt, 100000, 64, "sha512").toString("hex");
-      if (h100k === storedHash) return true;
+      if (h100k === storedHash) return { valid: true, needsUpgrade: false };
+
+      // Legacy 10,000 iterations check
+      const h10k = crypto.pbkdf2Sync(inputPassword, storedSalt, 10000, 64, "sha512").toString("hex");
+      if (h10k === storedHash) return { valid: true, needsUpgrade: true };
     } catch {}
   }
 
-  return false;
+  // 2. Direct plain-text match (Legacy unhashed password) -> mark for immediate auto-upgrade
+  if (inputPassword === storedHash) {
+    return { valid: true, needsUpgrade: true };
+  }
+
+  return { valid: false };
 }
 
 declare global {
@@ -225,7 +236,7 @@ export const db = {
           userRow.salt
         );
 
-        if (!isPasswordValid) {
+        if (!isPasswordValid.valid) {
           const newAttempts = (userRow.failedAttempts || 0) + 1;
           const maxAttempts = 5;
 
@@ -258,6 +269,18 @@ export const db = {
               message: `Invalid administrator password. ${maxAttempts - newAttempts} attempt(s) remaining before lock.`,
             };
           }
+        }
+
+        // Auto-upgrade password to PBKDF2-SHA512 (100k rounds) if legacy or unhashed
+        if (isPasswordValid.needsUpgrade) {
+          try {
+            const { hash: newHash, salt: newSalt } = hashUserPassword(passwordInput);
+            await safeQuery(
+              "UPDATE `users` SET `passwordHash` = ?, `salt` = ?, `password` = NULL WHERE `id` = ?",
+              "UPDATE `user` SET `passwordHash` = ?, `salt` = ?, `password` = NULL WHERE `id` = ?",
+              [newHash, newSalt, userRow.id]
+            );
+          } catch {}
         }
 
         // Reset attempts and update last login timestamp in database
@@ -358,8 +381,7 @@ export const db = {
   ): Promise<SafeUser | null> => {
     const id = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const password = data.password || data.email;
-    const salt = crypto.randomBytes(32).toString("hex");
-    const passwordHash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+    const { hash: passwordHash, salt } = hashUserPassword(password);
     const permissionsJson = JSON.stringify(data.permissions || []);
 
     try {
@@ -400,9 +422,8 @@ export const db = {
         values.push(updates.email.toLowerCase().trim());
       }
       if (updates.password !== undefined) {
-        const salt = crypto.randomBytes(32).toString("hex");
-        const passwordHash = crypto.pbkdf2Sync(updates.password, salt, 10000, 64, "sha512").toString("hex");
-        fields.push("`passwordHash` = ?, `salt` = ?");
+        const { hash: passwordHash, salt } = hashUserPassword(updates.password);
+        fields.push("`passwordHash` = ?, `salt` = ?, `password` = NULL");
         values.push(passwordHash, salt);
       }
       if (updates.role !== undefined) {
@@ -507,12 +528,11 @@ export const db = {
       );
       if (rows && rows.length > 0) {
         const userId = rows[0].userId;
-        const salt = crypto.randomBytes(32).toString("hex");
-        const passwordHash = crypto.pbkdf2Sync(newPassword, salt, 10000, 64, "sha512").toString("hex");
+        const { hash: passwordHash, salt } = hashUserPassword(newPassword);
 
         await safeQuery(
-          "UPDATE `users` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?",
-          "UPDATE `user` SET `passwordHash` = ?, `salt` = ? WHERE `id` = ?",
+          "UPDATE `users` SET `passwordHash` = ?, `salt` = ?, `password` = NULL WHERE `id` = ?",
+          "UPDATE `user` SET `passwordHash` = ?, `salt` = ?, `password` = NULL WHERE `id` = ?",
           [passwordHash, salt, userId]
         );
 
@@ -827,6 +847,7 @@ export const db = {
           ...b,
           authorRole: b.authorRole || undefined,
           authorBio: b.authorBio || undefined,
+          authorImage: b.authorImage || undefined,
           showProjectSnapshot: Boolean(b.showProjectSnapshot),
           image: normalizeBlogImage(b.image || b.coverImage, index),
           coverImage: normalizeBlogImage(b.coverImage || b.image, index),
@@ -887,6 +908,7 @@ export const db = {
           ...b,
           authorRole: b.authorRole || undefined,
           authorBio: b.authorBio || undefined,
+          authorImage: b.authorImage || undefined,
           showProjectSnapshot: Boolean(b.showProjectSnapshot),
           image: normalizeBlogImage(b.image || b.coverImage, 0),
           coverImage: normalizeBlogImage(b.coverImage || b.image, 0),
@@ -914,10 +936,11 @@ export const db = {
       await pool.query("ALTER TABLE `blogs` ADD COLUMN `faqs` JSON NULL;").catch(() => {});
       await pool.query("ALTER TABLE `blogs` ADD COLUMN `authorRole` VARCHAR(191) NULL;").catch(() => {});
       await pool.query("ALTER TABLE `blogs` ADD COLUMN `authorBio` TEXT NULL;").catch(() => {});
+      await pool.query("ALTER TABLE `blogs` ADD COLUMN `authorImage` VARCHAR(500) NULL;").catch(() => {});
       await pool.query("ALTER TABLE `blogs` ADD COLUMN `showProjectSnapshot` BOOLEAN DEFAULT 0;").catch(() => {});
       await pool.query(
-        `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`authorRole\`, \`authorBio\`, \`showProjectSnapshot\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`imageAlt\`, \`faqs\`, \`createdAt\`) ` +
-          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        `INSERT INTO \`blogs\` (\`id\`, \`slug\`, \`title\`, \`excerpt\`, \`content\`, \`image\`, \`category\`, \`author\`, \`authorRole\`, \`authorBio\`, \`authorImage\`, \`showProjectSnapshot\`, \`readTime\`, \`isPublished\`, \`seoTitle\`, \`metaDescription\`, \`canonicalUrl\`, \`robotsIndex\`, \`robotsFollow\`, \`focusKeyword\`, \`secondaryKeywords\`, \`h1Heading\`, \`imageAlt\`, \`faqs\`, \`createdAt\`) ` +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
         [
           id,
           blog.slug,
@@ -929,6 +952,7 @@ export const db = {
           blog.author || "Editorial Team",
           blog.authorRole || null,
           blog.authorBio || null,
+          blog.authorImage || null,
           blog.showProjectSnapshot ? 1 : 0,
           blog.readTime || "5 min read",
           blog.isPublished ? 1 : 0,
@@ -994,7 +1018,7 @@ export const db = {
     try {
       const allowedColumns = new Set([
         "slug", "title", "excerpt", "content", "image", "coverImage", "category",
-        "author", "authorRole", "authorBio", "showProjectSnapshot", "readTime", "isPublished", "seoTitle", "metaDescription",
+        "author", "authorRole", "authorBio", "authorImage", "showProjectSnapshot", "readTime", "isPublished", "seoTitle", "metaDescription",
         "canonicalUrl", "robotsIndex", "robotsFollow", "focusKeyword",
         "secondaryKeywords", "h1Heading", "imageAlt", "ogTitle", "ogDescription",
         "ogImage", "twitterTitle", "twitterDescription", "twitterImage", "customSchema", "faqs"
@@ -1189,10 +1213,58 @@ export const db = {
 
       const heroKeys = [
         "heroTitle", "heroHighlightedWord", "heroSubtitle", "heroBgImage", "heroButtonText",
+        "homeStatsJson", "homeOverviewHeading", "homeOverviewText", "homeOverviewImage",
+        "homeAmenitiesHeading", "homeAmenitiesJson", "homeFaqsHeading", "homeFaqsJson",
+        "homeCtaHeading", "homeCtaSubtitle",
+
         "masterPlanImage", "masterPlanFullImage", "masterPlanPdf", "masterPlanDescription",
+        "masterPlanHeroHeading", "masterPlanHeroSubtitle", "masterPlanHeroImage", "masterPlanStatsJson",
+        "masterPlanOverviewHeading", "masterPlanOverviewText", "masterPlanSectorsHeading", "masterPlanSectorsJson",
+        "masterPlanFacilitiesHeading", "masterPlanFacilitiesJson", "masterPlanFaqsHeading", "masterPlanFaqsJson",
+        "masterPlanCtaHeading", "masterPlanCtaSubtitle", "masterPlanCtaPhone",
+
+        "locationPageHeading", "locationPageSubtitle", "locationPageDescription", "locationMapImage", "locationGoogleEmbedUrl",
+        "locationHeroHeading", "locationHeroSubtitle", "locationHeroImage", "locationStatsJson",
+        "locationOverviewHeading", "locationOverviewText", "locationLandmarksHeading", "locationLandmarksJson",
+        "locationRoutesHeading", "locationRoutesJson", "locationTableHeading", "locationTableJson",
+        "locationCtaHeading", "locationCtaSubtitle", "locationCtaPhone",
+
         "sectorATitle", "sectorATagline", "sectorAPlots", "sectorAPrice", "sectorAImage",
+        "sectorADescription", "sectorABrochurePdf",
+        "sectorAOverviewHeading", "sectorAOverviewImage", "sectorAStatsJson",
+        "sectorAAmenitiesHeading", "sectorAAmenitiesJson",
+        "sectorALandmarksHeading", "sectorALandmarksJson", "sectorAMapEmbedUrl",
+        "sectorAPlotsHeading", "sectorAPlotsSubtitle",
+        "sectorACtaHeading", "sectorACtaSubtitle", "sectorACtaPhone",
+
         "sectorBTitle", "sectorBTagline", "sectorBPlots", "sectorBPrice", "sectorBImage",
-        "residentialPaymentPlanImage", "commercialPaymentPlanImage", "officialPaymentPlanPdf"
+        "sectorBDescription", "sectorBBrochurePdf",
+        "sectorBOverviewHeading", "sectorBOverviewImage", "sectorBStatsJson",
+        "sectorBAmenitiesHeading", "sectorBAmenitiesJson",
+        "sectorBLandmarksHeading", "sectorBLandmarksJson", "sectorBMapEmbedUrl",
+        "sectorBPlotsHeading", "sectorBPlotsSubtitle",
+        "sectorBCtaHeading", "sectorBCtaSubtitle", "sectorBCtaPhone",
+
+        "residentialPaymentPlanImage", "commercialPaymentPlanImage", "officialPaymentPlanPdf",
+        "aboutHeroHeading", "aboutHeroSubtitle", "aboutHeroImage", "aboutStoryHeading", "aboutStoryText", "aboutMissionText", "aboutVisionText", "aboutLegacyYears",
+        "aboutLegacyImage", "aboutStatsJson", "aboutLeadershipJson", "aboutTimelineJson", "aboutDifferentiatorsJson", "aboutCoreValuesJson", "aboutCommitmentsJson",
+        "nocPageHeading", "nocPageSubtitle", "nocPageDescription", "nocApprovalNumber", "nocCertificateImage", "nocRdaLetterPdf", "nocLegalFeaturesJson",
+        "nocHeroImage", "nocHeroHeading", "nocHeroSubtitle", "nocVerificationUrl", "nocStatsJson",
+        "nocOverviewHeading", "nocOverviewText", "nocDocumentsHeading", "nocDocumentsJson",
+        "nocStepsHeading", "nocStepsSubtitle", "nocStepsJson", "nocFaqsHeading", "nocFaqsJson",
+        "nocCtaHeading", "nocCtaSubtitle", "nocCtaPhone",
+
+        "residentialHeroHeading", "residentialHeroSubtitle", "residentialHeroImage", "residentialStatsJson",
+        "residentialOverviewHeading", "residentialOverviewText", "residentialPaymentPlanImage", "residentialInstallmentsJson",
+        "residentialFeaturesHeading", "residentialFeaturesJson", "residentialFaqsHeading", "residentialFaqsJson",
+        "residentialCtaHeading", "residentialCtaSubtitle", "residentialCtaPhone",
+        "residentialPageHeading", "residentialPageSubtitle", "residentialPageBanner",
+
+        "commercialHeroHeading", "commercialHeroSubtitle", "commercialHeroImage", "commercialStatsJson",
+        "commercialOverviewHeading", "commercialOverviewText", "commercialPaymentPlanImage", "commercialInstallmentsJson",
+        "commercialFeaturesHeading", "commercialFeaturesJson", "commercialFaqsHeading", "commercialFaqsJson",
+        "commercialCtaHeading", "commercialCtaSubtitle", "commercialCtaPhone",
+        "commercialPageHeading", "commercialPageSubtitle", "commercialPageBanner"
       ];
       const heroData: Record<string, any> = {};
       for (const key of heroKeys) {
@@ -1210,6 +1282,22 @@ export const db = {
       for (const key of chairmanKeys) {
         if (merged[key as keyof StoredSettings] !== undefined) {
           chairmanData[key] = merged[key as keyof StoredSettings];
+        }
+      }
+
+      // Also capture any extra custom/future CMS keys in heroData
+      const knownTopKeys = new Set([
+        "siteName", "contactPhone", "secondaryPhone", "whatsappPhone", "officialEmail",
+        "officeAddress", "googleMapsUrl", "rdaNocStatus", "rdaVerificationUrl", "announcement",
+        "activePreLaunchDiscount", "smtpEnabled", "smtpHost", "smtpPort", "smtpSecure",
+        "smtpUser", "smtpPass", "smtpFromEmail", "leadNotificationEmail",
+        "amenities", "landmarks", "paymentTiers",
+        ...metaKeys,
+        ...chairmanKeys
+      ]);
+      for (const [k, v] of Object.entries(merged)) {
+        if (!knownTopKeys.has(k) && !heroData[k] && v !== undefined) {
+          heroData[k] = v;
         }
       }
 

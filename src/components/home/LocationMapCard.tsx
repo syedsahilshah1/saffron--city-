@@ -6,7 +6,13 @@ import Link from "next/link";
 import { MapPin, Layers, Globe, ExternalLink, Download } from "lucide-react";
 import DownloadLeadModal from "@/components/forms/DownloadLeadModal";
 
-export default function LocationMapCard() {
+export default function LocationMapCard({
+  imageSrc = "/images/imgi_87_LOCATION.webp",
+  googleEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+}: {
+  imageSrc?: string;
+  googleEmbedUrl?: string;
+}) {
   const [mode, setMode] = useState<"map" | "official">("official");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
@@ -54,7 +60,7 @@ export default function LocationMapCard() {
         {mode === "official" ? (
           <div className="relative w-full h-full flex items-center justify-center bg-white p-2">
             <Image
-              src="/images/imgi_87_LOCATION.webp"
+              src={imageSrc || "/images/imgi_87_LOCATION.webp"}
               alt="Saffron City Official Location Map"
               title="Saffron City Official Location Map"
               fill
@@ -67,7 +73,7 @@ export default function LocationMapCard() {
         ) : (
           <iframe
             title="Saffron City Google Location Map"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+            src={googleEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106450.60155606992!2d73.11181283995874!3d33.49397682977461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfebbe487dc843%3A0x6b63d76b1f237efb!2sRawat%2C%20Rawalpindi%2C%20Punjab!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"}
             width="100%"
             height="100%"
             className="w-full h-full"

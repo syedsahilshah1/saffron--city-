@@ -190,7 +190,12 @@ export default async function HomePage() {
         ========================================================= */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <GsapSplitReveal
-            leftContent={<LocationMapCard />}
+            leftContent={
+              <LocationMapCard
+                imageSrc={settings.locationMapImage}
+                googleEmbedUrl={settings.locationGoogleEmbedUrl}
+              />
+            }
             leftClassName="order-2 lg:order-1"
             rightContent={
               <div className="space-y-6 flex flex-col justify-center h-full">
@@ -725,7 +730,18 @@ export default async function HomePage() {
 
           {/* Interactive Collapsible FAQ Accordion */}
           <ScrollReveal animation="fade-up" delay={100}>
-            <FaqAccordion />
+            {(() => {
+              let dynamicHomeFaqs = undefined;
+              if (settings.homeFaqsJson) {
+                try {
+                  const parsed = JSON.parse(settings.homeFaqsJson);
+                  if (Array.isArray(parsed) && parsed.length > 0) {
+                    dynamicHomeFaqs = parsed;
+                  }
+                } catch {}
+              }
+              return <FaqAccordion items={dynamicHomeFaqs} />;
+            })()}
           </ScrollReveal>
         </section>
 

@@ -59,8 +59,13 @@ const DIFFERENTIATORS: DifferentiatorItem[] = [
   }
 ];
 
-export default function DifferentiatorsSection() {
+interface DifferentiatorsSectionProps {
+  items?: DifferentiatorItem[];
+}
+
+export default function DifferentiatorsSection({ items }: DifferentiatorsSectionProps) {
   const [showAllMobile, setShowAllMobile] = useState(false);
+  const differentiatorsList = items && items.length > 0 ? items : DIFFERENTIATORS;
 
   return (
     <section className="space-y-8 sm:space-y-12">
@@ -81,7 +86,7 @@ export default function DifferentiatorsSection() {
 
       {/* 3 Cards In a Line (Exactly 2 Lines Total on Tablet/Desktop) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-        {DIFFERENTIATORS.map((diff, index) => (
+        {differentiatorsList.map((diff, index) => (
           <div
             key={diff.number}
             className={`rounded-3xl bg-white border border-amber-200 hover:border-[#D49E17] shadow-md hover:shadow-xl transition-all overflow-hidden group flex flex-col justify-between ${

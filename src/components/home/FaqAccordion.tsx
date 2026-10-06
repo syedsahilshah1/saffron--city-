@@ -4,8 +4,14 @@ import React, { useState } from "react";
 import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { HOME_FAQS } from "@/data/saffron-data";
 
-export default function FaqAccordion() {
+export default function FaqAccordion({
+  items
+}: {
+  items?: { question: string; answer: string; category?: string }[];
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(0); // First open by default
+
+  const faqList = items && items.length > 0 ? items : HOME_FAQS;
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -13,7 +19,7 @@ export default function FaqAccordion() {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4">
-      {HOME_FAQS.map((faq, idx) => {
+      {faqList.map((faq, idx) => {
         const isOpen = openIndex === idx;
 
         return (
