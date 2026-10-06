@@ -4,6 +4,28 @@ import { requireAdminAuth } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const plot = await db.getPlotById(id);
+    if (!plot) {
+      return NextResponse.json(
+        { success: false, message: "Plot not found" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({ success: true, data: plot });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error.message || "Failed to fetch plot" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

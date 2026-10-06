@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MapPin, TrendingUp, MessageSquare, Ruler, ChevronRight } from "lucide-react";
+import { ArrowRight, MapPin, TrendingUp, MessageSquare, Ruler, ChevronRight, MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/data/saffron-data";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import { StoredPlot } from "@/lib/types";
@@ -274,99 +274,74 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
       </div>
 
       {/* =========================================================
-          1. MOBILE VIEW — Max 4 Plots in INLINE Horizontal Swipe Format
+          1. MOBILE VIEW — 6 Plots Grid (3 per row)
       ========================================================= */}
       <div className="block sm:hidden space-y-3">
-        {/* Swipe hint */}
-        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium px-1">
-          <span>Swipe to explore plots</span>
-          <span className="text-[#D49E17] font-bold flex items-center gap-0.5">
-            4 Featured <ChevronRight className="w-3.5 h-3.5" />
-          </span>
-        </div>
-
-        {/* Inline Horizontal Scrollable Container */}
-        <div className="flex flex-nowrap overflow-x-auto gap-3.5 pb-2 pt-1 px-1 snap-x snap-mandatory scrollbar-none -mx-4 px-4">
-          {mobilePlots.map((plot) => {
+        <div className="grid grid-cols-3 gap-1.5 px-1">
+          {desktopPlots.map((plot) => {
             const plotWhatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${encodeURIComponent(
               `Hi, I want to inquire about ${plot.title} (${plot.plotNumber} - ${plot.sector}, ${plot.dimensions}) listed for ${plot.priceFormatted} in Saffron City.`
             )}`;
 
             return (
               <div
-                key={`mob-inline-${plot.id}`}
-                className="w-[260px] shrink-0 snap-start rounded-2xl bg-white text-slate-900 overflow-hidden shadow-md border border-amber-200/80 flex flex-col justify-between"
+                key={`mob-grid-${plot.id}`}
+                className="w-full rounded-lg bg-white text-slate-900 overflow-hidden shadow-sm border border-amber-200/80 flex flex-col justify-between"
               >
                 <div>
-                  {/* Clickable Image -> Redirects to /plot-for-sale */}
                   <Link
                     href="/plot-for-sale"
-                    className="block relative h-36 w-full overflow-hidden bg-slate-100 cursor-pointer"
+                    aria-label="View inventory"
+                    className="block relative h-[70px] w-full overflow-hidden bg-slate-100 cursor-pointer"
                   >
                     <Image
                       src={plot.image}
                       alt={`${plot.title} - ${plot.sector}`}
                       title={`${plot.title} - ${plot.sector}`}
                       fill
-                      sizes="260px"
-                      className="object-cover group-hover:scale-105 transition-transform"
+                      sizes="33vw"
+                      className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                     
-                    <div className="absolute top-2.5 left-2.5 z-10">
-                      <span className="px-2 py-0.5 rounded bg-white/95 text-slate-900 text-[10px] font-mono font-bold shadow">
+                    <div className="absolute top-1 left-1 z-10">
+                      <span className="px-1 py-[1px] rounded bg-white/95 text-slate-900 text-[7px] font-mono font-bold shadow">
                         {plot.plotNumber}
                       </span>
                     </div>
 
-                    <div className="absolute top-2.5 right-2.5 z-10">
-                      <span className="px-2 py-0.5 rounded-full bg-[#D49E17] text-white text-[9px] font-bold uppercase shadow">
-                        {plot.category}
-                      </span>
-                    </div>
-
-                    <div className="absolute bottom-2 left-2.5 right-2.5 z-10 flex items-end justify-between">
-                      <span className="text-sm font-black text-white drop-shadow font-mono block leading-tight">
-                        {plot.priceFormatted}
-                      </span>
-                      <span className="text-[10px] font-bold text-amber-300">
-                        {plot.tag}
+                    <div className="absolute bottom-1 left-1 right-1 z-10">
+                      <span className="text-white font-bold text-[8px] leading-none block">
+                        PKR {plot.priceFormatted}
                       </span>
                     </div>
                   </Link>
 
-                  <div className="p-3 space-y-1.5">
-                    <Link href="/plot-for-sale" className="hover:text-[#D49E17] transition-colors block">
-                      <h3 className="text-sm font-bold text-slate-900 truncate">
-                        {plot.title}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 truncate">
-                      <MapPin className="w-3 h-3 text-[#D49E17] shrink-0" />
+                  <div className="p-1.5 space-y-1">
+                    <h3 className="font-bold text-slate-900 text-[8px] leading-tight truncate">
+                      {plot.dimensions}
+                    </h3>
+                    <div className="flex items-center gap-0.5 text-slate-500 text-[7px] font-medium truncate">
+                      <MapPin className="w-2 h-2 shrink-0 text-[#D49E17]" />
                       <span className="truncate">{plot.sector}</span>
-                    </div>
-                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600 font-mono">
-                      <Ruler className="w-3 h-3 text-slate-400" />
-                      <span>{plot.dimensions}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3 pt-0 flex gap-2 mt-1">
+                <div className="p-1.5 pt-0 mt-auto flex flex-col gap-1">
                   <Link
-                    href="/plot-for-sale"
-                    aria-label={`View details for ${plot.title} in ${plot.sector}`}
-                    className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold text-center transition-colors"
+                    href={`/plots/${plot.id}`}
+                    className="w-full py-1 text-center rounded bg-slate-100 text-slate-700 font-bold text-[7px] hover:bg-slate-200 transition-colors"
                   >
-                    <span>Details</span>
+                    Details
                   </Link>
                   <a
                     href={plotWhatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-1.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold text-center inline-flex items-center justify-center gap-1 shadow-sm"
+                    className="w-full py-1 text-center rounded bg-[#10b981] hover:bg-[#059669] text-white font-bold text-[7px] flex justify-center items-center gap-0.5 transition-colors"
                   >
-                    <MessageSquare className="w-3 h-3" />
+                    <MessageCircle className="w-1.5 h-1.5" />
                     <span>Inquire</span>
                   </a>
                 </div>
@@ -375,15 +350,15 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
           })}
         </div>
 
-        {/* Mobile Action Button Below Inline Plots */}
-        <div className="pt-2">
+        {/* View All Button inside Mobile Block */}
+        <div className="pt-2 px-1">
           <Link
             href="/plot-for-sale"
-            aria-label="View complete directory of residential and commercial plots for sale in Saffron City"
-            className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold tracking-wider uppercase transition-all shadow-md active:scale-95"
+            aria-label="View complete directory"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-[#D49E17] to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-[11px] font-bold tracking-wider uppercase transition-all shadow-md active:scale-95"
           >
             <span>VIEW COMPLETE DIRECTORY</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>
@@ -408,10 +383,11 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
                 key={plot.id}
                 className="group rounded-3xl bg-white text-slate-900 overflow-hidden shadow-md hover:shadow-2xl border border-amber-200/70 hover:border-[#D49E17] transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"
               >
-                {/* Card Image Area -> Clickable directly to /plot-for-sale */}
+                {/* Card Image Area -> Clickable directly to inventory */}
                 <div>
                   <Link
                     href="/plot-for-sale"
+                    aria-label="View full inventory of plots for sale in Saffron City"
                     className="block relative h-52 w-full overflow-hidden bg-slate-100 cursor-pointer"
                   >
                     <Image
@@ -466,8 +442,8 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
                       <span className="text-slate-500 text-[11px]">{plot.tag}</span>
                     </div>
 
-                    {/* Plot Title */}
-                    <Link href="/plot-for-sale" className="block hover:text-[#D49E17] transition-colors">
+                    {/* Plot Title - links to detail page */}
+                    <Link href={`/plots/${plot.id}`} className="block hover:text-[#D49E17] transition-colors">
                       <h3 className="text-xl font-serif font-bold text-slate-900 tracking-tight">
                         {plot.title}
                       </h3>
@@ -484,11 +460,11 @@ export default function PlotsForSaleGrid({ initialPlots = [] }: PlotsForSaleGrid
                 {/* Bottom Card Actions */}
                 <div className="p-5 pt-0 border-t border-slate-100 flex items-center justify-between gap-2 mt-2">
                   <Link
-                    href="/plot-for-sale"
-                    aria-label={`View details for ${plot.title} in ${plot.sector}`}
+                    href={`/plots/${plot.id}`}
+                    aria-label={`View full details for ${plot.title} in ${plot.sector}`}
                     className="flex-1 py-2 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold text-center transition-colors inline-flex items-center justify-center gap-1"
                   >
-                    <span>Details</span>
+                    <span>View Details</span>
                     <ArrowRight className="w-3 h-3 text-slate-500" />
                   </Link>
 

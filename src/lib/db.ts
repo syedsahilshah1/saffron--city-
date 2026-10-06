@@ -505,7 +505,7 @@ export const db = {
         [email.toLowerCase().trim()]
       );
       if (rows && rows.length > 0) {
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = crypto.randomInt(100000, 1000000).toString();
         await safeQuery(
           "INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())",
           "INSERT INTO `passwordresettoken` (`id`, `token`, `userId`, `expiresAt`, `createdAt`) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NOW())",
@@ -780,6 +780,28 @@ export const db = {
       return rows && rows.length > 0 ? rows[0] : null;
     } catch (err: any) {
       console.error("[MySQL updatePlot Error]:", err?.message);
+    }
+    return null;
+  },
+
+  getPlotById: async (id: string): Promise<StoredPlot | null> => {
+    try {
+      const rows: any = await safeQuery(
+        "SELECT * FROM `plots` WHERE `id` = ? LIMIT 1",
+        "SELECT * FROM `plotinventory` WHERE `id` = ? LIMIT 1",
+        [id]
+      );
+      if (rows && rows.length > 0) {
+        const p = rows[0];
+        return {
+          ...p,
+          totalPrice: Number(p.totalPrice) || 0,
+          downPayment: Number(p.downPayment) || 0,
+          monthlyInst: Number(p.monthlyInst) || 0,
+        };
+      }
+    } catch (err: any) {
+      logDbNotice("getPlotById", err);
     }
     return null;
   },
@@ -1214,7 +1236,7 @@ export const db = {
       const heroKeys = [
         "heroTitle", "heroHighlightedWord", "heroSubtitle", "heroBgImage", "heroButtonText",
         "homeStatsJson", "homeOverviewHeading", "homeOverviewText", "homeOverviewImage",
-        "homeAmenitiesHeading", "homeAmenitiesJson", "homeFaqsHeading", "homeFaqsJson",
+        "homeAmenitiesHeading", "homeAmenitiesJson", "homeFaqsHeading", "homeFaqsJson", "homeReviewsJson",
         "homeCtaHeading", "homeCtaSubtitle",
 
         "masterPlanImage", "masterPlanFullImage", "masterPlanPdf", "masterPlanDescription",

@@ -7,6 +7,7 @@ interface EnquiryFormProps {
   id?: string;
   title?: string;
   subtitle?: string;
+  plotDetails?: string;
   defaultPlotSize?: string;
   defaultSector?: string;
   defaultPlotType?: string;
@@ -18,6 +19,7 @@ export default function EnquiryForm({
   id,
   title = "Book Your Plot Today",
   subtitle = "",
+  plotDetails = "",
   defaultPlotSize = "",
   defaultSector = "",
   defaultPlotType = "",
@@ -92,9 +94,11 @@ export default function EnquiryForm({
         <h3 className={`text-xl sm:text-2xl font-bold font-heading ${isDark ? "text-white" : "text-slate-900"}`}>
           {title}
         </h3>
-        {subtitle && (
+        {(subtitle || plotDetails) && (
           <p className={`mt-1 text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
-            {subtitle}
+            {subtitle && <span>{subtitle}</span>}
+            {subtitle && plotDetails && <span> &middot; </span>}
+            {plotDetails && <span className="font-semibold text-[#D49E17]">{plotDetails}</span>}
           </p>
         )}
       </div>

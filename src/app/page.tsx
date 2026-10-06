@@ -454,7 +454,17 @@ export default async function HomePage() {
 
           {/* 4-Item Row with See More Drawer for Remaining Amenities */}
           {(() => {
-            const renderAmenityCard = (item: typeof AMENITIES[0], idx: number) => (
+            let displayAmenities = AMENITIES;
+            if (settings.homeAmenitiesJson) {
+              try {
+                const parsed = JSON.parse(settings.homeAmenitiesJson);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  displayAmenities = parsed;
+                }
+              } catch {}
+            }
+
+            const renderAmenityCard = (item: any, idx: number) => (
               <div
                 key={idx}
                 className="group rounded-3xl overflow-hidden bg-white text-slate-900 border border-amber-200/80 hover:border-[#D49E17] shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
@@ -493,12 +503,12 @@ export default async function HomePage() {
                     staggerDelay={80}
                     direction="up"
                   >
-                    {AMENITIES.slice(0, 4).map((item, idx) => renderAmenityCard(item, idx))}
+                    {displayAmenities.slice(0, 4).map((item, idx) => renderAmenityCard(item, idx))}
                   </StaggerReveal>
                 }
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {AMENITIES.slice(4).map((item, idx) => renderAmenityCard(item, idx + 4))}
+                  {displayAmenities.slice(4).map((item, idx) => renderAmenityCard(item, idx + 4))}
                 </div>
               </SeeMoreDrawer>
             );
@@ -661,56 +671,65 @@ export default async function HomePage() {
             </h2>
           </ScrollReveal>
 
-          <StaggerReveal
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch"
-            staggerDelay={90}
-            direction="up"
-          >
-            {REVIEWS.map((rev) => (
-              <div
-                key={rev.id}
-                className="p-6 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] transition-all duration-300 relative shadow-md hover:shadow-xl hover:-translate-y-1 group flex flex-col justify-between h-full"
-              >
-                <div className="space-y-4">
-                  {/* Header: Rating Stars & Quote Icon */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-[#D49E17]">
-                      {[...Array(rev.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-[#D49E17] text-[#D49E17]" />
-                      ))}
+          {/* Reviews Swipeable Mobile / Grid Desktop */}
+          <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 sm:gap-8 items-stretch pb-4 scrollbar-hide snap-x sm:snap-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            {(() => {
+              let dynamicReviews = REVIEWS;
+              if (settings.homeReviewsJson) {
+                try {
+                  const parsed = JSON.parse(settings.homeReviewsJson);
+                  if (Array.isArray(parsed) && parsed.length > 0) {
+                    dynamicReviews = parsed;
+                  }
+                } catch {}
+              }
+
+              return dynamicReviews.map((rev) => (
+                <div
+                  key={rev.id}
+                  className="w-[85vw] sm:w-auto shrink-0 snap-center p-5 sm:p-8 rounded-3xl bg-white border border-amber-200/80 hover:border-[#D49E17] transition-all duration-300 relative shadow-md hover:shadow-xl group flex flex-col justify-between h-full"
+                >
+                  <div className="space-y-4">
+                    {/* Header: Rating Stars & Quote Icon */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-[#D49E17]">
+                        {[...Array(rev.rating || 5)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-[#D49E17] text-[#D49E17]" />
+                        ))}
+                      </div>
+                      <Quote className="w-6 h-6 sm:w-7 sm:h-7 text-amber-200/80 group-hover:text-[#D49E17] transition-colors" />
                     </div>
-                    <Quote className="w-7 h-7 text-amber-200/80 group-hover:text-[#D49E17] transition-colors" />
+
+                    {/* Review Text with consistent height */}
+                    <p className="text-sm text-slate-600 leading-relaxed italic min-h-[64px] sm:min-h-[72px]">
+                      &ldquo;{rev.quote}&rdquo;
+                    </p>
                   </div>
 
-                  {/* Review Text with consistent height */}
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic min-h-[64px] sm:min-h-[72px]">
-                    &ldquo;{rev.quote}&rdquo;
-                  </p>
-                </div>
-
-                {/* Author Info */}
-                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] font-bold text-sm shrink-0">
-                    {rev.author.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm block font-heading group-hover:text-[#D49E17] transition-colors">
-                      {rev.author}
-                    </h4>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                      <span className="text-[#D49E17] font-semibold">{rev.location}</span>
-                      {rev.role && (
-                        <>
-                          <span>•</span>
-                          <span>{rev.role}</span>
-                        </>
-                      )}
+                  {/* Author Info */}
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-3">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D49E17] font-bold text-sm shrink-0">
+                      {rev.author.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm block font-heading group-hover:text-[#D49E17] transition-colors">
+                        {rev.author}
+                      </h4>
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] text-slate-500 flex-wrap">
+                        <span className="text-[#D49E17] font-semibold">{rev.location}</span>
+                        {rev.role && (
+                          <>
+                            <span>•</span>
+                            <span>{rev.role}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </StaggerReveal>
+              ));
+            })()}
+          </div>
         </section>
 
         {/* =========================================================
