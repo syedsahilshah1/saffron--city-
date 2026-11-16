@@ -577,11 +577,11 @@ export default function HomepageHeroCms({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {amenities.map((item, idx) => (
             <div
               key={item.id || idx}
-              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-amber-300 transition-all space-y-3 relative group"
+              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-amber-300 transition-all space-y-3 relative group overflow-hidden"
             >
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[11px] font-mono">
@@ -591,7 +591,7 @@ export default function HomepageHeroCms({
                 <button
                   type="button"
                   onClick={() => handleRemoveAmenity(idx)}
-                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition"
+                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition cursor-pointer"
                   title="Remove Amenity"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -605,7 +605,7 @@ export default function HomepageHeroCms({
                   onUploadSuccess={(url) => handleAmenityChange(idx, "image", url)}
                 />
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-slate-700 block mb-1">Title</label>
                     <input
@@ -613,7 +613,7 @@ export default function HomepageHeroCms({
                       value={item.title}
                       onChange={(e) => handleAmenityChange(idx, "title", e.target.value)}
                       placeholder="e.g. 250 Ft Grand Boulevard"
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-900"
+                      className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-bold text-xs text-slate-900 focus:border-[#D49E17] focus:outline-none transition-all"
                     />
                   </div>
 
@@ -624,7 +624,7 @@ export default function HomepageHeroCms({
                       value={item.tag}
                       onChange={(e) => handleAmenityChange(idx, "tag", e.target.value)}
                       placeholder="e.g. Main Arterial"
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-bold text-[#D49E17]"
+                      className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-bold text-xs text-[#D49E17] focus:border-[#D49E17] focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -636,7 +636,7 @@ export default function HomepageHeroCms({
                     value={item.desc}
                     onChange={(e) => handleAmenityChange(idx, "desc", e.target.value)}
                     placeholder="Description..."
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed focus:border-[#D49E17] focus:outline-none transition-all"
                   />
                 </div>
               </div>

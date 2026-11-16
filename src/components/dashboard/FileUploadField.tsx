@@ -71,14 +71,14 @@ export default function FileUploadField({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-700">{label}</label>
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-xs font-bold text-slate-700 truncate">{label}</label>
         {currentValue && (
           <a
             href={currentValue}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-[#D49E17] hover:underline inline-flex items-center gap-1 font-semibold"
+            className="text-[11px] text-[#D49E17] hover:underline inline-flex items-center gap-1 font-semibold shrink-0"
           >
             <Eye className="w-3 h-3" />
             <span>View Current File</span>
@@ -86,86 +86,92 @@ export default function FileUploadField({
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="flex items-center gap-3">
         {/* Preview Thumbnail */}
-        <div className="relative w-24 h-16 sm:w-28 sm:h-18 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          title="Click to upload"
+          className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer hover:border-amber-400 transition-colors group/thumb shadow-sm"
+        >
           {currentValue ? (
             isPdf || previewType === "file" ? (
               <div className="flex flex-col items-center justify-center text-slate-600 p-1">
-                <FileText className="w-6 h-6 text-rose-500" />
-                <span className="text-[9px] font-bold uppercase truncate max-w-[90px]">PDF Document</span>
+                <FileText className="w-5 h-5 text-rose-500" />
+                <span className="text-[9px] font-bold uppercase truncate max-w-[80px]">PDF</span>
               </div>
             ) : (
               <img
                 src={currentValue}
                 alt="Preview"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-200"
               />
             )
           ) : (
-            <div className="flex flex-col items-center text-slate-400">
-              <ImageIcon className="w-5 h-5 opacity-50" />
-              <span className="text-[9px]">No File</span>
+            <div className="flex flex-col items-center text-slate-400 group-hover/thumb:text-amber-500">
+              <ImageIcon className="w-5 h-5 opacity-60" />
+              <span className="text-[9px] font-medium">No File</span>
             </div>
           )}
         </div>
 
-        {/* Input & Upload Button */}
-        <div className="flex-1 w-full space-y-1.5">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={currentValue || ""}
-              onChange={(e) => onUploadSuccess(e.target.value)}
-              placeholder="e.g. /images/hero-bg.webp or https://..."
-              className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none transition-all"
-            />
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept={accept}
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <button
-              type="button"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Upload</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {helperText && (
-            <p className="text-[11px] text-slate-500">{helperText}</p>
-          )}
-
-          {uploadSuccess && (
-            <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 animate-in fade-in">
-              <Check className="w-3 h-3" />
-              <span>File uploaded successfully!</span>
-            </p>
-          )}
-
-          {uploadError && (
-            <p className="text-[11px] text-rose-600 font-semibold flex items-center gap-1 animate-in fade-in">
-              <AlertCircle className="w-3 h-3" />
-              <span>{uploadError}</span>
-            </p>
-          )}
+        {/* Upload Button */}
+        <div className="flex-1 min-w-0">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept={accept}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <button
+            type="button"
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Path Input */}
+      <div>
+        <input
+          type="text"
+          value={currentValue || ""}
+          onChange={(e) => onUploadSuccess(e.target.value)}
+          placeholder="e.g. /images/hero-bg.webp or https://..."
+          className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-800 placeholder:text-slate-400 focus:border-[#D49E17] focus:bg-white focus:outline-none transition-all"
+        />
+      </div>
+
+      {helperText && (
+        <p className="text-[11px] text-slate-500">{helperText}</p>
+      )}
+
+      {uploadSuccess && (
+        <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 animate-in fade-in">
+          <Check className="w-3 h-3" />
+          <span>File uploaded successfully!</span>
+        </p>
+      )}
+
+      {uploadError && (
+        <p className="text-[11px] text-rose-600 font-semibold flex items-center gap-1 animate-in fade-in">
+          <AlertCircle className="w-3 h-3" />
+          <span>{uploadError}</span>
+        </p>
+      )}
     </div>
   );
 }
