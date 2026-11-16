@@ -794,11 +794,11 @@ export default function CommercialPlotsCms({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {amenities.map((item, idx) => (
             <div
               key={item.id || idx}
-              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-amber-300 transition-all space-y-3 relative group"
+              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-amber-300 transition-all space-y-3 relative group overflow-hidden"
             >
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[11px] font-mono">
@@ -808,7 +808,7 @@ export default function CommercialPlotsCms({
                 <button
                   type="button"
                   onClick={() => handleRemoveAmenity(idx)}
-                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition"
+                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition cursor-pointer"
                   title="Remove Facility"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -829,7 +829,7 @@ export default function CommercialPlotsCms({
                     value={item.title}
                     onChange={(e) => handleAmenityChange(idx, "title", e.target.value)}
                     placeholder="e.g. Direct GT Road Frontage"
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-900"
+                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-bold text-xs text-slate-900 focus:border-[#D49E17] focus:outline-none transition-all"
                   />
                 </div>
 
@@ -840,7 +840,7 @@ export default function CommercialPlotsCms({
                     value={item.desc}
                     onChange={(e) => handleAmenityChange(idx, "desc", e.target.value)}
                     placeholder="Description of commercial benefit..."
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed"
+                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed text-xs focus:border-[#D49E17] focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -874,11 +874,11 @@ export default function CommercialPlotsCms({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {plotCards.map((plot, idx) => (
             <div
               key={plot.id || idx}
-              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-400 transition-all space-y-4 relative group"
+              className="p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-400 transition-all space-y-4 relative group overflow-hidden"
             >
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs font-mono">
@@ -888,7 +888,7 @@ export default function CommercialPlotsCms({
                 <button
                   type="button"
                   onClick={() => handleRemovePlotCard(idx)}
-                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                   title="Remove Plot"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -902,106 +902,128 @@ export default function CommercialPlotsCms({
                   onUploadSuccess={(url) => handlePlotCardChange(idx, "image", url)}
                 />
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Size / Name</label>
+                    <label className="font-bold text-slate-700 block mb-1 text-xs">Size / Name</label>
                     <input
                       type="text"
                       placeholder="e.g. 4 Marla Commercial"
                       value={plot.size}
                       onChange={(e) => handlePlotCardChange(idx, "size", e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-900"
+                      className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-bold text-xs text-slate-900 focus:border-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Dimensions</label>
+                    <label className="font-bold text-slate-700 block mb-1 text-xs">Dimensions</label>
                     <input
                       type="text"
                       placeholder="e.g. 30' × 30'"
                       value={plot.dimensions}
                       onChange={(e) => handlePlotCardChange(idx, "dimensions", e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-mono"
+                      className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-mono text-xs text-slate-800 focus:border-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Total Price</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. PKR 2,20,00,000"
-                      value={plot.totalPrice}
-                      onChange={(e) => handlePlotCardChange(idx, "totalPrice", e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-bold text-[#D49E17]"
-                    />
+                {/* Pricing & Installment Schedule Box */}
+                <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1 text-xs">Total Price</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. PKR 2,20,00,000"
+                        value={plot.totalPrice}
+                        onChange={(e) => handlePlotCardChange(idx, "totalPrice", e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-amber-50/50 border border-amber-200 font-bold font-mono text-xs text-[#D49E17] focus:bg-white focus:border-[#D49E17] focus:outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1 text-xs truncate">Discount / Promo</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. PKR 45 Lac Discount"
+                        value={plot.discountBadge}
+                        onChange={(e) => handlePlotCardChange(idx, "discountBadge", e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-emerald-50/50 border border-emerald-200 text-emerald-700 font-bold text-xs focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">Discount / Promo Badge</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. PKR 45 Lac Discount"
-                      value={plot.discountBadge}
-                      onChange={(e) => handlePlotCardChange(idx, "discountBadge", e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-emerald-700 font-bold"
-                    />
-                  </div>
-                </div>
+                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Installment Plan
+                      </span>
+                      <span className="text-[10px] text-emerald-700 font-semibold font-mono bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Schedule
+                      </span>
+                    </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1 text-[11px]">Down Payment</label>
-                    <input
-                      type="text"
-                      placeholder="PKR 22,00,000"
-                      value={plot.downPayment}
-                      onChange={(e) => handlePlotCardChange(idx, "downPayment", e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1 text-[11px]">Monthly</label>
-                    <input
-                      type="text"
-                      placeholder="PKR 4,69,333"
-                      value={plot.monthly}
-                      onChange={(e) => handlePlotCardChange(idx, "monthly", e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1 text-[11px]">Possession</label>
-                    <input
-                      type="text"
-                      placeholder="PKR 44,00,000"
-                      value={plot.possession}
-                      onChange={(e) => handlePlotCardChange(idx, "possession", e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-emerald-700 font-bold"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div>
+                        <label className="font-bold text-slate-600 block mb-1 text-[11px] h-4 leading-4 truncate" title="Down Payment">
+                          Down Pay
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="PKR 22,00,000"
+                          value={plot.downPayment}
+                          onChange={(e) => handlePlotCardChange(idx, "downPayment", e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-600 block mb-1 text-[11px] h-4 leading-4 truncate" title="Monthly Installment">
+                          Monthly
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="PKR 4,69,333"
+                          value={plot.monthly}
+                          onChange={(e) => handlePlotCardChange(idx, "monthly", e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-medium text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-600 block mb-1 text-[11px] h-4 leading-4 truncate" title="Possession Payment">
+                          Possession
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="PKR 44,00,000"
+                          value={plot.possession}
+                          onChange={(e) => handlePlotCardChange(idx, "possession", e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-emerald-700 focus:bg-white focus:border-emerald-500 focus:outline-none transition-all"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Tag Badge</label>
+                  <label className="font-bold text-slate-700 block mb-1 text-xs">Tag Badge</label>
                   <input
                     type="text"
                     placeholder="e.g. GT Road Frontage"
                     value={plot.tag}
                     onChange={(e) => handlePlotCardChange(idx, "tag", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-800"
+                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-xs focus:border-emerald-500 focus:outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Description</label>
+                  <label className="font-bold text-slate-700 block mb-1 text-xs">Description</label>
                   <textarea
                     rows={2}
                     placeholder="Description..."
                     value={plot.desc}
                     onChange={(e) => handlePlotCardChange(idx, "desc", e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed"
+                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 leading-relaxed text-xs focus:border-emerald-500 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -1047,11 +1069,11 @@ export default function CommercialPlotsCms({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {landmarks.map((lm, idx) => (
               <div
                 key={lm.id || idx}
-                className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative group"
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative group overflow-hidden"
               >
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
                   <span className="font-bold font-mono text-[11px] text-slate-700">
@@ -1061,7 +1083,7 @@ export default function CommercialPlotsCms({
                   <button
                     type="button"
                     onClick={() => handleRemoveLandmark(idx)}
-                    className="p-1 text-rose-500 hover:bg-rose-50 rounded transition"
+                    className="p-1 text-rose-500 hover:bg-rose-50 rounded transition cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -1080,7 +1102,7 @@ export default function CommercialPlotsCms({
                     value={lm.name}
                     onChange={(e) => handleLandmarkChange(idx, "name", e.target.value)}
                     placeholder="e.g. T-Chowk Rawat"
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-xs focus:border-rose-400 focus:outline-none transition-all"
                   />
                 </div>
 
@@ -1092,7 +1114,7 @@ export default function CommercialPlotsCms({
                       value={lm.time}
                       onChange={(e) => handleLandmarkChange(idx, "time", e.target.value)}
                       placeholder="e.g. 5 Minutes"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-[#D49E17]"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-xs text-[#D49E17] focus:border-[#D49E17] focus:outline-none transition-all"
                     />
                   </div>
 
@@ -1103,7 +1125,7 @@ export default function CommercialPlotsCms({
                       value={lm.distance}
                       onChange={(e) => handleLandmarkChange(idx, "distance", e.target.value)}
                       placeholder="e.g. 3.5 km"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs focus:border-rose-400 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -1138,11 +1160,11 @@ export default function CommercialPlotsCms({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {reasons.map((item, idx) => (
             <div
               key={item.id || idx}
-              className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative group"
+              className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 relative group overflow-hidden"
             >
               <div className="flex items-center justify-between pb-1 border-b border-slate-200">
                 <span className="font-bold font-mono text-[11px] text-slate-700">
@@ -1152,7 +1174,7 @@ export default function CommercialPlotsCms({
                 <button
                   type="button"
                   onClick={() => handleRemoveReason(idx)}
-                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition"
+                  className="p-1 text-rose-500 hover:bg-rose-50 rounded transition cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1172,7 +1194,7 @@ export default function CommercialPlotsCms({
                     value={item.tag}
                     onChange={(e) => handleReasonChange(idx, "tag", e.target.value)}
                     placeholder="e.g. Maximum ROI"
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-[#D49E17]"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-xs text-[#D49E17] focus:border-[#D49E17] focus:outline-none transition-all"
                   />
                 </div>
 
@@ -1183,7 +1205,7 @@ export default function CommercialPlotsCms({
                     value={item.title}
                     onChange={(e) => handleReasonChange(idx, "title", e.target.value)}
                     placeholder="e.g. High Rental Yields"
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-slate-900"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-xs text-slate-900 focus:border-emerald-500 focus:outline-none transition-all"
                   />
                 </div>
 
@@ -1194,7 +1216,7 @@ export default function CommercialPlotsCms({
                     value={item.desc}
                     onChange={(e) => handleReasonChange(idx, "desc", e.target.value)}
                     placeholder="Description..."
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 leading-relaxed text-xs"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 leading-relaxed text-xs focus:border-emerald-500 focus:outline-none transition-all"
                   />
                 </div>
               </div>

@@ -79,25 +79,26 @@ export default function FileUploadField({
             target="_blank"
             rel="noopener noreferrer"
             className="text-[11px] text-[#D49E17] hover:underline inline-flex items-center gap-1 font-semibold shrink-0"
+            title="View current file in new tab"
           >
             <Eye className="w-3 h-3" />
-            <span>View Current File</span>
+            <span>View File</span>
           </a>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {/* Preview Thumbnail */}
         <div
           onClick={() => fileInputRef.current?.click()}
           title="Click to upload"
-          className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer hover:border-amber-400 transition-colors group/thumb shadow-sm"
+          className="relative w-16 h-12 sm:w-20 sm:h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer hover:border-amber-400 transition-colors group/thumb shadow-sm"
         >
           {currentValue ? (
             isPdf || previewType === "file" ? (
               <div className="flex flex-col items-center justify-center text-slate-600 p-1">
                 <FileText className="w-5 h-5 text-rose-500" />
-                <span className="text-[9px] font-bold uppercase truncate max-w-[80px]">PDF</span>
+                <span className="text-[9px] font-bold uppercase truncate max-w-[70px]">PDF</span>
               </div>
             ) : (
               <img
@@ -127,7 +128,7 @@ export default function FileUploadField({
             type="button"
             disabled={isUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#D49E17] hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 shrink-0 transition-all cursor-pointer disabled:opacity-50"
           >
             {isUploading ? (
               <>
