@@ -59,15 +59,28 @@ export default async function RootLayout({
 
         {/* Google Tag Manager */}
         {settings.googleTagManagerId && (
-          <Script id="google-tag-manager" strategy="afterInteractive">
-            {`
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${settings.googleTagManagerId}');
-            `}
-          </Script>
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtm.js?id=${settings.googleTagManagerId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="gtm-datalayer-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+              `}
+            </Script>
+            <Script id="google-tag-manager" strategy="afterInteractive">
+              {`
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${settings.googleTagManagerId}');
+              `}
+            </Script>
+          </>
         )}
 
         {/* Custom Header Script */}
@@ -78,6 +91,17 @@ export default async function RootLayout({
         )}
       </head>
       <body className="min-h-screen flex flex-col bg-white text-slate-900 antialiased selection:bg-[#D49E17] selection:text-slate-950">
+        {/* Google Tag Manager (noscript fallback) */}
+        {settings.googleTagManagerId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${settings.googleTagManagerId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         {/* Structured Data: Organization & Real Estate Agent Schema */}
         <OrganizationSchema
           name={settings.orgName || settings.siteName}

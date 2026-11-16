@@ -605,7 +605,7 @@ export default function HomepageHeroCms({
                   onUploadSuccess={(url) => handleAmenityChange(idx, "image", url)}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2.5">
                   <div>
                     <label className="font-bold text-slate-700 block mb-1">Title</label>
                     <input

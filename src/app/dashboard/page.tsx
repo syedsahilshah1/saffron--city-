@@ -222,7 +222,7 @@ export default function AdminDashboardPage() {
   });
 
   // SEO Suite & Redirects States (Matching Reference Layout)
-  const [seoSubTab, setSeoSubTab] = useState<"pages" | "canonical_sitemap" | "robots_indexing" | "redirects">("pages");
+  const [seoSubTab, setSeoSubTab] = useState<"pages" | "canonical_sitemap" | "robots_indexing" | "redirects" | "tracking">("pages");
   const [pageSeoList, setPageSeoList] = useState<StoredPageSeo[]>([]);
   const [selectedPagePath, setSelectedPagePath] = useState<string>("/");
   const [selectedPageSeo, setSelectedPageSeo] = useState<StoredPageSeo | null>(null);
@@ -3102,6 +3102,19 @@ export default function AdminDashboardPage() {
                       {redirectsList.length}
                     </span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSeoSubTab("tracking")}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      seoSubTab === "tracking"
+                        ? "bg-[#800020] text-white shadow-md"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <Sliders className="w-4 h-4" />
+                    <span>Google Tag Manager &amp; Scripts</span>
+                  </button>
                 </div>
               </div>
 
@@ -3858,6 +3871,103 @@ export default function AdminDashboardPage() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-TAB 5: GOOGLE TAG MANAGER, GA4 & SCRIPTS
+              ---------------------------------------------------- */}
+              {seoSubTab === "tracking" && (
+                <div className="space-y-6">
+                  <div className="bg-white border border-amber-200/80 rounded-3xl p-6 shadow-sm space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                      <div>
+                        <h3 className="font-bold text-slate-900 font-heading text-base flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-[#800020]" />
+                          <span>Google Tag Manager, GA4 &amp; Tracking Codes</span>
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Configure GTM container IDs, Google Analytics 4, and custom header tracking tags. Changes take effect site-wide automatically.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveSettings()}
+                        disabled={savingSettings}
+                        className="px-6 py-2.5 rounded-xl bg-[#800020] hover:bg-[#6b1424] text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 self-start sm:self-auto"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>{savingSettings ? "Saving Settings..." : "Save Tracking Settings"}</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-5 text-xs">
+                      {/* 1. Google Tag Manager Container */}
+                      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="font-bold text-slate-800 text-xs flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-[10px]">1</span>
+                            <span>Google Tag Manager (GTM) Container ID</span>
+                          </label>
+                          <span className="text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                            Active in &lt;head&gt; and &lt;body&gt;
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={settings.googleTagManagerId || "GTM-WSR76TGV"}
+                          onChange={(e) => updateSettingField("googleTagManagerId", e.target.value)}
+                          placeholder="e.g. GTM-WSR76TGV"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 font-mono font-bold text-xs text-slate-900 focus:border-[#800020] focus:outline-none transition-all"
+                        />
+                        <div className="p-3 rounded-xl bg-slate-950 text-slate-300 font-mono text-[11px] space-y-1">
+                          <p className="text-amber-400 font-bold">Auto-injected Script Preview:</p>
+                          <p className="text-slate-400">&lt;script async src=&quot;https://www.googletagmanager.com/gtm.js?id={settings.googleTagManagerId || "GTM-WSR76TGV"}&quot;&gt;&lt;/script&gt;</p>
+                          <p className="text-slate-400">&lt;script&gt;window.dataLayer = window.dataLayer || []; function gtag()&#123;dataLayer.push(arguments);&#125; gtag(&apos;js&apos;, new Date());&lt;/script&gt;</p>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Enter your GTM Container ID. The GTM script and dataLayer initialization will be loaded automatically on all public pages.
+                        </p>
+                      </div>
+
+                      {/* 2. Google Analytics 4 (GA4) */}
+                      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <label className="font-bold text-slate-800 text-xs flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-md bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-[10px]">2</span>
+                          <span>Google Analytics 4 (GA4) Measurement ID (Optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.googleAnalyticsId || ""}
+                          onChange={(e) => updateSettingField("googleAnalyticsId", e.target.value)}
+                          placeholder="e.g. G-XXXXXXXXXX"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 font-mono text-xs text-slate-900 focus:border-[#800020] focus:outline-none transition-all"
+                        />
+                        <p className="text-[11px] text-slate-500">
+                          Direct GA4 measurement ID. If you manage Google Analytics tags directly inside GTM above, you can leave this blank.
+                        </p>
+                      </div>
+
+                      {/* 3. Custom Head Scripts & Verification Tags */}
+                      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <label className="font-bold text-slate-800 text-xs flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-md bg-purple-100 text-purple-900 font-bold flex items-center justify-center text-[10px]">3</span>
+                          <span>Custom Header Scripts &amp; Verification Tags (&lt;head&gt;)</span>
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={settings.customHeadScript || ""}
+                          onChange={(e) => updateSettingField("customHeadScript", e.target.value)}
+                          placeholder='e.g. <meta name="google-site-verification" content="..." /> or custom JavaScript'
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 font-mono text-xs text-slate-800 focus:border-[#800020] focus:outline-none transition-all leading-relaxed"
+                        />
+                        <p className="text-[11px] text-slate-500">
+                          Insert Google Search Console HTML verification tags, Meta Pixel, or any third-party header scripts. They are inserted directly into the document &lt;head&gt;.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

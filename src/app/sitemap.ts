@@ -5,7 +5,11 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const settings = await db.getSettings();
-  const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
+  let rawBase = settings?.canonicalUrl || "https://saffroncity.org";
+  if (rawBase.includes("saffroncity.pk")) {
+    rawBase = "https://saffroncity.org";
+  }
+  const baseUrl = rawBase.replace(/\/$/, "");
 
   const [pageSeoList, blogs, plots] = await Promise.all([
     db.getPageSeoList(),

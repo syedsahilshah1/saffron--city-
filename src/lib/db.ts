@@ -1175,6 +1175,12 @@ export const db = {
         if (settings.ogImage && settings.ogImage.endsWith(".jpg")) {
           settings.ogImage = settings.ogImage.replace(".jpg", ".webp");
         }
+        if (settings.canonicalUrl && settings.canonicalUrl.includes("saffroncity.pk")) {
+          settings.canonicalUrl = "https://saffroncity.org";
+        }
+        if (!settings.googleTagManagerId) {
+          settings.googleTagManagerId = "GTM-WSR76TGV";
+        }
 
         backendCache.set("site_settings", settings, 60);
         return settings;
@@ -1205,6 +1211,8 @@ export const db = {
       leadNotificationEmail: "info@saffroncity.org",
       heroBgImage: "/images/hero-bg.webp",
       chairmanPortrait: "/images/chairman_portrait_hd.webp",
+      canonicalUrl: "https://saffroncity.org",
+      googleTagManagerId: "GTM-WSR76TGV",
     } as StoredSettings;
 
     backendCache.set("site_settings", defaultFallback, 60);

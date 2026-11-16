@@ -20,7 +20,11 @@ export async function getPageMetadata(
     ]);
 
     const siteName = settings?.siteName || "Saffron City Islamabad";
-    const canonicalBase = settings?.canonicalUrl?.replace(/\/$/, "") || DEFAULT_BASE_URL;
+    let rawBase = settings?.canonicalUrl || DEFAULT_BASE_URL;
+    if (rawBase.includes("saffroncity.pk")) {
+      rawBase = DEFAULT_BASE_URL;
+    }
+    const canonicalBase = rawBase.replace(/\/$/, "");
     const pageUrl = `${canonicalBase}${cleanPath === "/" ? "" : cleanPath}`;
 
     const DEFAULT_FALLBACK_TITLE = "Saffron City Islamabad | RDA Approved Plots on GT Road Rawat";

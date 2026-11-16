@@ -5,7 +5,11 @@ export const dynamic = "force-dynamic";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const settings = await db.getSettings();
-  const baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").replace(/\/$/, "");
+  let rawBase = settings?.canonicalUrl || "https://saffroncity.org";
+  if (rawBase.includes("saffroncity.pk")) {
+    rawBase = "https://saffroncity.org";
+  }
+  const baseUrl = rawBase.replace(/\/$/, "");
 
   const allowIndexing = settings?.defaultRobotsIndex !== false;
 
@@ -15,7 +19,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         userAgent: "*",
         allow: allowIndexing ? "/" : undefined,
         disallow: allowIndexing
-          ? ["/dashboard/", "/api/", "/ubaid/", "/_next/", "/static/"]
+          ? ["/dashboard/", "/api/", "/ubaid/"]
           : "/",
       },
       {
