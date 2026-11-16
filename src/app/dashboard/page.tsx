@@ -286,8 +286,9 @@ export default function AdminDashboardPage() {
   const [sectorFilter, setSectorFilter] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // New plot modal
+  // Plot modal states
   const [showAddPlot, setShowAddPlot] = useState(false);
+  const [editingPlot, setEditingPlot] = useState<StoredPlot | null>(null);
   const [newPlot, setNewPlot] = useState<{
     plotNumber: string;
     sector: "Sector A" | "Sector B" | "Commercial Block";
@@ -925,9 +926,37 @@ export default function AdminDashboardPage() {
           features: "100% Underground Utilities, 50ft Wide Carpeted Road",
           image: "/images/sectors/sector-a-luxury.webp",
         });
+      } else {
+        alert("Failed to save plot: " + (data.message || "Database error"));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to create plot", err);
+      alert("Error creating plot: " + (err?.message || "Network error"));
+    }
+  };
+
+  // Update existing plot
+  const handleUpdatePlot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlot) return;
+    try {
+      const res = await fetch(`/api/plots/${editingPlot.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingPlot),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPlots((prev) =>
+          prev.map((p) => (p.id === editingPlot.id ? data.data : p))
+        );
+        setEditingPlot(null);
+      } else {
+        alert("Failed to update plot: " + (data.message || "Database error"));
+      }
+    } catch (err: any) {
+      console.error("Failed to update plot", err);
+      alert("Error updating plot: " + (err?.message || "Network error"));
     }
   };
 
@@ -2251,6 +2280,160 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
+              {/* Edit Plot Modal / Drawer */}
+              {editingPlot && (
+                <div className="p-5 rounded-3xl bg-blue-50/70 border border-blue-300 space-y-4 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Edit3 className="w-4 h-4 text-blue-600" />
+                      <h4 className="font-bold text-slate-900 text-sm">
+                        Edit Plot: {editingPlot.plotNumber} ({editingPlot.category})
+                      </h4>
+                    </div>
+                    <button
+                      onClick={() => setEditingPlot(null)}
+                      className="p-1 rounded-lg hover:bg-blue-200 text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleUpdatePlot} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Plot Number / Code</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingPlot.plotNumber}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, plotNumber: e.target.value })}
+                        placeholder="e.g. A-108 or COM-05"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Sector</label>
+                      <select
+                        value={editingPlot.sector}
+                        onChange={(e) =>
+                          setEditingPlot({
+                            ...editingPlot,
+                            sector: e.target.value as any,
+                            type: e.target.value === "Commercial Block" ? "Commercial" : "Residential",
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      >
+                        <option value="Sector A">Sector A</option>
+                        <option value="Sector B">Sector B</option>
+                        <option value="Commercial Block">Commercial Block</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Plot Size Category</label>
+                      <select
+                        value={editingPlot.category}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, category: e.target.value as any })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      >
+                        <option value="5 Marla">5 Marla (25×50)</option>
+                        <option value="10 Marla">10 Marla (35×70)</option>
+                        <option value="1 Kanal">1 Kanal (50×90)</option>
+                        <option value="4 Marla">4 Marla Commercial</option>
+                        <option value="8 Marla">8 Marla Commercial</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Total Price (PKR)</label>
+                      <input
+                        type="number"
+                        required
+                        value={editingPlot.totalPrice}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setEditingPlot({
+                            ...editingPlot,
+                            totalPrice: val,
+                          });
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Down Payment (PKR)</label>
+                      <input
+                        type="number"
+                        value={editingPlot.downPayment}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, downPayment: Number(e.target.value) })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Monthly Installment (PKR)</label>
+                      <input
+                        type="number"
+                        value={editingPlot.monthlyInst}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, monthlyInst: Number(e.target.value) })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Status</label>
+                      <select
+                        value={editingPlot.status}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, status: e.target.value as any })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      >
+                        <option value="Available">Available</option>
+                        <option value="Reserved">Reserved</option>
+                        <option value="Booked">Booked</option>
+                      </select>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="font-bold text-slate-700 block mb-1">Plot Features / Notes</label>
+                      <input
+                        type="text"
+                        value={editingPlot.features || ""}
+                        onChange={(e) => setEditingPlot({ ...editingPlot, features: e.target.value })}
+                        placeholder="e.g. Corner Plot, Facing Park"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-medium"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-3">
+                      <FileUploadField
+                        label="Plot Photo / Layout Diagram"
+                        currentValue={editingPlot.image || ""}
+                        onUploadSuccess={(url) => setEditingPlot({ ...editingPlot, image: url })}
+                        helperText="Upload specific plot view or sector photo."
+                      />
+                    </div>
+
+                    <div className="sm:col-span-3 flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingPlot(null)}
+                        className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition cursor-pointer"
+                      >
+                        Update Plot
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
               {/* Plots Table */}
               <div className="overflow-x-auto rounded-2xl border border-slate-200">
                 <table className="w-full text-left border-collapse text-xs">
@@ -2314,13 +2497,22 @@ export default function AdminDashboardPage() {
                           </select>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => handleDeletePlot(plot.id)}
-                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
-                            title="Remove Plot"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setEditingPlot(plot)}
+                              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-[#D49E17] transition-colors cursor-pointer"
+                              title="Edit Plot Details"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeletePlot(plot.id)}
+                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                              title="Remove Plot"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

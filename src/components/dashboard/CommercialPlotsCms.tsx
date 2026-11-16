@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Building2,
   TrendingUp,
@@ -560,6 +560,61 @@ export default function CommercialPlotsCms({
     setFaqs(updated);
     updateSettingField("commercialFaqsJson", JSON.stringify(updated));
   };
+
+  // Sync state from settings when settings prop updates
+  useEffect(() => {
+    if (settings.commercialAmenitiesJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialAmenitiesJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setAmenities(parsed);
+      } catch {}
+    }
+  }, [settings.commercialAmenitiesJson]);
+
+  useEffect(() => {
+    if (settings.commercialLandmarksJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialLandmarksJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setLandmarks(parsed);
+      } catch {}
+    }
+  }, [settings.commercialLandmarksJson]);
+
+  useEffect(() => {
+    if (settings.commercialPlotsJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialPlotsJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setPlotCards(parsed);
+      } catch {}
+    }
+  }, [settings.commercialPlotsJson]);
+
+  useEffect(() => {
+    if (settings.commercialWhyChooseJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialWhyChooseJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setReasons(parsed);
+      } catch {}
+    }
+  }, [settings.commercialWhyChooseJson]);
+
+  useEffect(() => {
+    if (settings.commercialPricingJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialPricingJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setPricingRows(parsed);
+      } catch {}
+    }
+  }, [settings.commercialPricingJson]);
+
+  useEffect(() => {
+    if (settings.commercialFaqsJson) {
+      try {
+        const parsed = JSON.parse(settings.commercialFaqsJson);
+        if (Array.isArray(parsed) && parsed.length > 0) setFaqs(parsed);
+      } catch {}
+    }
+  }, [settings.commercialFaqsJson]);
 
   return (
     <div className="bg-white border border-amber-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-10">

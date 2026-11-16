@@ -742,6 +742,7 @@ export const db = {
       );
     } catch (err: any) {
       console.error("[MySQL createPlot Error]:", err?.message);
+      throw err;
     }
 
     return { ...plot, id };
@@ -780,6 +781,7 @@ export const db = {
       return rows && rows.length > 0 ? rows[0] : null;
     } catch (err: any) {
       console.error("[MySQL updatePlot Error]:", err?.message);
+      throw err;
     }
     return null;
   },
@@ -1286,7 +1288,13 @@ export const db = {
         "commercialOverviewHeading", "commercialOverviewText", "commercialPaymentPlanImage", "commercialInstallmentsJson",
         "commercialFeaturesHeading", "commercialFeaturesJson", "commercialFaqsHeading", "commercialFaqsJson",
         "commercialCtaHeading", "commercialCtaSubtitle", "commercialCtaPhone",
-        "commercialPageHeading", "commercialPageSubtitle", "commercialPageBanner"
+        "commercialPageHeading", "commercialPageSubtitle", "commercialPageBanner",
+        "commercialAmenitiesHeading", "commercialAmenitiesJson",
+        "commercialLandmarksHeading", "commercialLandmarksJson",
+        "commercialGoogleMapEmbed",
+        "commercialPlotsHeading", "commercialPlotsSubtitle", "commercialPlotsJson",
+        "commercialWhyChooseHeading", "commercialWhyChooseJson",
+        "commercialPricingHeading", "commercialPricingJson"
       ];
       const heroData: Record<string, any> = {};
       for (const key of heroKeys) {
