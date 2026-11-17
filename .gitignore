@@ -27,7 +27,6 @@ yarn-error.log*
 # Local env files
 .env.hostinger
 .env*.local
-.env
 
 # Vercel
 .vercel

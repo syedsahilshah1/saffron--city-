@@ -40,6 +40,7 @@ import FaqAccordion from "@/components/home/FaqAccordion";
 import NocApprovalSection from "@/components/home/NocApprovalSection";
 import EnquiryForm from "@/components/forms/EnquiryForm";
 import DownloadButtonWithLeadModal from "@/components/ui/DownloadButtonWithLeadModal";
+import CopyPlotLinkButton from "@/components/plots/CopyPlotLinkButton";
 import { db } from "@/lib/db";
 import { getPageMetadata } from "@/lib/seo";
 
@@ -67,7 +68,16 @@ export async function generateMetadata({ params }: PlotDetailPageProps): Promise
   const { id } = await params;
   const plot = await db.getPlotById(id);
   const settings = await db.getSettings();
-  const baseUrl = settings?.canonicalUrl || "https://saffroncity.org";
+  let baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").trim();
+  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    baseUrl = `https://${baseUrl}`;
+  }
+  let metadataBaseUrl: URL;
+  try {
+    metadataBaseUrl = new URL(baseUrl);
+  } catch {
+    metadataBaseUrl = new URL("https://saffroncity.org");
+  }
 
   if (!plot) {
     return {
@@ -77,15 +87,21 @@ export async function generateMetadata({ params }: PlotDetailPageProps): Promise
     };
   }
 
-  const title = `${plot.category} Plot ${plot.plotNumber} | ${plot.sector} | Saffron City Islamabad`;
-  const description = `Book ${plot.category} plot ${plot.plotNumber} in ${plot.sector} at Saffron City Islamabad. Total price ${formatPricePKR(plot.totalPrice)}, ${plot.type} with easy 3-year installments. RDA Approved.`;
+  const category = plot.category || "Residential";
+  const plotNum = plot.plotNumber || "";
+  const sector = plot.sector || "Saffron City";
+  const type = plot.type || "Residential";
+  const price = Number(plot.totalPrice) || 0;
+
+  const title = `${category} Plot ${plotNum} | ${sector} | Saffron City Islamabad`;
+  const description = `Book ${category} plot ${plotNum} in ${sector} at Saffron City Islamabad. Total price ${formatPricePKR(price)}, ${type} with easy 3-year installments. RDA Approved.`;
   const canonicalUrl = `${baseUrl}/plots/${plot.id}`;
 
   return {
     title,
     description,
-    keywords: [`${plot.sector} plots`, `${plot.category} Saffron City`, plot.plotNumber, "RDA approved plots", "Islamabad real estate"],
-    metadataBase: new URL(baseUrl),
+    keywords: [`${sector} plots`, `${category} Saffron City`, plotNum, "RDA approved plots", "Islamabad real estate"],
+    metadataBase: metadataBaseUrl,
     alternates: { canonical: canonicalUrl },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
     openGraph: {
@@ -93,7 +109,7 @@ export async function generateMetadata({ params }: PlotDetailPageProps): Promise
       description,
       url: canonicalUrl,
       siteName: settings?.siteName || "Saffron City Islamabad",
-      images: [{ url: plot.image || "/images/hero-bg.webp", width: 1200, height: 630, alt: `${plot.category} Plot ${plot.plotNumber}` }],
+      images: [{ url: plot.image || "/images/hero-bg.webp", width: 1200, height: 630, alt: `${category} Plot ${plotNum}` }],
       locale: "en_PK",
       type: "website",
     },
@@ -117,26 +133,38 @@ export default async function PlotDetailPage({ params }: PlotDetailPageProps) {
     notFound();
   }
 
+  const category = plot.category || "Residential";
+  const plotNum = plot.plotNumber || "";
+  const sector = plot.sector || "Saffron City";
+  const type = plot.type || "Residential";
+  const totalPrice = Number(plot.totalPrice) || 0;
+
+  const rawPhone = settings?.whatsappPhone || SITE_CONFIG.whatsapp || "923331113551";
+  const cleanPhone = rawPhone.replace(/[^0-9]/g, "");
+
   const whatsappMessage = encodeURIComponent(
-    `Hi, I want to inquire about ${plot.category} Plot ${plot.plotNumber} in ${plot.sector}, Saffron City Islamabad. Total Price: ${formatPricePKR(plot.totalPrice)}. Please share more details.`
+    `Hi, I want to inquire about ${category} Plot ${plotNum} in ${sector}, Saffron City Islamabad. Total Price: ${formatPricePKR(totalPrice)}. Please share more details.`
   );
-  const whatsappUrl = `https://wa.me/${settings?.whatsappPhone || SITE_CONFIG.whatsapp}?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${whatsappMessage}`;
 
-  const downPayment = plot.downPayment || Math.round(plot.totalPrice * 0.1);
-  const monthlyInst = plot.monthlyInst || Math.round((plot.totalPrice * 0.3) / 30);
-  const possession = Math.round(plot.totalPrice * 0.2);
-  const biAnnual = Math.round((plot.totalPrice * 0.4) / 6);
+  const downPayment = Number(plot.downPayment) || Math.round(totalPrice * 0.1);
+  const monthlyInst = Number(plot.monthlyInst) || Math.round((totalPrice * 0.3) / 30);
+  const possession = Math.round(totalPrice * 0.2);
+  const biAnnual = Math.round((totalPrice * 0.4) / 6);
 
-  const featuresList = plot.features
+  const featuresList = (typeof plot.features === "string" && plot.features.trim().length > 0)
     ? plot.features.split(",").map((f) => f.trim()).filter(Boolean)
     : ["100% Underground Utilities", "RDA Approved Layout", "30-Month Installment Plan", "Gated Community Access"];
 
   const similarPlots = await db.getPlots();
-  const relatedPlots = similarPlots
-    .filter((p) => p.id !== plot.id && (p.sector === plot.sector || p.type === plot.type))
+  const relatedPlots = (Array.isArray(similarPlots) ? similarPlots : [])
+    .filter((p) => p && p.id !== plot.id && (p.sector === plot.sector || p.type === plot.type))
     .slice(0, 3);
 
-  const baseUrl = settings?.canonicalUrl || "https://saffroncity.org";
+  let baseUrl = (settings?.canonicalUrl || "https://saffroncity.org").trim();
+  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    baseUrl = `https://${baseUrl}`;
+  }
   const shareUrl = `${baseUrl}/plots/${plot.id}`;
 
   return (
@@ -146,9 +174,10 @@ export default async function PlotDetailPage({ params }: PlotDetailPageProps) {
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src={plot.image || settings?.heroBgImage || "/images/hero-bg.webp"}
-            alt={`${plot.category} Plot ${plot.plotNumber} - ${plot.sector}`}
-            title={`${plot.category} Plot ${plot.plotNumber} - ${plot.sector}`}
+            alt={`${category} Plot ${plotNum} - ${sector}`}
+            title={`${category} Plot ${plotNum} - ${sector}`}
             fill
+            unoptimized
             priority
             quality={85}
             sizes="100vw"
@@ -163,29 +192,29 @@ export default async function PlotDetailPage({ params }: PlotDetailPageProps) {
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#D49E17]/20 border border-[#D49E17]/40 text-[#D49E17] text-xs font-bold tracking-wider uppercase backdrop-blur-md">
                   <Tag className="w-3.5 h-3.5" />
-                  <span>{plot.status === "Available" ? "Open for Booking" : plot.status}</span>
+                  <span>{plot.status === "Available" ? "Open for Booking" : plot.status || "Available"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-wider uppercase backdrop-blur-md">
                   <Hash className="w-3.5 h-3.5" />
-                  <span>{plot.plotNumber}</span>
+                  <span>{plotNum}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-wider uppercase backdrop-blur-md">
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>{plot.type}</span>
+                  <span>{type}</span>
                 </span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-serif font-bold text-white tracking-tight leading-[1.15]">
-                {plot.category} Plot <span className="text-[#D49E17]">{plot.plotNumber}</span>
+                {category} Plot <span className="text-[#D49E17]">{plotNum}</span>
               </h1>
 
               <div className="flex items-center gap-2 text-amber-200">
                 <MapPin className="w-4 h-4 text-[#D49E17]" />
-                <span className="text-sm sm:text-base font-medium">{plot.sector} &middot; Saffron City Islamabad</span>
+                <span className="text-sm sm:text-base font-medium">{sector} &middot; Saffron City Islamabad</span>
               </div>
 
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-                Premium {plot.type.toLowerCase()} investment opportunity on Main GT Road Rawat. {plot.category} with {plot.status === "Available" ? "immediate booking available" : "limited availability"} and flexible 3-year installment plans.
+                Premium {type.toLowerCase()} investment opportunity on Main GT Road Rawat. {category} with {plot.status === "Available" ? "immediate booking available" : "limited availability"} and flexible 3-year installment plans.
               </p>
             </div>
 
@@ -341,6 +370,7 @@ export default async function PlotDetailPage({ params }: PlotDetailPageProps) {
                             alt={`${rp.category} ${rp.plotNumber} - ${rp.sector}`}
                             title={`${rp.category} ${rp.plotNumber} - ${rp.sector}`}
                             fill
+                            unoptimized
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -425,15 +455,7 @@ export default async function PlotDetailPage({ params }: PlotDetailPageProps) {
                   <Mail className="w-4 h-4 text-[#D49E17]" />
                   <span>Email Inquiry</span>
                 </a>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(shareUrl);
-                  }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 text-sm font-medium text-slate-800 transition-colors w-full text-left"
-                >
-                  <Share2 className="w-4 h-4 text-[#D49E17]" />
-                  <span>Copy Plot Link</span>
-                </button>
+                <CopyPlotLinkButton shareUrl={shareUrl} />
               </div>
             </ScrollReveal>
 
